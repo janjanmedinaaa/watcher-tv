@@ -1,0 +1,15 @@
+<resources>
+
+    <style name="Theme.Watcher" parent="@style/Theme.Leanback">
+        <item name="android:windowBackground">@color/gray_dark</item>
+        <item name="android:textColor">@color/default_text_color</item>
+        <item name="android:textColorPrimary">@color/default_text_color</item>
+        <item name="android:textColorSecondary">@color/default_text_color_secondary</item>
+    </style>
+
+    <!-- Theme for card views that show a Video -->
+    <style name="VideoCardViewTheme">
+        <item name="imageCardViewStyle">@style/CardViewStyle</item>
+        <item name="imageCardViewInfoAreaStyle">@style/CardViewInfoAreaStyle</item>
+    </style>
+</resources>

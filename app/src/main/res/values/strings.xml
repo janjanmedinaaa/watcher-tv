@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Watcher</string>
+    <string name="loklok_api_base_url">https://ga-mobile-api.loklok.tv/</string>
+
+    <!-- Server Error Message -->
+    <string name="no_internet_connection">Please check your internet connection and try again later.</string>
+    <string name="something_went_wrong">Something went wrong. Try again later.</string>
+
+    <!-- Content types -->
+    <string name="content_type_movie">Movie</string>
+    <string name="content_type_series">Series</string>
+
+    <!-- Playback error actions -->
+    <string name="retry">Retry</string>
+    <string name="go_back">Return to browsing</string>
+    <string name="error_title_with_video">Something terrible happened with %s</string>
+</resources>

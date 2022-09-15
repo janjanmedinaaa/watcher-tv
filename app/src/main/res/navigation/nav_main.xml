@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.medina.juanantonio.watcher.features.home.HomeFragment"
+        android:label="HomeFragment">
+        <argument
+            android:name="episodeList"
+            android:defaultValue="@null"
+            app:argType="com.medina.juanantonio.watcher.data.models.VideoGroup"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_self"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_videoSearchFragment"
+            app:destination="@id/videoSearchFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.medina.juanantonio.watcher.features.player.PlayerFragment"
+        android:label="PlayerFragment">
+        <argument
+            android:name="videoMedia"
+            app:argType="com.medina.juanantonio.watcher.data.models.VideoMedia" />
+        <action
+            android:id="@+id/action_playerFragment_to_playerErrorFragment"
+            app:destination="@id/playerErrorFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playerErrorFragment"
+        android:name="com.medina.juanantonio.watcher.features.player.error.PlayerErrorFragment"
+        android:label="PlayerErrorFragment">
+        <argument
+            android:name="videoMedia"
+            app:argType="com.medina.juanantonio.watcher.data.models.VideoMedia" />
+        <argument
+            android:name="error"
+            app:argType="java.lang.Exception" />
+        <action
+            android:id="@+id/action_playerErrorFragment_to_playerFragment"
+            app:destination="@id/playerFragment"
+            app:popUpTo="@id/playerFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/videoSearchFragment"
+        android:name="com.medina.juanantonio.watcher.features.search.VideoSearchFragment"
+        android:label="VideoSearchFragment" >
+        <action
+            android:id="@+id/action_videoSearchFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_videoSearchFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+    </fragment>
+</navigation>
