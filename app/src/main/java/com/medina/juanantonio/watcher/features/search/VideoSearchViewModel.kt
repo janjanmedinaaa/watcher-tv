@@ -44,6 +44,7 @@ class VideoSearchViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
+                homePageRepository.currentlyPlayingVideo = video
                 this@VideoSearchViewModel.videoMedia.value = Event(it)
             }
         }

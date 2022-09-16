@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,9 +47,6 @@ class PlayerViewModel @Inject constructor(
 
     fun saveVideo(progress: Long) {
         viewModelScope.launch {
-            // TODO: Handle saved Series progress
-            if (video?.contentType != HomePageBean.ContentType.MOVIE) return@launch
-
             video?.let {
                 homePageRepository.addOnGoingVideo(
                     it.apply { videoProgress = progress }
@@ -59,18 +55,37 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun deleteVideo() {
+    fun handleVideoEnd() {
         viewModelScope.launch {
             video?.let {
-                homePageRepository.removeOnGoingVideo(it.contentId)
+                if (it.episodeNumber + 1 > it.episodeCount)
+                    homePageRepository.removeOnGoingVideo(it.contentId)
+                else
+                    homePageRepository.addOnGoingVideo(
+                        it.apply {
+                            episodeNumber += 1
+                            videoProgress = 0L
+                        }
+                    )
             }
         }
     }
 
     fun getVideoDetails(id: Int) {
         viewModelScope.launch {
-            video = homePageRepository.getVideo(id)
+            val onGoingVideo = homePageRepository.getOnGoingVideo(id)
+            val currentlyPlayingVideo = homePageRepository.currentlyPlayingVideo
+
+            // Check if the user played a different episode in an on going series
+            val isSameEpisode =
+                onGoingVideo?.episodeNumber == currentlyPlayingVideo?.episodeNumber
+
+            video = if (isSameEpisode) onGoingVideo else currentlyPlayingVideo
             savedProgress.value = Event(video?.videoProgress ?: 0L)
         }
+    }
+
+    fun cleanUpPlayer() {
+        homePageRepository.currentlyPlayingVideo = null
     }
 }

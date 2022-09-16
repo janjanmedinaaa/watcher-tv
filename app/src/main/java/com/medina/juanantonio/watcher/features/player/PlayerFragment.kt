@@ -48,7 +48,7 @@ class PlayerFragment : VideoSupportFragment() {
             when (state) {
                 is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
                 is VideoPlaybackState.End -> {
-                    viewModel.deleteVideo()
+                    viewModel.handleVideoEnd()
                     // To get to playback, the user always goes through browse first. Deep links for
                     // directly playing a video also go to browse before playback. If playback
                     // finishes the entire video, the PlaybackFragment is popped off the back stack
@@ -104,6 +104,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.removePlaybackStateListener(uiPlaybackStateListener)
+        viewModel.cleanUpPlayer()
     }
 
     override fun onStart() {

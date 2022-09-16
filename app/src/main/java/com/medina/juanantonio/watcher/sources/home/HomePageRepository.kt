@@ -13,6 +13,8 @@ class HomePageRepository(
 
     override val homeContentList: ArrayList<VideoGroup> = arrayListOf()
 
+    override var currentlyPlayingVideo: Video? = null
+
     override suspend fun setupHomePage(startingPage: Int) {
         val result = getHomePage(startingPage)
         if (!result.isNullOrEmpty()) {
@@ -80,7 +82,7 @@ class HomePageRepository(
             VideoGroup(
                 category = videoDetails.name,
                 videoList = videoDetails.episodeVo.map { episodeBean ->
-                    Video(video, episodeBean)
+                    Video(video, episodeBean, videoDetails.episodeVo.size)
                 }
             )
         } else null
@@ -105,7 +107,7 @@ class HomePageRepository(
         return database.getOnGoingVideos()
     }
 
-    override suspend fun getVideo(id: Int): Video? {
+    override suspend fun getOnGoingVideo(id: Int): Video? {
         return database.getVideo(id)
     }
 
@@ -117,6 +119,9 @@ class HomePageRepository(
 interface IHomePageRepository {
     val homeContentList: ArrayList<VideoGroup>
 
+    // TODO: Maybe move this to somewhere cleaner?
+    var currentlyPlayingVideo: Video?
+
     suspend fun setupHomePage(startingPage: Int = 0)
 
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
@@ -125,6 +130,6 @@ interface IHomePageRepository {
 
     suspend fun addOnGoingVideo(video: Video)
     suspend fun getOnGoingVideos(): List<Video>
-    suspend fun getVideo(id: Int): Video?
+    suspend fun getOnGoingVideo(id: Int): Video?
     suspend fun removeOnGoingVideo(id: Int)
 }

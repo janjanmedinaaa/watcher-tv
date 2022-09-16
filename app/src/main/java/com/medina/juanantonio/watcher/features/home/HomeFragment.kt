@@ -8,6 +8,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.BackgroundManager
 import androidx.leanback.app.BrowseSupportFragment
+import androidx.leanback.widget.ListRow
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
@@ -47,9 +48,6 @@ class HomeFragment : BrowseSupportFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val episodeList = HomeFragmentArgs.fromBundle(requireArguments()).episodeList
-        viewModel.setupVideoList(episodeList)
 
         displayMetrics.setTo(resources.displayMetrics)
 
@@ -96,6 +94,13 @@ class HomeFragment : BrowseSupportFragment() {
         listenVM()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        val episodeList = HomeFragmentArgs.fromBundle(requireArguments()).episodeList
+        viewModel.setupVideoList(episodeList)
+    }
+
     private fun listenVM() {
         viewModel.contentList.observeEvent(viewLifecycleOwner) {
             contentAdapter.addContent(it)
@@ -111,6 +116,20 @@ class HomeFragment : BrowseSupportFragment() {
             findNavController().navigate(
                 HomeFragmentDirections.actionHomeFragmentSelf(it)
             )
+        }
+
+        viewModel.onGoingVideosList.observeEvent(viewLifecycleOwner) { onGoingVideoGroup ->
+            val firstRow = contentAdapter.get(0) as? ListRow
+            firstRow?.let { first ->
+                if (first.headerItem?.name == "Continue Watching") {
+                    if (onGoingVideoGroup.videoList.isEmpty())
+                        contentAdapter.removeItems(0, 1)
+                    else
+                        contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, true)
+                } else if (onGoingVideoGroup.videoList.isNotEmpty()) {
+                    contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, true)
+                }
+            }
         }
     }
 

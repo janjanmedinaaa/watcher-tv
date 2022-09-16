@@ -21,6 +21,7 @@ class HomeViewModel @Inject constructor(
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
     val videoMedia = MutableLiveData<Event<VideoMedia>>()
     val episodeList = MutableLiveData<Event<VideoGroup>>()
+    val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
 
     private var displaysEpisodes = false
     var contentLoaded = false
@@ -29,22 +30,32 @@ class HomeViewModel @Inject constructor(
 
     // TODO: Update on going videos when navigating to Home Screen
     fun setupVideoList(episodeList: VideoGroup?) {
-        if (contentLoaded) return
+        if (contentLoaded) {
+            if (episodeList == null) getOnGoingVideoGroup()
+            return
+        }
         contentLoaded = true
 
         viewModelScope.launch {
             if (episodeList != null) {
                 displaysEpisodes = true
                 contentList.value = Event(listOf(episodeList))
-            } else {
-                val onGoingVideos = homePageRepository.getOnGoingVideos()
-                val mergedContents = arrayListOf<VideoGroup>().apply {
-                    if (onGoingVideos.isNotEmpty())
-                        add(VideoGroup("Continue Watching", onGoingVideos))
 
-                    addAll(homePageRepository.homeContentList)
+                // 1. Gets a Content id of the Series
+                episodeList.videoList.firstOrNull()?.contentId?.let { seriesId ->
+                    // 2. Check if there is an on going playing episode
+                    homePageRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                        // 3. If there is, get the specific episode to play
+                        episodeList.videoList.firstOrNull {
+                            it.episodeNumber == onGoingVideo.episodeNumber
+                        }?.let { episodeToPlay ->
+                            getVideoMedia(episodeToPlay)
+                        }
+                    }
                 }
-                contentList.value = Event(mergedContents)
+            } else {
+                contentList.value = Event(homePageRepository.homeContentList)
+                getOnGoingVideoGroup()
             }
         }
     }
@@ -58,8 +69,25 @@ class HomeViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
+                homePageRepository.currentlyPlayingVideo = video
                 this@HomeViewModel.videoMedia.value = Event(it)
             }
+        }
+    }
+
+    private fun getOnGoingVideoGroup() {
+        viewModelScope.launch {
+            val onGoingVideos = homePageRepository.getOnGoingVideos()
+            val onGoingVideoGroup =
+                VideoGroup(
+                    "Continue Watching",
+                    onGoingVideos.map {
+                        it.episodeNumber = 0
+                        it
+                    }
+                )
+
+            onGoingVideosList.value = Event(onGoingVideoGroup)
         }
     }
 

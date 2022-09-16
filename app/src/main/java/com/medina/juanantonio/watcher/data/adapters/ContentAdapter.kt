@@ -7,7 +7,7 @@ import androidx.leanback.widget.ListRowPresenter
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 
-class ContentAdapter: ArrayObjectAdapter(ListRowPresenter()) {
+class ContentAdapter : ArrayObjectAdapter(ListRowPresenter()) {
 
     fun addContent(videoGroup: List<VideoGroup>) {
         val cardPresenter = VideoCardPresenter()
@@ -17,5 +17,14 @@ class ContentAdapter: ArrayObjectAdapter(ListRowPresenter()) {
             val headerItem = HeaderItem(it.category)
             add(ListRow(headerItem, listRowAdapter))
         }
+    }
+
+    fun addVideoGroupOnStart(videoGroup: VideoGroup, replace: Boolean) {
+        val cardPresenter = VideoCardPresenter()
+        val listRowAdapter = ArrayObjectAdapter(cardPresenter)
+        listRowAdapter.addAll(0, videoGroup.videoList)
+        val headerItem = HeaderItem(videoGroup.category)
+        val listRow = ListRow(headerItem, listRowAdapter)
+        if (replace) replace(0, listRow) else add(0, listRow)
     }
 }

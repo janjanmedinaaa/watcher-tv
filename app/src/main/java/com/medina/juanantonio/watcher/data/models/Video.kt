@@ -17,7 +17,8 @@ data class Video(
     @PrimaryKey val contentId: Int,
     val imageUrl: String,
     val title: String,
-    val episodeNumber: Int
+    var episodeNumber: Int,
+    val episodeCount: Int
 ) : Parcelable {
 
     @Ignore
@@ -31,16 +32,18 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.imageUrl,
         title = bean.title,
-        episodeNumber = 0
+        episodeNumber = 0,
+        episodeCount = 0
     )
 
-    constructor(video: Video, bean: EpisodeBean) : this(
+    constructor(video: Video, bean: EpisodeBean, episodeCount: Int) : this(
         category = video.category,
         contentType = video.contentType,
         contentId = video.contentId,
         imageUrl = video.imageUrl,
         title = video.title,
-        episodeNumber = bean.seriesNo
+        episodeNumber = bean.seriesNo,
+        episodeCount = episodeCount
     )
 
     constructor(bean: SearchResultBean) : this(
@@ -55,7 +58,8 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
         title = bean.name,
-        episodeNumber = 0
+        episodeNumber = 0,
+        episodeCount = 0
     ) {
         isSearchResult = true
     }
