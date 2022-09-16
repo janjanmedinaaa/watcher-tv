@@ -2,8 +2,22 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_main"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/splashFragment">
 
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.medina.juanantonio.watcher.features.splash.SplashFragment"
+        android:label="SplashFragment">
+        <action
+            android:id="@+id/action_splashFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.medina.juanantonio.watcher.features.home.HomeFragment"
@@ -15,13 +29,25 @@
             app:nullable="true" />
         <action
             android:id="@+id/action_homeFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
+            app:destination="@id/playerFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation" />
         <action
             android:id="@+id/action_homeFragment_self"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation" />
         <action
             android:id="@+id/action_homeFragment_to_videoSearchFragment"
-            app:destination="@id/videoSearchFragment" />
+            app:destination="@id/videoSearchFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation" />
     </fragment>
 
     <fragment
@@ -33,7 +59,13 @@
             app:argType="com.medina.juanantonio.watcher.data.models.VideoMedia" />
         <action
             android:id="@+id/action_playerFragment_to_playerErrorFragment"
-            app:destination="@id/playerErrorFragment" />
+            app:destination="@id/playerErrorFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation"
+            app:popUpTo="@id/playerFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -49,18 +81,30 @@
         <action
             android:id="@+id/action_playerErrorFragment_to_playerFragment"
             app:destination="@id/playerFragment"
-            app:popUpTo="@id/playerFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation"
+            app:popUpTo="@id/playerErrorFragment"
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/videoSearchFragment"
         android:name="com.medina.juanantonio.watcher.features.search.VideoSearchFragment"
-        android:label="VideoSearchFragment" >
+        android:label="VideoSearchFragment">
         <action
             android:id="@+id/action_videoSearchFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation" />
         <action
             android:id="@+id/action_videoSearchFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
+            app:destination="@id/playerFragment"
+            app:enterAnim="@anim/fade_in_animation"
+            app:exitAnim="@anim/fade_out_animation"
+            app:popEnterAnim="@anim/fade_in_animation"
+            app:popExitAnim="@anim/fade_out_animation" />
     </fragment>
 </navigation>

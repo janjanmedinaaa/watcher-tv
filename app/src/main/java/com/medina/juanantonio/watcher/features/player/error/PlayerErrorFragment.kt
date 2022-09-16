@@ -30,7 +30,7 @@ class PlayerErrorFragment : Fragment() {
             override fun handleOnBackPressed() {
                 // Upon selecting back, return the user to the browse fragment and clean up the
                 // parent node in the nav graph, PlaybackFragment, from the back stack when popping.
-                findNavController().popBackStack(R.id.playerFragment, /* inclusive= */ true)
+                findNavController().popBackStack()
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
@@ -68,7 +68,7 @@ class PlayerErrorFragment : Fragment() {
                 )
             }
             actionGoBack.setOnClickListener {
-                findNavController().popBackStack(R.id.playerFragment, true)
+                findNavController().popBackStack()
             }
         }
     }

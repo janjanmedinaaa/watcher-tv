@@ -10,7 +10,16 @@ class HomePageRepository(
     private val remoteSource: IHomePageRemoteSource
 ) : IHomePageRepository {
 
-    override suspend fun getHomePage(page: Int): List<VideoGroup>? {
+    override val homeContentList: ArrayList<VideoGroup> = arrayListOf()
+
+    override suspend fun setupHomePage(startingPage: Int) {
+        val result = getHomePage(startingPage)
+        if (!result.isNullOrEmpty()) {
+            setupHomePage(startingPage + 1)
+        }
+    }
+
+    private suspend fun getHomePage(page: Int): List<VideoGroup>? {
         val result = remoteSource.getHomePage(page)
 
         return if (result is Result.Success) {
@@ -18,7 +27,7 @@ class HomePageRepository(
                 it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM
             }
 
-            filteredVideos?.map {
+            val listVideoGroup = filteredVideos?.map {
                 VideoGroup(
                     category = it.homeSectionName,
                     videoList = it.recommendContentVOList.map { videoItem ->
@@ -26,6 +35,9 @@ class HomePageRepository(
                     }
                 )
             }
+
+            homeContentList.addAll(listVideoGroup ?: emptyList())
+            listVideoGroup
         } else null
     }
 
@@ -85,7 +97,10 @@ class HomePageRepository(
 }
 
 interface IHomePageRepository {
-    suspend fun getHomePage(page: Int): List<VideoGroup>?
+    val homeContentList: ArrayList<VideoGroup>
+
+    suspend fun setupHomePage(startingPage: Int = 0)
+
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
     suspend fun searchByKeyword(keyword: String): List<Video>?

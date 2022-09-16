@@ -27,23 +27,16 @@ class HomeViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    private suspend fun setupHomePage(page: Int) {
-        val currentPage = homePageRepository.getHomePage(page = page)
-        currentPage?.let {
-            contentList.value = Event(it)
-            setupHomePage(page = page + 1)
-        }
-    }
-
     fun setupVideoList(episodeList: VideoGroup?) {
         if (contentLoaded) return
         contentLoaded = true
+
         if (episodeList != null) {
             displaysEpisodes = true
             contentList.value = Event(listOf(episodeList))
-        }
-        else viewModelScope.launch {
-            setupHomePage(page = 0)
+        } else {
+            contentList.value = Event(homePageRepository.homeContentList)
+
         }
     }
 
