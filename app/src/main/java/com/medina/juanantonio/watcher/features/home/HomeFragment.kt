@@ -103,6 +103,7 @@ class HomeFragment : BrowseSupportFragment() {
 
     private fun listenVM() {
         viewModel.contentList.observeEvent(viewLifecycleOwner) {
+            contentAdapter.clear()
             contentAdapter.addContent(it)
         }
 
@@ -127,7 +128,7 @@ class HomeFragment : BrowseSupportFragment() {
                     else
                         contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, true)
                 } else if (onGoingVideoGroup.videoList.isNotEmpty()) {
-                    contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, true)
+                    contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, false)
                 }
             }
         }

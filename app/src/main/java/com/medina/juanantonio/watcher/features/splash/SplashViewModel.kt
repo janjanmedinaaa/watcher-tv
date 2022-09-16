@@ -18,6 +18,7 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            homePageRepository.homeContentList.clear()
             homePageRepository.setupHomePage(startingPage = 0)
             navigateToHomeScreen.value = Event(Unit)
         }
