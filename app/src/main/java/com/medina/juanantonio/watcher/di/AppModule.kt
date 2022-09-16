@@ -2,12 +2,11 @@ package com.medina.juanantonio.watcher.di
 
 import android.content.Context
 import android.net.TrafficStats
+import androidx.room.Room
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.network.ApiService
-import com.medina.juanantonio.watcher.sources.home.HomePageRemoteSource
-import com.medina.juanantonio.watcher.sources.home.HomePageRepository
-import com.medina.juanantonio.watcher.sources.home.IHomePageRemoteSource
-import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
+import com.medina.juanantonio.watcher.sources.home.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,8 +70,25 @@ class AppModule {
     @Provides
     @Singleton
     fun provideHomePageRepository(
-        remoteSource: IHomePageRemoteSource
+        remoteSource: IHomePageRemoteSource,
+        database: IHomePageDatabase
     ): IHomePageRepository {
-        return HomePageRepository(remoteSource)
+        return HomePageRepository(remoteSource, database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWatcherDb(@ApplicationContext context: Context): WatcherDb {
+        return Room.databaseBuilder(context, WatcherDb::class.java, "watcher.db")
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHomePageDatabase(
+        watcherDb: WatcherDb
+    ): IHomePageDatabase {
+        return HomePageDatabase(watcherDb)
     }
 }

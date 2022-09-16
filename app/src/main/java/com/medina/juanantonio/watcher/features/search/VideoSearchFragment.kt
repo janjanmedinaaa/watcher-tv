@@ -58,7 +58,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item is Video) {
                 when (item.contentType) {
-                    HomePageBean.ContentType.MOVIE -> viewModel.getVideo(item)
+                    HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
                     HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
                     else -> Unit
                 }

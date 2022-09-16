@@ -7,7 +7,8 @@ import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class HomePageRepository(
-    private val remoteSource: IHomePageRemoteSource
+    private val remoteSource: IHomePageRemoteSource,
+    private val database: IHomePageDatabase
 ) : IHomePageRepository {
 
     override val homeContentList: ArrayList<VideoGroup> = arrayListOf()
@@ -62,6 +63,7 @@ class HomePageRepository(
 
             if (videoMediaResult is Result.Success) {
                 VideoMedia(
+                    contentId = id,
                     episodeBean = episode ?: return null,
                     detailsResponse = videoDetailsResult.data?.data ?: return null,
                     mediaResponse = videoMediaResult.data?.data ?: return null
@@ -94,6 +96,22 @@ class HomePageRepository(
             filteredList.map { Video(it) }
         } else null
     }
+
+    override suspend fun addOnGoingVideo(video: Video) {
+        database.addVideo(video)
+    }
+
+    override suspend fun getOnGoingVideos(): List<Video> {
+        return database.getOnGoingVideos()
+    }
+
+    override suspend fun getVideo(id: Int): Video? {
+        return database.getVideo(id)
+    }
+
+    override suspend fun removeOnGoingVideo(id: Int) {
+        database.removeVideo(id)
+    }
 }
 
 interface IHomePageRepository {
@@ -104,4 +122,9 @@ interface IHomePageRepository {
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
     suspend fun searchByKeyword(keyword: String): List<Video>?
+
+    suspend fun addOnGoingVideo(video: Video)
+    suspend fun getOnGoingVideos(): List<Video>
+    suspend fun getVideo(id: Int): Video?
+    suspend fun removeOnGoingVideo(id: Int)
 }

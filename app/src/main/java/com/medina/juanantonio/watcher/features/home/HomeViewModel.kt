@@ -27,26 +27,35 @@ class HomeViewModel @Inject constructor(
 
     private var job: Job? = null
 
+    // TODO: Update on going videos when navigating to Home Screen
     fun setupVideoList(episodeList: VideoGroup?) {
         if (contentLoaded) return
         contentLoaded = true
 
-        if (episodeList != null) {
-            displaysEpisodes = true
-            contentList.value = Event(listOf(episodeList))
-        } else {
-            contentList.value = Event(homePageRepository.homeContentList)
+        viewModelScope.launch {
+            if (episodeList != null) {
+                displaysEpisodes = true
+                contentList.value = Event(listOf(episodeList))
+            } else {
+                val onGoingVideos = homePageRepository.getOnGoingVideos()
+                val mergedContents = arrayListOf<VideoGroup>().apply {
+                    if (onGoingVideos.isNotEmpty())
+                        add(VideoGroup("Continue Watching", onGoingVideos))
 
+                    addAll(homePageRepository.homeContentList)
+                }
+                contentList.value = Event(mergedContents)
+            }
         }
     }
 
-    fun getVideo(video: Video) {
+    fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             val videoMedia = homePageRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
-                episodeNumber = video.episodeId
+                episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
                 this@HomeViewModel.videoMedia.value = Event(it)
@@ -55,7 +64,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun handleSeries(video: Video) {
-        if (displaysEpisodes) getVideo(video)
+        if (displaysEpisodes) getVideoMedia(video)
         else getEpisodeList(video)
     }
 

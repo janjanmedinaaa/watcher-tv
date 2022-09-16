@@ -10,6 +10,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class VideoMedia(
     val id: Int,
+    val contentId: Int,
     val title: String,
     val introduction: String,
     val mediaUrl: String,
@@ -17,11 +18,13 @@ data class VideoMedia(
 ) : Parcelable {
 
     constructor(
+        contentId: Int,
         episodeBean: EpisodeBean,
         detailsResponse: GetVideoDetailsResponse.Data,
         mediaResponse: GetVideoResourceResponse.Data
     ) : this(
         id = episodeBean.id,
+        contentId = contentId,
         title = if (episodeBean.seriesNo == 0) detailsResponse.name
         else "${detailsResponse.name} - Episode ${episodeBean.seriesNo}",
         introduction = detailsResponse.introduction,

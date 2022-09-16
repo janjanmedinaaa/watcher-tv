@@ -34,11 +34,11 @@ class VideoCardPresenter : Presenter() {
         val video = item as Video
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
 
-        if (video.episodeId == 0 && !video.isSearchResult) {
-            binding.root.cardType = CARD_TYPE_FLAG_IMAGE_ONLY
-        }
+//        if (video.episodeId == 0 && !video.isSearchResult) {
+//            binding.root.cardType = CARD_TYPE_FLAG_IMAGE_ONLY
+//        }
 
-        binding.root.titleText = video.title
+        binding.root.titleText = getTitleText(video)
         binding.root.contentText = getContentText(binding.root.resources, video)
         binding.root.mainImageView.load(video.imageUrl) {
             crossfade(true)
@@ -49,6 +49,17 @@ class VideoCardPresenter : Presenter() {
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
         binding.root.mainImage = null
+    }
+
+    private fun getTitleText(video: Video): String? {
+        return when (video.contentType) {
+            HomePageBean.ContentType.MOVIE -> video.title
+            HomePageBean.ContentType.DRAMA -> {
+                if (video.episodeNumber == 0) video.title
+                else "Episode ${video.episodeNumber}"
+            }
+            else -> null
+        }
     }
 
     /**

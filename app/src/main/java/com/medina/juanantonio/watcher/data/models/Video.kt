@@ -1,22 +1,29 @@
 package com.medina.juanantonio.watcher.data.models
 
 import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.search.SearchResultBean
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
+@Entity
 data class Video(
     val category: Int?,
     val contentType: HomePageBean.ContentType,
-    val contentId: Int,
+    @PrimaryKey val contentId: Int,
     val imageUrl: String,
     val title: String,
-    val episodeId: Int
+    val episodeNumber: Int
 ) : Parcelable {
 
+    @Ignore
     var isSearchResult = false
+
+    var videoProgress: Long = 0L
 
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
@@ -24,7 +31,7 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.imageUrl,
         title = bean.title,
-        episodeId = 0
+        episodeNumber = 0
     )
 
     constructor(video: Video, bean: EpisodeBean) : this(
@@ -32,8 +39,8 @@ data class Video(
         contentType = video.contentType,
         contentId = video.contentId,
         imageUrl = video.imageUrl,
-        title = "Episode ${bean.seriesNo}",
-        episodeId = bean.seriesNo
+        title = video.title,
+        episodeNumber = bean.seriesNo
     )
 
     constructor(bean: SearchResultBean) : this(
@@ -48,7 +55,7 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
         title = bean.name,
-        episodeId = 0
+        episodeNumber = 0
     ) {
         isSearchResult = true
     }

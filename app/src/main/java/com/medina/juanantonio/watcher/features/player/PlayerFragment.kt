@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -35,6 +36,8 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
+    private var currentProgress = 0L
+
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
             // While a video is playing, the screen should stay on and the device should not go to
@@ -43,8 +46,9 @@ class PlayerFragment : VideoSupportFragment() {
             view?.keepScreenOn = state is VideoPlaybackState.Play
 
             when (state) {
-                is VideoPlaybackState.Prepare -> {}
+                is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
                 is VideoPlaybackState.End -> {
+                    viewModel.deleteVideo()
                     // To get to playback, the user always goes through browse first. Deep links for
                     // directly playing a video also go to browse before playback. If playback
                     // finishes the entire video, the PlaybackFragment is popped off the back stack
@@ -59,6 +63,9 @@ class PlayerFragment : VideoSupportFragment() {
                         )
                     )
                 }
+                is VideoPlaybackState.Pause -> {
+                    viewModel.saveVideo(currentProgress)
+                }
                 else -> {
                     // Do nothing.
                 }
@@ -66,9 +73,17 @@ class PlayerFragment : VideoSupportFragment() {
         }
     }
 
-    private val onProgressUpdate: () -> Unit = {
+    private fun startPlaybackFromWatchProgress(startPosition: Long) {
+        exoPlayer?.apply {
+            seekTo(startPosition)
+            playWhenReady = true
+        }
+    }
+
+    private val onProgressUpdate: (Long) -> Unit = { progress ->
         // TODO(benbaxter): Calculate when end credits are displaying and show the next episode for
         //  episodic content.
+        currentProgress = progress
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,6 +98,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)
+        listenVM()
     }
 
     override fun onDestroyView() {
@@ -106,6 +122,17 @@ class PlayerFragment : VideoSupportFragment() {
         mediaSession.release()
     }
 
+    private fun listenVM() {
+        viewModel.savedProgress.observeEvent(viewLifecycleOwner) {
+            viewModel.onStateChange(
+                VideoPlaybackState.Prepare(
+                    videoMedia,
+                    it
+                )
+            )
+        }
+    }
+
     private fun createMediaSession() {
         mediaSession = MediaSessionCompat(requireContext(), MEDIA_SESSION_TAG)
 
@@ -123,7 +150,6 @@ class PlayerFragment : VideoSupportFragment() {
             prepare()
             addListener(PlayerEventListener())
             prepareGlue(this)
-            playWhenReady = true
             mediaSessionConnector.setPlayer(object : ForwardingPlayer(this) {
                 override fun stop() {
                     // Treat stop commands as pause, this keeps ExoPlayer, MediaSession, etc.
@@ -137,8 +163,7 @@ class PlayerFragment : VideoSupportFragment() {
             })
             mediaSession.isActive = true
         }
-
-        viewModel.onStateChange(VideoPlaybackState.Load(videoMedia))
+        viewModel.getVideoDetails(videoMedia.contentId)
     }
 
     private fun destroyPlayer() {

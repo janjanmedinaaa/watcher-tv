@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// TODO: Refactor to more generic screen name
 @AndroidEntryPoint
 class HomeFragment : BrowseSupportFragment() {
 
@@ -33,6 +34,7 @@ class HomeFragment : BrowseSupportFragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private val contentAdapter = ContentAdapter()
+
     private lateinit var backgroundManager: BackgroundManager
     private lateinit var imageLoader: ImageLoader
     private var imageLoadingJob: Job? = null
@@ -62,7 +64,7 @@ class HomeFragment : BrowseSupportFragment() {
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item is Video) {
                 when (item.contentType) {
-                    HomePageBean.ContentType.MOVIE -> viewModel.getVideo(item)
+                    HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
                     HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
                     else -> Unit
                 }

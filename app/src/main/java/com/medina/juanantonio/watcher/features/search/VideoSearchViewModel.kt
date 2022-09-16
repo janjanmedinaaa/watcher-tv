@@ -35,13 +35,13 @@ class VideoSearchViewModel @Inject constructor(
         }
     }
 
-    fun getVideo(video: Video) {
+    fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             val videoMedia = homePageRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
-                episodeNumber = video.episodeId
+                episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
                 this@VideoSearchViewModel.videoMedia.value = Event(it)
@@ -50,7 +50,7 @@ class VideoSearchViewModel @Inject constructor(
     }
 
     fun handleSeries(video: Video) {
-        if (displaysEpisodes) getVideo(video)
+        if (displaysEpisodes) getVideoMedia(video)
         else getEpisodeList(video)
     }
 

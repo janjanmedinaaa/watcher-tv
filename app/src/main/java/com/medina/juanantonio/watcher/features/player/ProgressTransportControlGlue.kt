@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit
 class ProgressTransportControlGlue<T : PlayerAdapter>(
     context: Context,
     impl: T,
-    private val updateProgress: () -> Unit
+    private val updateProgress: (Long) -> Unit
 ) : PlaybackTransportControlGlue<T>(context, impl) {
 
     // Define actions for fast forward and rewind operations.
@@ -75,7 +75,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
     override fun onUpdateProgress() {
         super.onUpdateProgress()
-        updateProgress()
+        updateProgress(currentPosition)
     }
 
     override fun onActionClicked(action: Action) {
