@@ -3,6 +3,7 @@ package com.medina.juanantonio.watcher.data.presenters
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.leanback.widget.ImageCardView.*
 import androidx.leanback.widget.Presenter
 import coil.load
 import com.medina.juanantonio.watcher.R
@@ -22,7 +23,8 @@ class VideoCardPresenter : Presenter() {
         val resources = context.resources
         binding.root.setMainImageDimensions(
             resources.getDimensionPixelSize(R.dimen.image_card_width),
-            resources.getDimensionPixelSize(R.dimen.image_card_height))
+            resources.getDimensionPixelSize(R.dimen.image_card_height)
+        )
 
         return ViewHolder(binding.root)
     }
@@ -31,6 +33,10 @@ class VideoCardPresenter : Presenter() {
         checkNotNull(item)
         val video = item as Video
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
+
+        if (video.episodeId == 0 && !video.isSearchResult) {
+            binding.root.cardType = CARD_TYPE_FLAG_IMAGE_ONLY
+        }
 
         binding.root.titleText = video.title
         binding.root.contentText = getContentText(binding.root.resources, video)

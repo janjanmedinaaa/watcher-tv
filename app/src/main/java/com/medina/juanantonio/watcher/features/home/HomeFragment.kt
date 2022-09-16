@@ -2,8 +2,6 @@ package com.medina.juanantonio.watcher.features.home
 
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
@@ -21,6 +19,8 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -35,17 +35,13 @@ class HomeFragment : BrowseSupportFragment() {
     private val contentAdapter = ContentAdapter()
     private lateinit var backgroundManager: BackgroundManager
     private lateinit var imageLoader: ImageLoader
-    private lateinit var handler: Handler
+    private var imageLoadingJob: Job? = null
 
     // The DisplayMetrics instance is used to get the screen dimensions
     private val displayMetrics = DisplayMetrics()
 
     // The URI of the background we are currently displaying to avoid reloading the same one
     private var backgroundUri = ""
-
-    private val backgroundRunnable: Runnable = Runnable {
-        updateBackgroundImmediate()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +51,6 @@ class HomeFragment : BrowseSupportFragment() {
 
         displayMetrics.setTo(resources.displayMetrics)
 
-        handler = Handler(Looper.getMainLooper())
         imageLoader = ImageLoader(requireContext())
         backgroundManager = BackgroundManager.getInstance(requireActivity()).apply {
             if (!isAttached) {
@@ -125,13 +120,17 @@ class HomeFragment : BrowseSupportFragment() {
      */
     private fun updateBackgroundDelayed(video: Video) {
         if (backgroundUri != video.imageUrl) {
-            handler.removeCallbacks(backgroundRunnable)
+            imageLoadingJob?.cancel()
+            imageLoadingJob = null
             backgroundUri = video.imageUrl
 
             if (backgroundUri.isEmpty()) {
                 showDefaultBackground()
             } else {
-                handler.postDelayed(backgroundRunnable, BACKGROUND_UPDATE_DELAY_MILLIS)
+                viewModel.viewModelScope.launch {
+                    delay(BACKGROUND_UPDATE_DELAY_MILLIS)
+                    updateBackgroundImmediate()
+                }
             }
         }
     }
@@ -139,9 +138,11 @@ class HomeFragment : BrowseSupportFragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.contentLoaded = false
+        imageLoadingJob?.cancel()
+        imageLoadingJob = null
     }
 
-    private fun updateBackgroundImmediate() {
+    private suspend fun updateBackgroundImmediate() {
         if (activity == null) {
             // Triggered after fragment detached from activity, ignore
             return
@@ -155,13 +156,11 @@ class HomeFragment : BrowseSupportFragment() {
             .size(displayMetrics.widthPixels, displayMetrics.heightPixels)
             .build()
 
-        viewModel.viewModelScope.launch {
-            val bitmapDrawable = imageLoader.execute(imageRequest).drawable as? BitmapDrawable
-            if (bitmapDrawable != null) {
-                backgroundManager.setBitmap(bitmapDrawable.bitmap)
-            } else {
-                showDefaultBackground()
-            }
+        val bitmapDrawable = imageLoader.execute(imageRequest).drawable as? BitmapDrawable
+        if (bitmapDrawable != null) {
+            backgroundManager.setBitmap(bitmapDrawable.bitmap)
+        } else {
+            showDefaultBackground()
         }
     }
 

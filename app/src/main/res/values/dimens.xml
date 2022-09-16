@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="image_card_width">192dp</dimen>
-    <dimen name="image_card_height">108dp</dimen>
+    <dimen name="image_card_width">108dp</dimen>
+    <dimen name="image_card_height">192dp</dimen>
 
     <!-- Text sizes. -->
     <dimen name="text_size_h3">16sp</dimen>

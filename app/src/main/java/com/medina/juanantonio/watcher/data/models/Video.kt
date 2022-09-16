@@ -16,6 +16,8 @@ data class Video(
     val episodeId: Int
 ) : Parcelable {
 
+    var isSearchResult = false
+
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
         contentType = bean.contentType,
@@ -47,5 +49,7 @@ data class Video(
         imageUrl = bean.coverVerticalUrl,
         title = bean.name,
         episodeId = 0
-    )
+    ) {
+        isSearchResult = true
+    }
 }
