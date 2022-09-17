@@ -52,6 +52,21 @@ class HomeFragment : BrowseSupportFragment() {
     // The URI of the background we are currently displaying to avoid reloading the same one
     private var backgroundUri = ""
 
+    private val backgroundTarget = object : CustomTarget<Bitmap>() {
+        override fun onResourceReady(
+            resource: Bitmap,
+            transition: Transition<in Bitmap>?
+        ) {
+            backgroundManager.setBitmap(resource)
+        }
+
+        override fun onLoadFailed(errorDrawable: Drawable?) {
+            showDefaultBackground()
+        }
+
+        override fun onLoadCleared(placeholder: Drawable?) = Unit
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -128,6 +143,7 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         viewModel.onGoingVideosList.observeEvent(viewLifecycleOwner) { onGoingVideoGroup ->
+            if (contentAdapter.size() == 0) return@observeEvent
             val firstRow = contentAdapter.get(0) as? ListRow
             firstRow?.let { first ->
                 if (first.headerItem?.name == "Continue Watching") {
@@ -150,8 +166,7 @@ class HomeFragment : BrowseSupportFragment() {
      */
     private fun updateBackgroundDelayed(video: Video) {
         if (backgroundUri != video.imageUrl) {
-            imageLoadingJob?.cancel()
-            imageLoadingJob = null
+            cancelBackgroundImageLoading()
             backgroundUri = video.imageUrl
 
             if (backgroundUri.isEmpty()) {
@@ -168,8 +183,7 @@ class HomeFragment : BrowseSupportFragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.contentLoaded = false
-        imageLoadingJob?.cancel()
-        imageLoadingJob = null
+        cancelBackgroundImageLoading()
     }
 
     private fun updateBackgroundImmediate() {
@@ -184,22 +198,13 @@ class HomeFragment : BrowseSupportFragment() {
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(100, 133)
             .apply(RequestOptions.bitmapTransform(BlurTransformation(5, 1)))
-            .into(
-                object : CustomTarget<Bitmap>() {
-                    override fun onResourceReady(
-                        resource: Bitmap,
-                        transition: Transition<in Bitmap>?
-                    ) {
-                        backgroundManager.setBitmap(resource)
-                    }
+            .into(backgroundTarget)
+    }
 
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
-                        showDefaultBackground()
-                    }
-
-                    override fun onLoadCleared(placeholder: Drawable?) = Unit
-                }
-            )
+    private fun cancelBackgroundImageLoading() {
+        Glide.with(requireContext()).clear(backgroundTarget)
+        imageLoadingJob?.cancel()
+        imageLoadingJob = null
     }
 
     private fun showDefaultBackground() {

@@ -28,7 +28,6 @@ class HomeViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    // TODO: Update on going videos when navigating to Home Screen
     fun setupVideoList(episodeList: VideoGroup?) {
         if (contentLoaded) {
             if (episodeList == null) getOnGoingVideoGroup()
@@ -69,7 +68,10 @@ class HomeViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                homePageRepository.currentlyPlayingVideo = video
+                homePageRepository.currentlyPlayingVideo = video.apply {
+                    // Reset video progress
+                    videoProgress = 0L
+                }
                 this@HomeViewModel.videoMedia.value = Event(it)
             }
         }

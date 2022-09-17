@@ -16,12 +16,12 @@
 package com.medina.juanantonio.watcher.features.player
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import androidx.leanback.media.MediaPlayerAdapter
 import androidx.leanback.media.PlaybackTransportControlGlue
 import androidx.leanback.media.PlayerAdapter
 import androidx.leanback.widget.Action
 import androidx.leanback.widget.ArrayObjectAdapter
+import androidx.leanback.widget.PlaybackControlsRow
 import androidx.leanback.widget.PlaybackControlsRow.FastForwardAction
 import androidx.leanback.widget.PlaybackControlsRow.RewindAction
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
@@ -55,12 +55,16 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     private val updateProgress: (Long) -> Unit
 ) : PlaybackTransportControlGlue<T>(context, impl) {
 
-    // Define actions for fast forward and rewind operations.
-    @VisibleForTesting
-    var skipForwardAction: FastForwardAction = FastForwardAction(context)
+    var skipForwardAction = FastForwardAction(context)
+        private set
+    var skipBackwardAction = RewindAction(context)
+        private set
+    var skipNextAction = PlaybackControlsRow.SkipNextAction(context)
+        private set
+    var skipPreviousAction = PlaybackControlsRow.SkipPreviousAction(context)
+        private set
 
-    @VisibleForTesting
-    var skipBackwardAction: RewindAction = RewindAction(context)
+    private var onActionListener: (Action) -> Unit = {}
 
     override fun onCreatePrimaryActions(primaryActionsAdapter: ArrayObjectAdapter) {
         // super.onCreatePrimaryActions() will create the play / pause action.
@@ -68,8 +72,10 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
         // Add the rewind and fast forward actions following the play / pause action.
         primaryActionsAdapter.apply {
+            add(skipPreviousAction)
             add(skipBackwardAction)
             add(skipForwardAction)
+            add(skipNextAction)
         }
     }
 
@@ -85,6 +91,15 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
             skipForwardAction -> skipForward()
             else -> super.onActionClicked(action)
         }
+        onActionListener.invoke(action)
+    }
+
+    fun setOnActionListener(listener: (Action) -> Unit) {
+        onActionListener = listener
+    }
+
+    fun endVideo() {
+        playerAdapter.seekTo(duration)
     }
 
     /** Skips backward 30 seconds.  */

@@ -35,6 +35,7 @@ class PlayerFragment : VideoSupportFragment() {
     private val viewModel: PlayerViewModel by viewModels()
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
+    private lateinit var controlGlue: ProgressTransportControlGlue<LeanbackPlayerAdapter>
 
     private var currentProgress = 0L
 
@@ -46,6 +47,7 @@ class PlayerFragment : VideoSupportFragment() {
             view?.keepScreenOn = state is VideoPlaybackState.Play
 
             when (state) {
+                is VideoPlaybackState.Load -> setupVideoMedia(state.videoMedia)
                 is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
                 is VideoPlaybackState.End -> {
                     viewModel.handleVideoEnd()
@@ -53,7 +55,6 @@ class PlayerFragment : VideoSupportFragment() {
                     // directly playing a video also go to browse before playback. If playback
                     // finishes the entire video, the PlaybackFragment is popped off the back stack
                     // and the user returns to browse.
-                    findNavController().popBackStack()
                 }
                 is VideoPlaybackState.Error -> {
                     findNavController().navigate(
@@ -66,9 +67,7 @@ class PlayerFragment : VideoSupportFragment() {
                 is VideoPlaybackState.Pause -> {
                     viewModel.saveVideo(currentProgress)
                 }
-                else -> {
-                    // Do nothing.
-                }
+                else -> Unit
             }
         }
     }
@@ -132,6 +131,10 @@ class PlayerFragment : VideoSupportFragment() {
                 )
             )
         }
+
+        viewModel.exitPlayer.observeEvent(viewLifecycleOwner) {
+            findNavController().popBackStack()
+        }
     }
 
     private fun createMediaSession() {
@@ -143,11 +146,7 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun initializePlayer() {
-        val dataSourceFactory = DefaultDataSource.Factory(requireContext())
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(videoMedia.mediaUrl))
         exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
-            setMediaSource(mediaSource)
             prepare()
             addListener(PlayerEventListener())
             prepareGlue(this)
@@ -164,7 +163,7 @@ class PlayerFragment : VideoSupportFragment() {
             })
             mediaSession.isActive = true
         }
-        viewModel.getVideoDetails(videoMedia.contentId)
+        viewModel.onStateChange(VideoPlaybackState.Load(videoMedia))
     }
 
     private fun destroyPlayer() {
@@ -179,7 +178,7 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun prepareGlue(localExoplayer: ExoPlayer) {
-        ProgressTransportControlGlue(
+        controlGlue = ProgressTransportControlGlue(
             requireContext(),
             LeanbackPlayerAdapter(
                 requireContext(),
@@ -189,12 +188,35 @@ class PlayerFragment : VideoSupportFragment() {
             onProgressUpdate
         ).apply {
             host = VideoSupportFragmentGlueHost(this@PlayerFragment)
-            title = videoMedia.title
             // Enable seek manually since PlaybackTransportControlGlue.getSeekProvider() is null,
             // so that PlayerAdapter.seekTo(long) will be called during user seeking.
             // TODO(gargsahil@): Add a PlaybackSeekDataProvider to support video scrubbing.
             isSeekEnabled = true
+
+            setOnActionListener { action ->
+                when (action) {
+                    skipNextAction -> endVideo()
+                    skipPreviousAction ->
+                        if (viewModel.isFirstEpisode) exoPlayer?.seekTo(0L)
+                        else viewModel.handleSkipPrevious()
+                }
+            }
         }
+    }
+
+    private fun setupVideoMedia(videoMedia: VideoMedia) {
+        val dataSourceFactory = DefaultDataSource.Factory(requireContext())
+        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(videoMedia.mediaUrl))
+
+        exoPlayer?.seekTo(0L)
+        exoPlayer?.setMediaSource(mediaSource)
+        controlGlue.run {
+            title = videoMedia.title
+            subtitle = videoMedia.introduction
+        }
+
+        viewModel.getVideoDetails(videoMedia.contentId)
     }
 
     inner class PlayerEventListener : Player.Listener {

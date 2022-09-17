@@ -7,6 +7,7 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,8 +17,20 @@ class PlayerViewModel @Inject constructor(
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
+    private var job: Job? = null
 
     val savedProgress = MutableLiveData<Event<Long>>()
+    val exitPlayer = MutableLiveData<Event<Unit>>()
+
+    val isFirstEpisode: Boolean
+        get() = video?.let { v ->
+            v.episodeNumber - 1 == 0
+        } ?: false
+
+    private val isLastEpisode: Boolean
+        get() = video?.let { v ->
+            v.episodeNumber + 1 > v.episodeCount
+        } ?: false
 
     private val playbackStateListeners = arrayListOf<PlaybackStateListener>()
 
@@ -55,18 +68,25 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun handleSkipPrevious() {
+        getNewVideoMedia(playNext = false)
+    }
+
     fun handleVideoEnd() {
         viewModelScope.launch {
             video?.let {
-                if (it.episodeNumber + 1 > it.episodeCount)
+                if (isLastEpisode) {
                     homePageRepository.removeOnGoingVideo(it.contentId)
-                else
+                    exitPlayer.value = Event(Unit)
+                } else {
                     homePageRepository.addOnGoingVideo(
-                        it.apply {
+                        it.copy().apply {
                             episodeNumber += 1
                             videoProgress = 0L
                         }
                     )
+                    getNewVideoMedia(playNext = true)
+                }
             }
         }
     }
@@ -87,5 +107,31 @@ class PlayerViewModel @Inject constructor(
 
     fun cleanUpPlayer() {
         homePageRepository.currentlyPlayingVideo = null
+    }
+
+    private fun getNewVideoMedia(playNext: Boolean) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            video?.let { currentlyPlayingVideo ->
+                val newEpisodeNumber = currentlyPlayingVideo.episodeNumber.let { number ->
+                    if (playNext) number + 1 else number - 1
+                }
+
+                val videoMedia = homePageRepository.getVideo(
+                    id = currentlyPlayingVideo.contentId,
+                    category = currentlyPlayingVideo.category ?: 1,
+                    episodeNumber = newEpisodeNumber
+                )
+
+                videoMedia?.let {
+                    homePageRepository.currentlyPlayingVideo =
+                        currentlyPlayingVideo.copy().apply {
+                            episodeNumber = newEpisodeNumber
+                            videoProgress = 0L
+                        }
+                    onStateChange(VideoPlaybackState.Load(it))
+                }
+            }
+        }
     }
 }

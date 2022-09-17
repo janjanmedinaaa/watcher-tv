@@ -16,8 +16,6 @@
 
 package com.medina.juanantonio.watcher.features.player
 
-import com.medina.juanantonio.watcher.features.player.VideoPlaybackState
-
 /**
  * Listens to changes in [VideoPlaybackState].
  */
