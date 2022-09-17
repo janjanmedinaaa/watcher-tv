@@ -1,10 +1,13 @@
 package com.medina.juanantonio.watcher.features.home
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.BackgroundManager
@@ -21,6 +24,8 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
+import com.medina.juanantonio.watcher.features.dialog.DialogActivity
+import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,6 +45,8 @@ class HomeFragment : BrowseSupportFragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private val contentAdapter = ContentAdapter()
+
+    private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
 
     private lateinit var backgroundManager: BackgroundManager
     private var imageLoadingJob: Job? = null
@@ -78,6 +85,18 @@ class HomeFragment : BrowseSupportFragment() {
                 attach(requireActivity().window)
             }
             setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
+        }
+
+        startForResultAutoPlay = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            when ("${it?.data?.data}".toLongOrNull()) {
+                ACTION_ID_POSITIVE -> {
+                    viewModel.episodeToAutoPlay.value?.peek()?.let { video ->
+                        viewModel.getVideoMedia(video)
+                    }
+                }
+            }
         }
 
         setOnItemViewClickedListener { _, item, _, _ ->
@@ -133,6 +152,20 @@ class HomeFragment : BrowseSupportFragment() {
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
             findNavController().navigate(
                 HomeFragmentDirections.actionHomeFragmentToPlayerFragment(it)
+            )
+        }
+
+        viewModel.episodeToAutoPlay.observeEvent(viewLifecycleOwner) {
+            startForResultAutoPlay.launch(
+                DialogActivity.getIntent(
+                    context = requireContext(),
+                    title = getString(R.string.continue_watching_title),
+                    description = getString(
+                        R.string.continue_watching_description,
+                        it.title,
+                        it.episodeNumber
+                    )
+                )
             )
         }
 

@@ -22,6 +22,7 @@ class HomeViewModel @Inject constructor(
     val videoMedia = MutableLiveData<Event<VideoMedia>>()
     val episodeList = MutableLiveData<Event<VideoGroup>>()
     val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
+    val episodeToAutoPlay = MutableLiveData<Event<Video>>()
 
     private var displaysEpisodes = false
     var contentLoaded = false
@@ -48,7 +49,7 @@ class HomeViewModel @Inject constructor(
                         episodeList.videoList.firstOrNull {
                             it.episodeNumber == onGoingVideo.episodeNumber
                         }?.let { episodeToPlay ->
-                            getVideoMedia(episodeToPlay)
+                            episodeToAutoPlay.value = Event(episodeToPlay)
                         }
                     }
                 }
