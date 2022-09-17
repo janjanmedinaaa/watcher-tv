@@ -1,7 +1,6 @@
 package com.medina.juanantonio.watcher.di
 
 import android.content.Context
-import android.net.TrafficStats
 import androidx.room.Room
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.database.WatcherDb
@@ -14,6 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -28,6 +28,11 @@ class AppModule {
     fun provideApiService(
         @ApplicationContext context: Context
     ): ApiService {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
         val requiredHeaderInterceptor = Interceptor { chain ->
             val requestBuilder =
                 chain.request()
@@ -40,14 +45,11 @@ class AppModule {
         }
 
         val client = OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(0, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.MINUTES)
+            .connectTimeout(20, TimeUnit.MINUTES)
+            .writeTimeout(20, TimeUnit.MINUTES)
+            .readTimeout(20, TimeUnit.MINUTES)
             .addInterceptor(requiredHeaderInterceptor)
-            .addInterceptor { chain ->
-                TrafficStats.setThreadStatsTag(10000)
-                chain.proceed(chain.request())
-            }
+            .addInterceptor(loggingInterceptor)
             .build()
 
         return Retrofit.Builder()

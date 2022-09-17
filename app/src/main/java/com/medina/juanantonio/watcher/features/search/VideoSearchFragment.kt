@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.features.search
 
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
@@ -10,15 +11,18 @@ import androidx.leanback.app.SearchSupportFragment
 import androidx.leanback.widget.*
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.transform.BlurTransformation
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.HomeFragment
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,7 +35,6 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     private var currentQuery = ""
 
     private lateinit var backgroundManager: BackgroundManager
-    private lateinit var imageLoader: ImageLoader
     private var imageLoadingJob: Job? = null
 
     // The DisplayMetrics instance is used to get the screen dimensions
@@ -47,7 +50,6 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
         displayMetrics.setTo(resources.displayMetrics)
 
-        imageLoader = ImageLoader(requireContext())
         backgroundManager = BackgroundManager.getInstance(requireActivity()).apply {
             if (!isAttached) {
                 attach(requireActivity().window)
@@ -146,26 +148,34 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         imageLoadingJob = null
     }
 
-    private suspend fun updateBackgroundImmediate() {
+    private fun updateBackgroundImmediate() {
         if (activity == null) {
             // Triggered after fragment detached from activity, ignore
             return
         }
-        val imageRequest = ImageRequest
-            .Builder(requireContext())
-            .data(backgroundUri)
-            .transformations(listOf(BlurTransformation(requireContext(), 20f)))
-            .crossfade(true)
-            .crossfade(500)
-            .size(displayMetrics.widthPixels, displayMetrics.heightPixels)
-            .build()
 
-        val bitmapDrawable = imageLoader.execute(imageRequest).drawable as? BitmapDrawable
-        if (bitmapDrawable != null) {
-            backgroundManager.setBitmap(bitmapDrawable.bitmap)
-        } else {
-            showDefaultBackground()
-        }
+        Glide.with(this)
+            .asBitmap()
+            .load(backgroundUri)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .override(100, 133)
+            .apply(RequestOptions.bitmapTransform(BlurTransformation(5, 1)))
+            .into(
+                object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
+                        backgroundManager.setBitmap(resource)
+                    }
+
+                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                        showDefaultBackground()
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) = Unit
+                }
+            )
     }
 
     private fun showDefaultBackground() {

@@ -5,21 +5,36 @@ import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 
 class HomePageRepository(
     private val remoteSource: IHomePageRemoteSource,
     private val database: IHomePageDatabase
 ) : IHomePageRepository {
 
-    override val homeContentList: ArrayList<VideoGroup> = arrayListOf()
-
     override var currentlyPlayingVideo: Video? = null
+
+    private val homeContentList: ArrayList<List<VideoGroup>> = arrayListOf()
+
+    private var currentPage = 0
 
     override suspend fun setupHomePage(startingPage: Int) {
         val result = getHomePage(startingPage)
         if (!result.isNullOrEmpty()) {
             setupHomePage(startingPage + 1)
         }
+    }
+
+    override fun getHomePage(): List<VideoGroup> {
+        val page = homeContentList.getOrNull(currentPage)
+        return if (!page.isNullOrEmpty()) {
+            currentPage++
+            page
+        } else emptyList()
+    }
+
+    override fun clearHomePage() {
+        homeContentList.clear()
     }
 
     private suspend fun getHomePage(page: Int): List<VideoGroup>? {
@@ -39,7 +54,7 @@ class HomePageRepository(
                 )
             }
 
-            homeContentList.addAll(listVideoGroup ?: emptyList())
+            homeContentList.add(listVideoGroup ?: emptyList())
             listVideoGroup
         } else null
     }
@@ -54,7 +69,11 @@ class HomePageRepository(
             } else {
                 videoDetails?.episodeVo?.firstOrNull { it.seriesNo == episodeNumber }
             }
-            val definition = episode?.definitionList?.firstOrNull()?.code
+            val definition = episode?.definitionList?.let {
+                it.firstOrNull { definition ->
+                    definition.code == EpisodeBean.DefinitionCode.GROOT_SD
+                } ?: it.firstOrNull()
+            }?.code
 
             val videoMediaResult = remoteSource.getVideoResource(
                 category = category,
@@ -117,12 +136,13 @@ class HomePageRepository(
 }
 
 interface IHomePageRepository {
-    val homeContentList: ArrayList<VideoGroup>
 
     // TODO: Maybe move this to somewhere cleaner?
     var currentlyPlayingVideo: Video?
 
     suspend fun setupHomePage(startingPage: Int = 0)
+    fun getHomePage(): List<VideoGroup>
+    fun clearHomePage()
 
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?

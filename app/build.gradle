@@ -65,9 +65,6 @@ dependencies {
     // Gson
     implementation 'com.google.code.gson:gson:2.8.9'
 
-    // Coil Image Loading
-    implementation 'io.coil-kt:coil:1.2.1'
-
     // Google Room
     def roomVersion = '2.4.3'
     implementation "androidx.room:room-runtime:$roomVersion"
@@ -92,4 +89,13 @@ dependencies {
     def retrofitVersion = '2.9.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.1'
+
+    // Glide Image Loading
+    implementation 'com.github.bumptech.glide:glide:4.13.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
+
+    // Glide Transformations
+    implementation 'jp.wasabeef:glide-transformations:4.3.0'
 }

@@ -54,7 +54,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             } else {
-                contentList.value = Event(homePageRepository.homeContentList)
+                contentList.value = Event(homePageRepository.getHomePage())
                 getOnGoingVideoGroup()
             }
         }
@@ -94,6 +94,10 @@ class HomeViewModel @Inject constructor(
     fun handleSeries(video: Video) {
         if (displaysEpisodes) getVideoMedia(video)
         else getEpisodeList(video)
+    }
+
+    fun addNewContent() {
+        contentList.value = Event(homePageRepository.getHomePage())
     }
 
     private fun getEpisodeList(video: Video) {

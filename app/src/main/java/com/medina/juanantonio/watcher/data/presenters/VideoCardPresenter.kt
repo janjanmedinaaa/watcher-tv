@@ -5,7 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.leanback.widget.ImageCardView.*
 import androidx.leanback.widget.Presenter
-import coil.load
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
@@ -40,10 +41,12 @@ class VideoCardPresenter : Presenter() {
 
         binding.root.titleText = getTitleText(video)
         binding.root.contentText = getContentText(binding.root.resources, video)
-        binding.root.mainImageView.load(video.imageUrl) {
-            crossfade(true)
-            crossfade(500)
-        }
+        Glide.with(binding.root.context)
+            .load(video.imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .override(152, 203)
+            .error(R.mipmap.ic_launcher)
+            .into(binding.root.mainImageView)
     }
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
