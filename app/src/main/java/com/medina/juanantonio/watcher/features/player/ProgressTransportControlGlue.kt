@@ -87,8 +87,10 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     override fun onActionClicked(action: Action) {
         // Primary actions are handled manually. The superclass handles default play/pause action.
         when (action) {
-            skipBackwardAction -> skipBackward()
-            skipForwardAction -> skipForward()
+            skipBackwardAction,
+            skipForwardAction,
+            skipPreviousAction,
+            skipNextAction -> Unit
             else -> super.onActionClicked(action)
         }
         onActionListener.invoke(action)

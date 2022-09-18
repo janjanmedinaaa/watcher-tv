@@ -4,22 +4,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.shared.utils.Event
-import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
+import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val homePageRepository: IHomePageRepository
+    private val contentRepository: IContentRepository
 ) : ViewModel() {
 
     val navigateToHomeScreen = MutableLiveData<Event<Unit>>()
 
     init {
         viewModelScope.launch {
-            homePageRepository.clearHomePage()
-            homePageRepository.setupHomePage(startingPage = 0)
+            contentRepository.clearHomePage()
+            contentRepository.setupHomePage(startingPage = 0)
             navigateToHomeScreen.value = Event(Unit)
         }
     }

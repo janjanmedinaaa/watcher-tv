@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
@@ -26,6 +27,7 @@ import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
+import jp.wasabeef.glide.transformations.gpu.BrightnessFilterTransformation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -170,11 +172,17 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
             return
         }
 
-        glide.asBitmap()
+        val multi = MultiTransformation(
+            BlurTransformation(5),
+            BrightnessFilterTransformation(-0.2f)
+        )
+
+        glide
+            .asBitmap()
             .load(backgroundUri)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(100, 133)
-            .apply(RequestOptions.bitmapTransform(BlurTransformation(5, 1)))
+            .apply(RequestOptions.bitmapTransform(multi))
             .into(backgroundTarget)
     }
 

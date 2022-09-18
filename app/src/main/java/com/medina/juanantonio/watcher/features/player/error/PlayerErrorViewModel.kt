@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.shared.utils.Event
-import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
+import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlayerErrorViewModel @Inject constructor(
-    private val homePageRepository: IHomePageRepository
+    private val mediaRepository: IMediaRepository
 ) : ViewModel() {
 
     val videoMedia = MutableLiveData<Event<VideoMedia>>()
@@ -22,14 +22,14 @@ class PlayerErrorViewModel @Inject constructor(
     fun getNewVideoMedia() {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
-            val video = homePageRepository.currentlyPlayingVideo ?: return@launch
-            val videoMedia = homePageRepository.getVideo(
+            val video = mediaRepository.currentlyPlayingVideo ?: return@launch
+            val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                homePageRepository.currentlyPlayingVideo = video
+                mediaRepository.currentlyPlayingVideo = video
                 this@PlayerErrorViewModel.videoMedia.value = Event(it)
             }
         }

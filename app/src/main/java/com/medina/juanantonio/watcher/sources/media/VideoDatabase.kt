@@ -1,9 +1,9 @@
-package com.medina.juanantonio.watcher.sources.home
+package com.medina.juanantonio.watcher.sources.media
 
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.database.WatcherDb
 
-class HomePageDatabase(watcherDb: WatcherDb) : IHomePageDatabase {
+class VideoDatabase(watcherDb: WatcherDb) : IVideoDatabase {
     private val videoDao = watcherDb.videoDao()
 
     override suspend fun addVideo(video: Video) {
@@ -23,7 +23,7 @@ class HomePageDatabase(watcherDb: WatcherDb) : IHomePageDatabase {
     }
 }
 
-interface IHomePageDatabase {
+interface IVideoDatabase {
     suspend fun addVideo(video: Video)
     suspend fun getOnGoingVideos(): List<Video>
     suspend fun getVideo(id: Int): Video?

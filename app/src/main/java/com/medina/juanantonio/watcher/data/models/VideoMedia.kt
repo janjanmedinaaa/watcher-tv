@@ -36,4 +36,8 @@ data class VideoMedia(
             it.id == episodeBean.id
         }?.subtitlingList
     )
+
+    fun getPreferredSubtitle(): Subtitle? {
+        return subtitles?.firstOrNull { it.languageAbbr == "en" } ?: subtitles?.firstOrNull()
+    }
 }

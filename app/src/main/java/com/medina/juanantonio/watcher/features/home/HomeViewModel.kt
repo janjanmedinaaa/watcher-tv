@@ -7,15 +7,18 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.shared.utils.Event
-import com.medina.juanantonio.watcher.sources.home.IHomePageRepository
+import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homePageRepository: IHomePageRepository
+    private val contentRepository: IContentRepository,
+    private val mediaRepository: IMediaRepository
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -44,17 +47,18 @@ class HomeViewModel @Inject constructor(
                 // 1. Gets a Content id of the Series
                 episodeList.videoList.firstOrNull()?.contentId?.let { seriesId ->
                     // 2. Check if there is an on going playing episode
-                    homePageRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                    mediaRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
                         // 3. If there is, get the specific episode to play
                         episodeList.videoList.firstOrNull {
                             it.episodeNumber == onGoingVideo.episodeNumber
                         }?.let { episodeToPlay ->
+                            delay(500)
                             episodeToAutoPlay.value = Event(episodeToPlay)
                         }
                     }
                 }
             } else {
-                contentList.value = Event(homePageRepository.getHomePage())
+                contentList.value = Event(contentRepository.getHomePage())
                 getOnGoingVideoGroup()
             }
         }
@@ -63,13 +67,13 @@ class HomeViewModel @Inject constructor(
     fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
-            val videoMedia = homePageRepository.getVideo(
+            val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                homePageRepository.currentlyPlayingVideo = video.apply {
+                mediaRepository.currentlyPlayingVideo = video.apply {
                     // Reset video progress
                     videoProgress = 0L
                 }
@@ -80,7 +84,7 @@ class HomeViewModel @Inject constructor(
 
     private fun getOnGoingVideoGroup() {
         viewModelScope.launch {
-            val onGoingVideos = homePageRepository.getOnGoingVideos()
+            val onGoingVideos = contentRepository.getOnGoingVideos()
             val onGoingVideoGroup =
                 VideoGroup(
                     "Continue Watching",
@@ -100,13 +104,13 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addNewContent() {
-        contentList.value = Event(homePageRepository.getHomePage())
+        contentList.value = Event(contentRepository.getHomePage())
     }
 
     private fun getEpisodeList(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
-            val videoMedia = homePageRepository.getSeriesEpisodes(video)
+            val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
                 this@HomeViewModel.episodeList.value = Event(it)
             }

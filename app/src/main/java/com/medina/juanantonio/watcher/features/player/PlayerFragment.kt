@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.features.player
 
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.View
@@ -10,9 +11,17 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.source.MergingMediaSource
+import com.google.android.exoplayer2.source.SingleSampleMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.text.CueGroup
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.util.MimeTypes
+import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,6 +45,8 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var controlGlue: ProgressTransportControlGlue<LeanbackPlayerAdapter>
+    private lateinit var mTrackSelector: DefaultTrackSelector
+    private lateinit var subtitleView: SubtitleView
 
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
@@ -88,6 +99,9 @@ class PlayerFragment : VideoSupportFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        subtitleView = view.findViewById(R.id.leanback_subtitles)
+
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)
         listenVM()
     }
@@ -137,7 +151,8 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun initializePlayer() {
-        exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
+        mTrackSelector = DefaultTrackSelector(requireContext())
+        exoPlayer = ExoPlayer.Builder(requireContext()).setTrackSelector(mTrackSelector).build().apply {
             prepare()
             addListener(PlayerEventListener())
             prepareGlue(this)
@@ -185,9 +200,16 @@ class PlayerFragment : VideoSupportFragment() {
             setOnActionListener { action ->
                 when (action) {
                     skipNextAction -> endVideo()
-                    skipPreviousAction ->
-                        if (viewModel.isFirstEpisode) exoPlayer?.seekTo(0L)
+                    skipPreviousAction -> {
+                        if (viewModel.isFirstEpisode) exoPlayer!!.seekTo(0L)
                         else viewModel.handleSkipPrevious()
+                    }
+                    skipForwardAction -> exoPlayer!!.let { p ->
+                        if (p.playbackSpeed < 2.0) p.playbackSpeed += .25f
+                    }
+                    skipBackwardAction -> exoPlayer!!.let { p ->
+                        if (p.playbackSpeed > 0.5) p.playbackSpeed -= .25f
+                    }
                 }
             }
         }
@@ -195,11 +217,27 @@ class PlayerFragment : VideoSupportFragment() {
 
     private fun setupVideoMedia(videoMedia: VideoMedia) {
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
+        val subtitleData = videoMedia.getPreferredSubtitle()
+        val subtitleUri = Uri.parse(subtitleData?.subtitlingUrl)
+        val subtitleMediaItem = MediaItem.SubtitleConfiguration.Builder(subtitleUri)
+            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+            .setLanguage(subtitleData?.languageAbbr)
+            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+            .build()
         val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(videoMedia.mediaUrl))
+            .createMediaSource(
+                MediaItem.Builder().setUri(videoMedia.mediaUrl)
+                    .setSubtitleConfigurations(listOf(subtitleMediaItem)).build()
+            )
+
+        val subtitleSource =
+            SingleSampleMediaSource
+                .Factory(dataSourceFactory)
+                .createMediaSource(subtitleMediaItem, C.TIME_UNSET)
+        val mergedSource = MergingMediaSource(mediaSource, subtitleSource)
 
         exoPlayer?.seekTo(0L)
-        exoPlayer?.setMediaSource(mediaSource)
+        exoPlayer?.setMediaSource(mergedSource)
         controlGlue.run {
             title = videoMedia.title
             subtitle = videoMedia.introduction
@@ -211,6 +249,12 @@ class PlayerFragment : VideoSupportFragment() {
     inner class PlayerEventListener : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
             viewModel.onStateChange(VideoPlaybackState.Error(videoMedia, error))
+        }
+
+        override fun onCues(cueGroup: CueGroup) {
+            super.onCues(cueGroup)
+            subtitleView.setCues(cueGroup.cues)
+            subtitleView.setUserDefaultStyle()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {

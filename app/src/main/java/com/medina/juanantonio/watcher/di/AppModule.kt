@@ -5,7 +5,11 @@ import androidx.room.Room
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.network.ApiService
-import com.medina.juanantonio.watcher.sources.home.*
+import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
+import com.medina.juanantonio.watcher.sources.content.ContentRepository
+import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
+import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.media.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -62,24 +66,6 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideHomePageRemoteSource(
-        @ApplicationContext context: Context,
-        apiService: ApiService
-    ): IHomePageRemoteSource {
-        return HomePageRemoteSource(context, apiService)
-    }
-
-    @Provides
-    @Singleton
-    fun provideHomePageRepository(
-        remoteSource: IHomePageRemoteSource,
-        database: IHomePageDatabase
-    ): IHomePageRepository {
-        return HomePageRepository(remoteSource, database)
-    }
-
-    @Provides
-    @Singleton
     fun provideWatcherDb(@ApplicationContext context: Context): WatcherDb {
         return Room.databaseBuilder(context, WatcherDb::class.java, "watcher.db")
             .fallbackToDestructiveMigration()
@@ -88,9 +74,45 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideHomePageDatabase(
+    fun provideVideoDatabase(
         watcherDb: WatcherDb
-    ): IHomePageDatabase {
-        return HomePageDatabase(watcherDb)
+    ): IVideoDatabase {
+        return VideoDatabase(watcherDb)
+    }
+
+    @Provides
+    @Singleton
+    fun provideContentRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IContentRemoteSource {
+        return ContentRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideContentRepository(
+        remoteSource: IContentRemoteSource,
+        database: IVideoDatabase
+    ): IContentRepository {
+        return ContentRepository(remoteSource, database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMediaRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IMediaRemoteSource {
+        return MediaRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMediaRepository(
+        remoteSource: IMediaRemoteSource,
+        database: IVideoDatabase
+    ): IMediaRepository {
+        return MediaRepository(remoteSource, database)
     }
 }

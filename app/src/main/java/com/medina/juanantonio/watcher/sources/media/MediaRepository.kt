@@ -1,63 +1,17 @@
-package com.medina.juanantonio.watcher.sources.home
+package com.medina.juanantonio.watcher.sources.media
 
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
-import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 
-class HomePageRepository(
-    private val remoteSource: IHomePageRemoteSource,
-    private val database: IHomePageDatabase
-) : IHomePageRepository {
+class MediaRepository(
+    private val remoteSource: IMediaRemoteSource,
+    private val database: IVideoDatabase
+) : IMediaRepository {
 
     override var currentlyPlayingVideo: Video? = null
-
-    private val homeContentList: ArrayList<List<VideoGroup>> = arrayListOf()
-
-    private var currentPage = 0
-
-    override suspend fun setupHomePage(startingPage: Int) {
-        val result = getHomePage(startingPage)
-        if (!result.isNullOrEmpty()) {
-            setupHomePage(startingPage + 1)
-        }
-    }
-
-    override fun getHomePage(): List<VideoGroup> {
-        val page = homeContentList.getOrNull(currentPage)
-        return if (!page.isNullOrEmpty()) {
-            currentPage++
-            page
-        } else emptyList()
-    }
-
-    override fun clearHomePage() {
-        homeContentList.clear()
-    }
-
-    private suspend fun getHomePage(page: Int): List<VideoGroup>? {
-        val result = remoteSource.getHomePage(page)
-
-        return if (result is Result.Success) {
-            val filteredVideos = result.data?.data?.recommendItems?.filter {
-                it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM
-            }
-
-            val listVideoGroup = filteredVideos?.map {
-                VideoGroup(
-                    category = it.homeSectionName,
-                    videoList = it.recommendContentVOList.map { videoItem ->
-                        Video(videoItem)
-                    }
-                )
-            }
-
-            homeContentList.add(listVideoGroup ?: emptyList())
-            listVideoGroup
-        } else null
-    }
 
     override suspend fun getVideo(id: Int, category: Int, episodeNumber: Int): VideoMedia? {
         val videoDetailsResult = remoteSource.getVideoDetails(id, category)
@@ -108,23 +62,8 @@ class HomePageRepository(
         } else null
     }
 
-    override suspend fun searchByKeyword(keyword: String): List<Video>? {
-        val result = remoteSource.searchByKeyword(keyword)
-
-        return if (result is Result.Success) {
-            val data = result.data?.data ?: return null
-            val filteredList = data.searchResults.filter { it.dramaType != null }
-
-            filteredList.map { Video(it) }
-        } else null
-    }
-
     override suspend fun addOnGoingVideo(video: Video) {
         database.addVideo(video)
-    }
-
-    override suspend fun getOnGoingVideos(): List<Video> {
-        return database.getOnGoingVideos()
     }
 
     override suspend fun getOnGoingVideo(id: Int): Video? {
@@ -136,21 +75,13 @@ class HomePageRepository(
     }
 }
 
-interface IHomePageRepository {
-
+interface IMediaRepository {
     // TODO: Maybe move this to somewhere cleaner? Also reset value
     var currentlyPlayingVideo: Video?
 
-    suspend fun setupHomePage(startingPage: Int = 0)
-    fun getHomePage(): List<VideoGroup>
-    fun clearHomePage()
-
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
-    suspend fun searchByKeyword(keyword: String): List<Video>?
-
     suspend fun addOnGoingVideo(video: Video)
-    suspend fun getOnGoingVideos(): List<Video>
     suspend fun getOnGoingVideo(id: Int): Video?
     suspend fun removeOnGoingVideo(id: Int)
 }
