@@ -1,10 +1,12 @@
 package com.medina.juanantonio.watcher.features.search
 
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.BackgroundManager
 import androidx.leanback.app.SearchSupportFragment
@@ -42,7 +44,6 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     // The DisplayMetrics instance is used to get the screen dimensions
     private val displayMetrics = DisplayMetrics()
 
-    // The URI of the background we are currently displaying to avoid reloading the same one
     private var backgroundUri = ""
 
     private val backgroundTarget = object : CustomTarget<Bitmap>() {
@@ -99,6 +100,12 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         listenVM()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (backgroundUri.isNotEmpty()) updateBackgroundImmediate(backgroundUri)
+    }
+
     override fun getResultsAdapter(): ObjectAdapter {
         return mRowsAdapter
     }
@@ -111,9 +118,6 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
-        currentQuery = query.orEmpty()
-        mRowsAdapter.clear()
-        viewModel.searchKeyword(query.orEmpty())
         return true
     }
 
@@ -126,6 +130,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         }
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
+            showDefaultBackground()
             findNavController().navigate(
                 VideoSearchFragmentDirections.actionVideoSearchFragmentToPlayerFragment(it)
             )
@@ -145,18 +150,12 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
      * background with every item that is passed.
      */
     private fun updateBackgroundDelayed(video: Video) {
-        if (backgroundUri != video.imageUrl) {
-            cancelBackgroundImageLoading()
-            backgroundUri = video.imageUrl
+        cancelBackgroundImageLoading()
+        backgroundUri = video.imageUrl
 
-            if (backgroundUri.isEmpty()) {
-                showDefaultBackground()
-            } else {
-                viewModel.viewModelScope.launch {
-                    delay(HomeFragment.BACKGROUND_UPDATE_DELAY_MILLIS)
-                    updateBackgroundImmediate()
-                }
-            }
+        imageLoadingJob = viewModel.viewModelScope.launch {
+            delay(HomeFragment.BACKGROUND_UPDATE_DELAY_MILLIS)
+            updateBackgroundImmediate(video.imageUrl)
         }
     }
 
@@ -165,7 +164,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         cancelBackgroundImageLoading()
     }
 
-    private fun updateBackgroundImmediate() {
+    private fun updateBackgroundImmediate(backgroundUri: String) {
         if (activity == null) {
             // Triggered after fragment detached from activity, ignore
             return
@@ -186,7 +185,10 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     private fun showDefaultBackground() {
-        backgroundUri = ""
         backgroundManager.setThemeDrawableResourceId(HomeFragment.BACKGROUND_RESOURCE_ID)
+
+        val drawable =
+            ResourcesCompat.getDrawable(resources, HomeFragment.BACKGROUND_RESOURCE_ID, null)
+        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 }

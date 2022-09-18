@@ -37,8 +37,6 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var controlGlue: ProgressTransportControlGlue<LeanbackPlayerAdapter>
 
-    private var currentProgress = 0L
-
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
             // While a video is playing, the screen should stay on and the device should not go to
@@ -65,7 +63,7 @@ class PlayerFragment : VideoSupportFragment() {
                     )
                 }
                 is VideoPlaybackState.Pause -> {
-                    viewModel.saveVideo(currentProgress)
+                    viewModel.saveVideo(controlGlue.currentPosition)
                 }
                 else -> Unit
             }
@@ -77,12 +75,6 @@ class PlayerFragment : VideoSupportFragment() {
             seekTo(startPosition)
             playWhenReady = true
         }
-    }
-
-    private val onProgressUpdate: (Long) -> Unit = { progress ->
-        // TODO(benbaxter): Calculate when end credits are displaying and show the next episode for
-        //  episodic content.
-        currentProgress = progress
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -184,13 +176,11 @@ class PlayerFragment : VideoSupportFragment() {
                 requireContext(),
                 localExoplayer,
                 PLAYER_UPDATE_INTERVAL_MILLIS
-            ),
-            onProgressUpdate
+            )
         ).apply {
             host = VideoSupportFragmentGlueHost(this@PlayerFragment)
             // Enable seek manually since PlaybackTransportControlGlue.getSeekProvider() is null,
             // so that PlayerAdapter.seekTo(long) will be called during user seeking.
-            // TODO(gargsahil@): Add a PlaybackSeekDataProvider to support video scrubbing.
             isSeekEnabled = true
 
             setOnActionListener { action ->

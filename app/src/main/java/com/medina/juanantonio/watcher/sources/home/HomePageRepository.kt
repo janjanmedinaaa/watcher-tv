@@ -85,6 +85,7 @@ class HomePageRepository(
             if (videoMediaResult is Result.Success) {
                 VideoMedia(
                     contentId = id,
+                    categoryId = category,
                     episodeBean = episode ?: return null,
                     detailsResponse = videoDetailsResult.data?.data ?: return null,
                     mediaResponse = videoMediaResult.data?.data ?: return null

@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit
 class ProgressTransportControlGlue<T : PlayerAdapter>(
     context: Context,
     impl: T,
-    private val updateProgress: (Long) -> Unit
+    private val updateProgress: (Long) -> Unit = {}
 ) : PlaybackTransportControlGlue<T>(context, impl) {
 
     var skipForwardAction = FastForwardAction(context)

@@ -30,7 +30,7 @@ class VideoSearchViewModel @Inject constructor(
         job = viewModelScope.launch {
             val results = homePageRepository.searchByKeyword(keyword)
             if (!results.isNullOrEmpty()) {
-                searchResults.value = Event(results)
+                searchResults.value = Event(results.sortedBy { it.title })
             }
         }
     }

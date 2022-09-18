@@ -11,6 +11,7 @@ import kotlinx.android.parcel.Parcelize
 data class VideoMedia(
     val id: Int,
     val contentId: Int,
+    val categoryId: Int,
     val title: String,
     val introduction: String,
     val mediaUrl: String,
@@ -19,13 +20,15 @@ data class VideoMedia(
 
     constructor(
         contentId: Int,
+        categoryId: Int,
         episodeBean: EpisodeBean,
         detailsResponse: GetVideoDetailsResponse.Data,
         mediaResponse: GetVideoResourceResponse.Data
     ) : this(
         id = episodeBean.id,
         contentId = contentId,
-        title = if (episodeBean.seriesNo == 0) detailsResponse.name
+        categoryId = categoryId,
+        title = if (categoryId == 0) detailsResponse.name
         else "${detailsResponse.name} - Episode ${episodeBean.seriesNo}",
         introduction = detailsResponse.introduction,
         mediaUrl = mediaResponse.mediaUrl,

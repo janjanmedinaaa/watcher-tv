@@ -87,7 +87,7 @@ class HomeViewModel @Inject constructor(
                     onGoingVideos.map {
                         it.episodeNumber = 0
                         it
-                    }
+                    }.sortedByDescending { it.lastWatchTime }.take(10)
                 )
 
             onGoingVideosList.value = Event(onGoingVideoGroup)

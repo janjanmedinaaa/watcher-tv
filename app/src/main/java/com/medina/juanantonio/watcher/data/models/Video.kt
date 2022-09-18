@@ -26,6 +26,8 @@ data class Video(
 
     var videoProgress: Long = 0L
 
+    var lastWatchTime: Long = System.currentTimeMillis()
+
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
         contentType = bean.contentType,

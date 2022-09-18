@@ -24,7 +24,7 @@ class PlayerViewModel @Inject constructor(
 
     val isFirstEpisode: Boolean
         get() = video?.let { v ->
-            v.episodeNumber - 1 == 0
+            v.episodeNumber - 1 <= 0
         } ?: false
 
     private val isLastEpisode: Boolean
@@ -62,7 +62,10 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             video?.let {
                 homePageRepository.addOnGoingVideo(
-                    it.apply { videoProgress = progress }
+                    it.apply {
+                        videoProgress = progress
+                        lastWatchTime = System.currentTimeMillis()
+                    }
                 )
             }
         }
@@ -83,6 +86,7 @@ class PlayerViewModel @Inject constructor(
                         it.copy().apply {
                             episodeNumber += 1
                             videoProgress = 0L
+                            lastWatchTime = System.currentTimeMillis()
                         }
                     )
                     getNewVideoMedia(playNext = true)

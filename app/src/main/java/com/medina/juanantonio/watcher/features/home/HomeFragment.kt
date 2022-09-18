@@ -2,6 +2,7 @@ package com.medina.juanantonio.watcher.features.home
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 class HomeFragment : BrowseSupportFragment() {
 
     companion object {
-        const val BACKGROUND_UPDATE_DELAY_MILLIS = 500L
+        const val BACKGROUND_UPDATE_DELAY_MILLIS = 300L
         const val BACKGROUND_RESOURCE_ID = R.drawable.image_placeholder
     }
 
@@ -55,11 +56,10 @@ class HomeFragment : BrowseSupportFragment() {
 
     private var episodeList: VideoGroup? = null
 
+    private var backgroundUri = ""
+
     // The DisplayMetrics instance is used to get the screen dimensions
     private val displayMetrics = DisplayMetrics()
-
-    // The URI of the background we are currently displaying to avoid reloading the same one
-    private var backgroundUri = ""
 
     private val backgroundTarget = object : CustomTarget<Bitmap>() {
         override fun onResourceReady(
@@ -69,9 +69,7 @@ class HomeFragment : BrowseSupportFragment() {
             backgroundManager.setBitmap(resource)
         }
 
-        override fun onLoadFailed(errorDrawable: Drawable?) {
-            showDefaultBackground()
-        }
+        override fun onLoadFailed(errorDrawable: Drawable?) = Unit
 
         override fun onLoadCleared(placeholder: Drawable?) = Unit
     }
@@ -146,6 +144,7 @@ class HomeFragment : BrowseSupportFragment() {
         super.onResume()
 
         viewModel.setupVideoList(episodeList)
+        if (backgroundUri.isNotEmpty()) updateBackgroundImmediate(backgroundUri)
     }
 
     private fun listenVM() {
@@ -154,6 +153,7 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
+            showDefaultBackground()
             findNavController().navigate(
                 HomeFragmentDirections.actionHomeFragmentToPlayerFragment(it)
             )
@@ -202,18 +202,12 @@ class HomeFragment : BrowseSupportFragment() {
      * background with every item that is passed.
      */
     private fun updateBackgroundDelayed(video: Video) {
-        if (backgroundUri != video.imageUrl) {
-            cancelBackgroundImageLoading()
-            backgroundUri = video.imageUrl
+        cancelBackgroundImageLoading()
+        backgroundUri = video.imageUrl
 
-            if (backgroundUri.isEmpty()) {
-                showDefaultBackground()
-            } else {
-                viewModel.viewModelScope.launch {
-                    delay(BACKGROUND_UPDATE_DELAY_MILLIS)
-                    updateBackgroundImmediate()
-                }
-            }
+        imageLoadingJob = viewModel.viewModelScope.launch {
+            delay(BACKGROUND_UPDATE_DELAY_MILLIS)
+            updateBackgroundImmediate(video.imageUrl)
         }
     }
 
@@ -223,7 +217,7 @@ class HomeFragment : BrowseSupportFragment() {
         cancelBackgroundImageLoading()
     }
 
-    private fun updateBackgroundImmediate() {
+    private fun updateBackgroundImmediate(backgroundUri: String) {
         if (activity == null) {
             // Triggered after fragment detached from activity, ignore
             return
@@ -245,7 +239,10 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     private fun showDefaultBackground() {
-        backgroundUri = ""
         backgroundManager.setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
+
+        val drawable =
+            ResourcesCompat.getDrawable(resources, BACKGROUND_RESOURCE_ID, null)
+        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 }
