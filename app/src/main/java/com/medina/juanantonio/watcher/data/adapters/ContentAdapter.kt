@@ -4,13 +4,14 @@ import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
+import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 
-class ContentAdapter : ArrayObjectAdapter(ListRowPresenter()) {
+class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(ListRowPresenter()) {
 
     fun addContent(videoGroup: List<VideoGroup>) {
-        val cardPresenter = VideoCardPresenter()
+        val cardPresenter = VideoCardPresenter(glide)
         videoGroup.forEach {
             val listRowAdapter = ArrayObjectAdapter(cardPresenter)
             listRowAdapter.addAll(0, it.videoList)
@@ -20,7 +21,7 @@ class ContentAdapter : ArrayObjectAdapter(ListRowPresenter()) {
     }
 
     fun addVideoGroupOnStart(videoGroup: VideoGroup, replace: Boolean) {
-        val cardPresenter = VideoCardPresenter()
+        val cardPresenter = VideoCardPresenter(glide)
         val listRowAdapter = ArrayObjectAdapter(cardPresenter)
         listRowAdapter.addAll(0, videoGroup.videoList)
         val headerItem = HeaderItem(videoGroup.category)

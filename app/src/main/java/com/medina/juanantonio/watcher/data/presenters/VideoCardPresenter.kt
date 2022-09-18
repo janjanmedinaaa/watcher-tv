@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.leanback.widget.ImageCardView.*
 import androidx.leanback.widget.Presenter
-import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
@@ -15,7 +15,7 @@ import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 /**
  * Presents a [Video] as an [ImageCardView] with descriptive text based on the Video's type.
  */
-class VideoCardPresenter : Presenter() {
+class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
         val binding = ViewVideoCardBinding.inflate(LayoutInflater.from(context), parent, false)
@@ -41,8 +41,7 @@ class VideoCardPresenter : Presenter() {
 
         binding.root.titleText = getTitleText(video)
         binding.root.contentText = getContentText(binding.root.resources, video)
-        Glide.with(binding.root.context)
-            .load(video.imageUrl)
+        glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(152, 203)
             .error(R.mipmap.ic_launcher)

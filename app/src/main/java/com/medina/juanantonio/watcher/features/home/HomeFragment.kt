@@ -16,6 +16,7 @@ import androidx.leanback.widget.ListRow
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
@@ -44,7 +45,8 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     private val viewModel: HomeViewModel by viewModels()
-    private val contentAdapter = ContentAdapter()
+    private lateinit var contentAdapter: ContentAdapter
+    private lateinit var glide: RequestManager
 
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
 
@@ -80,6 +82,8 @@ class HomeFragment : BrowseSupportFragment() {
         displayMetrics.setTo(resources.displayMetrics)
 
         episodeList = HomeFragmentArgs.fromBundle(requireArguments()).episodeList
+        glide = Glide.with(requireContext())
+        contentAdapter = ContentAdapter(glide)
         backgroundManager = BackgroundManager.getInstance(requireActivity()).apply {
             if (!isAttached) {
                 attach(requireActivity().window)
@@ -225,7 +229,7 @@ class HomeFragment : BrowseSupportFragment() {
             return
         }
 
-        Glide.with(this)
+        glide
             .asBitmap()
             .load(backgroundUri)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -235,7 +239,7 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     private fun cancelBackgroundImageLoading() {
-        Glide.with(requireContext()).clear(backgroundTarget)
+        glide.clear(backgroundTarget)
         imageLoadingJob?.cancel()
         imageLoadingJob = null
     }

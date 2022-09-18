@@ -12,6 +12,7 @@ import androidx.leanback.widget.*
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
@@ -32,6 +33,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     private val viewModel: VideoSearchViewModel by viewModels()
     private lateinit var mRowsAdapter: ArrayObjectAdapter
+    private lateinit var glide: RequestManager
     private var currentQuery = ""
 
     private lateinit var backgroundManager: BackgroundManager
@@ -60,7 +62,9 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         mRowsAdapter = ArrayObjectAdapter(ListRowPresenter())
+        glide = Glide.with(requireContext())
         setSearchResultProvider(this)
 
         displayMetrics.setTo(resources.displayMetrics)
@@ -115,7 +119,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     private fun listenVM() {
         viewModel.searchResults.observeEvent(viewLifecycleOwner) {
-            val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter())
+            val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter(glide))
             listRowAdapter.addAll(0, it)
             val headerItem = HeaderItem("Search Results for $currentQuery")
             mRowsAdapter.add(ListRow(headerItem, listRowAdapter))
@@ -167,8 +171,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
             return
         }
 
-        Glide.with(this)
-            .asBitmap()
+        glide.asBitmap()
             .load(backgroundUri)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(100, 133)
@@ -177,7 +180,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     private fun cancelBackgroundImageLoading() {
-        Glide.with(requireContext()).clear(backgroundTarget)
+        glide.clear(backgroundTarget)
         imageLoadingJob?.cancel()
         imageLoadingJob = null
     }
