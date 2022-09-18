@@ -95,7 +95,6 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.removePlaybackStateListener(uiPlaybackStateListener)
-        viewModel.cleanUpPlayer()
     }
 
     override fun onStart() {

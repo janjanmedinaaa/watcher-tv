@@ -109,10 +109,6 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun cleanUpPlayer() {
-        homePageRepository.currentlyPlayingVideo = null
-    }
-
     private fun getNewVideoMedia(playNext: Boolean) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {

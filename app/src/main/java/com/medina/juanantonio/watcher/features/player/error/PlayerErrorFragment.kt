@@ -7,19 +7,24 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.databinding.FragmentPlayerErrorBinding
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
+import com.medina.juanantonio.watcher.shared.utils.observeEvent
+import dagger.hilt.android.AndroidEntryPoint
 
 /** Displays an error to the user when something unexpected occurred during playback. */
+@AndroidEntryPoint
 class PlayerErrorFragment : Fragment() {
 
     private lateinit var videoMedia: VideoMedia
     private lateinit var error: Exception
 
     private var binding: FragmentPlayerErrorBinding by autoCleared()
+    private val viewModel: PlayerErrorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,14 +67,22 @@ class PlayerErrorFragment : Fragment() {
             message.text = error.cause?.message ?: error.message
 
             actionRetry.setOnClickListener {
-                findNavController().navigate(
-                    PlayerErrorFragmentDirections
-                        .actionPlayerErrorFragmentToPlayerFragment(videoMedia)
-                )
+                viewModel.getNewVideoMedia()
             }
             actionGoBack.setOnClickListener {
                 findNavController().popBackStack()
             }
+        }
+
+        listenVM()
+    }
+
+    private fun listenVM() {
+        viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
+            findNavController().navigate(
+                PlayerErrorFragmentDirections
+                    .actionPlayerErrorFragmentToPlayerFragment(it)
+            )
         }
     }
 }

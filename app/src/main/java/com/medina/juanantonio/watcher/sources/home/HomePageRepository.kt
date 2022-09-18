@@ -138,7 +138,7 @@ class HomePageRepository(
 
 interface IHomePageRepository {
 
-    // TODO: Maybe move this to somewhere cleaner?
+    // TODO: Maybe move this to somewhere cleaner? Also reset value
     var currentlyPlayingVideo: Video?
 
     suspend fun setupHomePage(startingPage: Int = 0)
