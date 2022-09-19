@@ -21,9 +21,7 @@ import androidx.leanback.media.PlaybackTransportControlGlue
 import androidx.leanback.media.PlayerAdapter
 import androidx.leanback.widget.Action
 import androidx.leanback.widget.ArrayObjectAdapter
-import androidx.leanback.widget.PlaybackControlsRow
-import androidx.leanback.widget.PlaybackControlsRow.FastForwardAction
-import androidx.leanback.widget.PlaybackControlsRow.RewindAction
+import androidx.leanback.widget.PlaybackControlsRow.*
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import java.util.concurrent.TimeUnit
 
@@ -59,9 +57,11 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         private set
     var skipBackwardAction = RewindAction(context)
         private set
-    var skipNextAction = PlaybackControlsRow.SkipNextAction(context)
+    var skipNextAction = SkipNextAction(context)
         private set
-    var skipPreviousAction = PlaybackControlsRow.SkipPreviousAction(context)
+    var skipPreviousAction = SkipPreviousAction(context)
+        private set
+    var closedCaptioningAction = ClosedCaptioningAction(context)
         private set
 
     private var onActionListener: (Action) -> Unit = {}
@@ -76,6 +76,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
             add(skipBackwardAction)
             add(skipForwardAction)
             add(skipNextAction)
+            add(closedCaptioningAction)
         }
     }
 
@@ -87,13 +88,12 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     override fun onActionClicked(action: Action) {
         // Primary actions are handled manually. The superclass handles default play/pause action.
         when (action) {
-            skipBackwardAction,
-            skipForwardAction,
             skipPreviousAction,
             skipNextAction -> Unit
             else -> super.onActionClicked(action)
         }
         onActionListener.invoke(action)
+        if (action is MultiAction) notifyActionChanged(action)
     }
 
     fun setOnActionListener(listener: (Action) -> Unit) {
@@ -102,6 +102,16 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
     fun endVideo() {
         playerAdapter.seekTo(duration)
+    }
+
+    private fun notifyActionChanged(action: MultiAction) {
+        var index: Int
+        (controlsRow.primaryActionsAdapter as? ArrayObjectAdapter)?.let {
+            index = it.indexOf(action)
+            if (index >= 0) {
+                it.notifyArrayItemRangeChanged(index, 1)
+            }
+        }
     }
 
     /** Skips backward 30 seconds.  */

@@ -4,9 +4,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
+import androidx.leanback.widget.PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON
 import androidx.navigation.fragment.findNavController
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
@@ -209,6 +211,10 @@ class PlayerFragment : VideoSupportFragment() {
                     }
                     skipBackwardAction -> exoPlayer!!.let { p ->
                         if (p.playbackSpeed > 0.5) p.playbackSpeed -= .25f
+                    }
+                    closedCaptioningAction -> {
+                        closedCaptioningAction.nextIndex()
+                        subtitleView.isVisible = closedCaptioningAction.index == INDEX_ON
                     }
                 }
             }
