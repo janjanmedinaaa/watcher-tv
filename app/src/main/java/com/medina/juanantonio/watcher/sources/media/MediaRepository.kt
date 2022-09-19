@@ -4,7 +4,6 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
-import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 
 class MediaRepository(
     private val remoteSource: IMediaRemoteSource,
@@ -23,11 +22,7 @@ class MediaRepository(
             } else {
                 videoDetails?.episodeVo?.firstOrNull { it.seriesNo == episodeNumber }
             }
-            val definition = episode?.definitionList?.let {
-                it.firstOrNull { definition ->
-                    definition.code == EpisodeBean.DefinitionCode.GROOT_SD
-                } ?: it.firstOrNull()
-            }?.code
+            val definition = episode?.getDefinition()
 
             val videoMediaResult = remoteSource.getVideoResource(
                 category = category,

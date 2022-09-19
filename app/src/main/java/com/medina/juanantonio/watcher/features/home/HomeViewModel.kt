@@ -52,7 +52,7 @@ class HomeViewModel @Inject constructor(
                         episodeList.videoList.firstOrNull {
                             it.episodeNumber == onGoingVideo.episodeNumber
                         }?.let { episodeToPlay ->
-                            delay(500)
+                            delay(250)
                             episodeToAutoPlay.value = Event(episodeToPlay)
                         }
                     }

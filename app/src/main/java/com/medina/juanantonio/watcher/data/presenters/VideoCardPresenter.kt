@@ -35,7 +35,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         binding.root.contentText = getContentText(binding.root.resources, video)
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .override(152, 203)
+            .override(152 * 2, 203 * 2)
             .error(R.mipmap.ic_launcher)
             .into(binding.root.mainImageView)
     }

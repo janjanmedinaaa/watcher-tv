@@ -148,7 +148,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         // Custom Action IDs
         private const val ACTION_SPEEDUP = 19
 
-        private val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
+        val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
         private val FIVE_SECONDS = TimeUnit.SECONDS.toMillis(5)
     }
 

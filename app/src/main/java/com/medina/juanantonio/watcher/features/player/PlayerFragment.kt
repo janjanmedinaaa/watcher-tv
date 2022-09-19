@@ -1,10 +1,13 @@
 package com.medina.juanantonio.watcher.features.player
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.View
+import androidx.annotation.Dimension
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
@@ -18,6 +21,8 @@ import com.google.android.exoplayer2.source.SingleSampleMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.text.CueGroup
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.ui.CaptionStyleCompat
+import com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_NONE
 import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
@@ -94,15 +99,25 @@ class PlayerFragment : VideoSupportFragment() {
         super.onCreate(savedInstanceState)
 
         videoMedia = PlayerFragmentArgs.fromBundle(requireArguments()).videoMedia
-
-        // Create the MediaSession that will be used throughout the lifecycle of this Fragment.
         createMediaSession()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        subtitleView = view.findViewById(R.id.leanback_subtitles)
+        subtitleView = view.findViewById<SubtitleView>(R.id.leanback_subtitles).apply {
+            val style = CaptionStyleCompat(
+                Color.WHITE,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT,
+                EDGE_TYPE_NONE,
+                Color.WHITE,
+                null
+            )
+            setStyle(style)
+            setFixedTextSize(Dimension.DP, 75F)
+            updatePadding(left = 300, right = 300)
+        }
 
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)
         listenVM()
@@ -125,7 +140,6 @@ class PlayerFragment : VideoSupportFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Releasing the mediaSession due to inactive playback and setting token for cast to null.
         mediaSession.release()
     }
 
@@ -226,6 +240,9 @@ class PlayerFragment : VideoSupportFragment() {
                     }
                 }
             }
+
+            // Set Caption On by default
+            onActionClicked(closedCaptioningAction)
         }
     }
 
@@ -268,7 +285,6 @@ class PlayerFragment : VideoSupportFragment() {
         override fun onCues(cueGroup: CueGroup) {
             super.onCues(cueGroup)
             subtitleView.setCues(cueGroup.cues)
-            subtitleView.setUserDefaultStyle()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {

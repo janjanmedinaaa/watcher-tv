@@ -19,4 +19,11 @@ data class EpisodeBean(
         GROOT_LD,
         GROOT_FD
     }
+
+    fun getDefinition(): DefinitionCode {
+        val preferred = DefinitionCode.GROOT_HD
+        return (definitionList.firstOrNull { definition ->
+            definition.code == preferred
+        } ?: definitionList.firstOrNull())?.code ?: preferred
+    }
 }

@@ -100,4 +100,8 @@ dependencies {
     // Glide Transformations
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
     implementation 'jp.co.cyberagent.android:gpuimage:2.1.0'
+
+    def retrieverVersion = '1.0.16'
+    implementation "com.github.wseemann:FFmpegMediaMetadataRetriever-core:$retrieverVersion"
+    implementation "com.github.wseemann:FFmpegMediaMetadataRetriever-native:$retrieverVersion"
 }
