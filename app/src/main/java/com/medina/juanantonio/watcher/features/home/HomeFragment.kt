@@ -105,23 +105,21 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         setOnItemViewClickedListener { _, item, _, _ ->
-            if (item is Video) {
-                when (item.contentType) {
-                    HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
-                    HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
-                    else -> Unit
-                }
+            if (item !is Video) return@setOnItemViewClickedListener
+            when (item.contentType) {
+                HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
+                HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
+                else -> Unit
             }
         }
 
         setOnItemViewSelectedListener { _, item, _, row ->
-            if (item is Video) {
-                val isLastItem = contentAdapter.size() == contentAdapter.indexOf(row) + 1
-                val isEpisodeList = episodeList != null
+            if (item !is Video) return@setOnItemViewSelectedListener
+            val isLastItem = contentAdapter.size() == contentAdapter.indexOf(row) + 1
+            val isEpisodeList = episodeList != null
 
-                if (isLastItem && !isEpisodeList) viewModel.addNewContent()
-                updateBackgroundDelayed(item)
-            }
+            if (isLastItem && !isEpisodeList) viewModel.addNewContent()
+            updateBackgroundDelayed(item)
         }
 
         setOnSearchClickedListener {

@@ -2,8 +2,8 @@ package com.medina.juanantonio.watcher.shared.utils
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -16,17 +16,22 @@ class AutoClearedValue<T : Any>(val fragment: Fragment) : ReadWriteProperty<Frag
     private var _value: T? = null
     
     init {
-        fragment.lifecycle.addObserver(object: LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-            fun onCreate() {
-                fragment.viewLifecycleOwnerLiveData.observe(fragment) { viewLifecycleOwner ->
-                    viewLifecycleOwner?.lifecycle?.addObserver(object: LifecycleObserver {
-                        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                        fun onDestroy() {
-                            _value = null
-                        }
-                    })
-                }
+        fragment.lifecycle.addObserver(object: LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+               if (event == Lifecycle.Event.ON_CREATE) {
+                   fragment.viewLifecycleOwnerLiveData.observe(fragment) {
+                       it.lifecycle.addObserver(object : LifecycleEventObserver {
+                           override fun onStateChanged(
+                               source: LifecycleOwner,
+                               event: Lifecycle.Event
+                           ) {
+                               if (event == Lifecycle.Event.ON_DESTROY) {
+                                   _value = null
+                               }
+                           }
+                       })
+                   }
+               }
             }
         })
     }

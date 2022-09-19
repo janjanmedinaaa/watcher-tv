@@ -204,8 +204,11 @@ class PlayerFragment : VideoSupportFragment() {
                 when (action) {
                     skipNextAction -> endVideo()
                     skipPreviousAction -> {
-                        if (viewModel.isFirstEpisode) exoPlayer!!.seekTo(0L)
-                        else viewModel.handleSkipPrevious()
+                        if (viewModel.isFirstEpisode || !justStarted) {
+                            exoPlayer!!.seekTo(0L)
+                        } else {
+                            viewModel.handleSkipPrevious()
+                        }
                     }
                     increaseSpeedAction -> {
                         increaseSpeedAction.nextIndex()

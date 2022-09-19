@@ -56,6 +56,9 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     private val updateProgress: (Long) -> Unit = {}
 ) : PlaybackTransportControlGlue<T>(context, impl) {
 
+    val justStarted: Boolean
+        get() = currentPosition < FIVE_SECONDS
+
     var skipForwardAction = FastForwardAction(context)
         private set
     var skipBackwardAction = RewindAction(context)
@@ -146,6 +149,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         private const val ACTION_SPEEDUP = 19
 
         private val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
+        private val FIVE_SECONDS = TimeUnit.SECONDS.toMillis(5)
     }
 
     class CustomMultiAction(

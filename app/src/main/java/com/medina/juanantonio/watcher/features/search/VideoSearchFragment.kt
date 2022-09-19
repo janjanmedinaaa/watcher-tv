@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.HomeFragment
@@ -80,20 +81,20 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         }
 
         setOnItemViewClickedListener { _, item, _, _ ->
-            if (item is Video) {
-                when (item.contentType) {
-                    HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
-                    HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
-                    else -> Unit
-                }
+            if (item !is Video) return@setOnItemViewClickedListener
+            when (item.contentType) {
+                HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
+                HomePageBean.ContentType.DRAMA -> viewModel.handleSeries(item)
+                else -> Unit
             }
         }
 
         setOnItemViewSelectedListener { _, item, _, _ ->
-            if (item is Video) {
-                updateBackgroundDelayed(item)
-            }
+            if (item !is Video) return@setOnItemViewSelectedListener
+            updateBackgroundDelayed(item)
         }
+
+        badgeDrawable = ResourcesCompat.getDrawable(resources, R.mipmap.ic_launcher, null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
