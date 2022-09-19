@@ -154,23 +154,24 @@ class PlayerFragment : VideoSupportFragment() {
 
     private fun initializePlayer() {
         mTrackSelector = DefaultTrackSelector(requireContext())
-        exoPlayer = ExoPlayer.Builder(requireContext()).setTrackSelector(mTrackSelector).build().apply {
-            prepare()
-            addListener(PlayerEventListener())
-            prepareGlue(this)
-            mediaSessionConnector.setPlayer(object : ForwardingPlayer(this) {
-                override fun stop() {
-                    // Treat stop commands as pause, this keeps ExoPlayer, MediaSession, etc.
-                    // in memory to allow for quickly resuming. This also maintains the playback
-                    // position so that the user will resume from the current position when backing
-                    // out and returning to this video
-                    // This both prevents playback from starting automatically and pauses it if
-                    // it's already playing
-                    playWhenReady = false
-                }
-            })
-            mediaSession.isActive = true
-        }
+        exoPlayer =
+            ExoPlayer.Builder(requireContext()).setTrackSelector(mTrackSelector).build().apply {
+                prepare()
+                addListener(PlayerEventListener())
+                prepareGlue(this)
+                mediaSessionConnector.setPlayer(object : ForwardingPlayer(this) {
+                    override fun stop() {
+                        // Treat stop commands as pause, this keeps ExoPlayer, MediaSession, etc.
+                        // in memory to allow for quickly resuming. This also maintains the playback
+                        // position so that the user will resume from the current position when backing
+                        // out and returning to this video
+                        // This both prevents playback from starting automatically and pauses it if
+                        // it's already playing
+                        playWhenReady = false
+                    }
+                })
+                mediaSession.isActive = true
+            }
         viewModel.onStateChange(VideoPlaybackState.Load(videoMedia))
     }
 
@@ -206,11 +207,15 @@ class PlayerFragment : VideoSupportFragment() {
                         if (viewModel.isFirstEpisode) exoPlayer!!.seekTo(0L)
                         else viewModel.handleSkipPrevious()
                     }
-                    skipForwardAction -> exoPlayer!!.let { p ->
-                        if (p.playbackSpeed < 2.0) p.playbackSpeed += .25f
-                    }
-                    skipBackwardAction -> exoPlayer!!.let { p ->
-                        if (p.playbackSpeed > 0.5) p.playbackSpeed -= .25f
+                    increaseSpeedAction -> {
+                        increaseSpeedAction.nextIndex()
+                        exoPlayer!!.let { p ->
+                            if (p.playbackSpeed < 2.0) {
+                                p.playbackSpeed += .25f
+                            } else {
+                                p.playbackSpeed = 1.0f
+                            }
+                        }
                     }
                     closedCaptioningAction -> {
                         closedCaptioningAction.nextIndex()

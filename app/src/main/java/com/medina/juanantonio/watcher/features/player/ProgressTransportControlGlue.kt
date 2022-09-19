@@ -16,6 +16,8 @@
 package com.medina.juanantonio.watcher.features.player
 
 import android.content.Context
+import android.graphics.drawable.Drawable
+import androidx.core.content.res.ResourcesCompat
 import androidx.leanback.media.MediaPlayerAdapter
 import androidx.leanback.media.PlaybackTransportControlGlue
 import androidx.leanback.media.PlayerAdapter
@@ -23,6 +25,7 @@ import androidx.leanback.widget.Action
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.PlaybackControlsRow.*
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
+import com.medina.juanantonio.watcher.R
 import java.util.concurrent.TimeUnit
 
 /**
@@ -63,6 +66,13 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         private set
     var closedCaptioningAction = ClosedCaptioningAction(context)
         private set
+    var increaseSpeedAction = CustomMultiAction(
+        context,
+        ACTION_SPEEDUP,
+        intArrayOf(R.drawable.ic_speed_increase),
+        intArrayOf(R.string.app_name)
+    )
+        private set
 
     private var onActionListener: (Action) -> Unit = {}
 
@@ -76,6 +86,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
             add(skipBackwardAction)
             add(skipForwardAction)
             add(skipNextAction)
+            add(increaseSpeedAction)
             add(closedCaptioningAction)
         }
     }
@@ -88,6 +99,8 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     override fun onActionClicked(action: Action) {
         // Primary actions are handled manually. The superclass handles default play/pause action.
         when (action) {
+            skipBackwardAction -> skipBackward()
+            skipForwardAction -> skipForward()
             skipPreviousAction,
             skipNextAction -> Unit
             else -> super.onActionClicked(action)
@@ -129,6 +142,29 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     }
 
     companion object {
+        // Custom Action IDs
+        private const val ACTION_SPEEDUP = 19
+
         private val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
+    }
+
+    class CustomMultiAction(
+        context: Context,
+        id: Int,
+        icons: IntArray,
+        labels: IntArray
+    ) : MultiAction(id) {
+
+        init {
+            val res = context.resources
+            val drawables = arrayOfNulls<Drawable>(icons.size)
+            val labelStr = arrayOfNulls<String>(icons.size)
+            for (i in icons.indices) {
+                drawables[i] = ResourcesCompat.getDrawable(res, icons[i], null)
+                labelStr[i] = res.getString(labels[i])
+            }
+            setDrawables(drawables)
+            setLabels(labelStr)
+        }
     }
 }
