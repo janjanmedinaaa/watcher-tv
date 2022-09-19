@@ -9,6 +9,7 @@
     <!-- Content types -->
     <string name="content_type_movie">Movie</string>
     <string name="content_type_series">Series</string>
+    <string name="episode_count">%d Episodes</string>
 
     <!-- Playback error actions -->
     <string name="retry">Retry</string>

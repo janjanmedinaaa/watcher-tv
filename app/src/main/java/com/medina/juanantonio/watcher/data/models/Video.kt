@@ -35,7 +35,7 @@ data class Video(
         imageUrl = bean.imageUrl,
         title = bean.title,
         episodeNumber = 0,
-        episodeCount = 0
+        episodeCount = bean.resourceNum ?: 0
     )
 
     constructor(video: Video, bean: EpisodeBean, episodeCount: Int) : this(

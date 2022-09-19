@@ -49,8 +49,16 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         return when (video.contentType) {
             HomePageBean.ContentType.MOVIE -> resources.getString(R.string.content_type_movie)
             HomePageBean.ContentType.DRAMA -> {
-                if (video.episodeNumber == 0) resources.getString(R.string.content_type_series)
-                else "Episode ${video.episodeNumber}"
+                if (video.episodeNumber == 0) {
+                    if (video.episodeCount != 0) {
+                        resources.getString(
+                            R.string.episode_count,
+                            video.episodeCount
+                        )
+                    } else {
+                        resources.getString(R.string.content_type_series)
+                    }
+                } else "Episode ${video.episodeNumber}"
             }
             else -> null
         }

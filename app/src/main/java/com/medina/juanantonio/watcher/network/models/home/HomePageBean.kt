@@ -15,7 +15,8 @@ data class HomePageBean(
         val jumpAddress: String,
         val needLogin: Boolean,
         val score: Double,
-        val title: String
+        val title: String,
+        val resourceNum: Int?
     )
 
     enum class SectionType {
