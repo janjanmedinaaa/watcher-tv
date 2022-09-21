@@ -11,8 +11,15 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
+import androidx.leanback.widget.ArrayObjectAdapter
+import androidx.leanback.widget.ClassPresenterSelector
+import androidx.leanback.widget.HeaderItem
+import androidx.leanback.widget.ListRow
+import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -27,7 +34,10 @@ import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,6 +64,10 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var controlGlue: ProgressTransportControlGlue<LeanbackPlayerAdapter>
     private lateinit var mTrackSelector: DefaultTrackSelector
     private lateinit var subtitleView: SubtitleView
+
+    private lateinit var classPresenterSelector: ClassPresenterSelector
+    private lateinit var rowsAdapter: ArrayObjectAdapter
+    private lateinit var glide: RequestManager
 
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
@@ -99,6 +113,14 @@ class PlayerFragment : VideoSupportFragment() {
         super.onCreate(savedInstanceState)
 
         videoMedia = PlayerFragmentArgs.fromBundle(requireArguments()).videoMedia
+        glide = Glide.with(requireContext())
+
+        classPresenterSelector = ClassPresenterSelector()
+        // This is required when adding the Related Videos section
+        classPresenterSelector.addClassPresenter(ListRow::class.java, ListRowPresenter())
+        rowsAdapter = ArrayObjectAdapter(classPresenterSelector)
+        adapter = rowsAdapter
+
         createMediaSession()
     }
 
@@ -117,6 +139,22 @@ class PlayerFragment : VideoSupportFragment() {
             setStyle(style)
             setFixedTextSize(Dimension.DP, 75F)
             updatePadding(left = 300, right = 300)
+        }
+
+        setOnItemViewClickedListener { _, item, _, _ ->
+            if (item !is Video) return@setOnItemViewClickedListener
+            when (item.contentType) {
+                HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
+                HomePageBean.ContentType.DRAMA -> viewModel.getEpisodeList(item)
+                else -> Unit
+            }
+        }
+
+        setOnItemViewSelectedListener { _, item, _, _ ->
+            if (item == null) return@setOnItemViewSelectedListener
+            subtitleView.isVisible =
+                if (item is Video) false
+                else controlGlue.closedCaptioningAction.index == INDEX_ON
         }
 
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)
@@ -155,6 +193,12 @@ class PlayerFragment : VideoSupportFragment() {
 
         viewModel.exitPlayer.observeEvent(viewLifecycleOwner) {
             findNavController().popBackStack()
+        }
+
+        viewModel.episodeList.observeEvent(viewLifecycleOwner) {
+            findNavController().navigate(
+                PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(it)
+            )
         }
     }
 
@@ -275,6 +319,16 @@ class PlayerFragment : VideoSupportFragment() {
         }
 
         viewModel.getVideoDetails(videoMedia.contentId)
+        setupRelatedVideos()
+    }
+
+    private fun setupRelatedVideos() {
+        val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter(glide))
+        listRowAdapter.addAll(0, videoMedia.videoSuggestions?.map { Video(it) })
+        val headerItem = HeaderItem(getString(R.string.related_videos))
+        val listRow = ListRow(headerItem, listRowAdapter)
+        if (rowsAdapter.size() > 1) rowsAdapter.replace(1, listRow)
+        else rowsAdapter.add(1, listRow)
     }
 
     inner class PlayerEventListener : Player.Listener {

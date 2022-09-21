@@ -16,6 +16,10 @@
     <string name="go_back">Return to browsing</string>
     <string name="error_title_with_video">Something terrible happened with %s</string>
 
+    <!-- Custom List Titles -->
+    <string name="continue_watching">Continue Watching</string>
+    <string name="related_videos">Related Videos</string>
+
     <!-- Dialogs -->
     <string name="continue_watching_title">Continue Watching?</string>
     <string name="continue_watching_description">You\'re currently watching %s - Episode %d. Do you want to continue?</string>

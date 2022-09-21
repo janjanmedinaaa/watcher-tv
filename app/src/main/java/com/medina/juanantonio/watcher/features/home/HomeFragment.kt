@@ -184,7 +184,7 @@ class HomeFragment : BrowseSupportFragment() {
             if (contentAdapter.size() == 0) return@observeEvent
             val firstRow = contentAdapter.get(0) as? ListRow
             firstRow?.let { first ->
-                if (first.headerItem?.name == "Continue Watching") {
+                if (first.headerItem?.name == getString(R.string.continue_watching)) {
                     if (onGoingVideoGroup.videoList.isEmpty())
                         contentAdapter.removeItems(0, 1)
                     else
@@ -245,6 +245,7 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     private fun showDefaultBackground() {
+        cancelBackgroundImageLoading()
         backgroundManager.setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
 
         val drawable =

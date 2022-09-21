@@ -1,10 +1,7 @@
 package com.medina.juanantonio.watcher.data.models
 
 import android.os.Parcelable
-import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
-import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
-import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
-import com.medina.juanantonio.watcher.network.models.player.Subtitle
+import com.medina.juanantonio.watcher.network.models.player.*
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -15,7 +12,8 @@ data class VideoMedia(
     val title: String,
     val introduction: String,
     val mediaUrl: String,
-    val subtitles: List<Subtitle>?
+    val subtitles: List<Subtitle>?,
+    val videoSuggestions: List<VideoSuggestion>?
 ) : Parcelable {
 
     constructor(
@@ -34,7 +32,10 @@ data class VideoMedia(
         mediaUrl = mediaResponse.mediaUrl,
         subtitles = detailsResponse.episodeVo.firstOrNull {
             it.id == episodeBean.id
-        }?.subtitlingList
+        }?.subtitlingList,
+        videoSuggestions = (detailsResponse.refList + detailsResponse.likeList).filter {
+            it.name != detailsResponse.name
+        }
     )
 
     fun getPreferredSubtitle(): Subtitle? {

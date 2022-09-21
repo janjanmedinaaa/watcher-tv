@@ -194,6 +194,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     private fun showDefaultBackground() {
+        cancelBackgroundImageLoading()
         backgroundManager.setThemeDrawableResourceId(HomeFragment.BACKGROUND_RESOURCE_ID)
 
         val drawable =

@@ -6,6 +6,7 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
+import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.network.models.search.SearchResultBean
 import kotlinx.android.parcel.Parcelize
 
@@ -65,4 +66,17 @@ data class Video(
     ) {
         isSearchResult = true
     }
+
+    constructor(videoSuggestion: VideoSuggestion): this(
+        category = videoSuggestion.category,
+        contentType = when (videoSuggestion.category) {
+            0 -> HomePageBean.ContentType.MOVIE
+            else -> HomePageBean.ContentType.DRAMA
+        },
+        contentId = videoSuggestion.id,
+        imageUrl = videoSuggestion.coverVerticalUrl,
+        title = videoSuggestion.name,
+        episodeNumber = 0,
+        episodeCount = 0
+    )
 }

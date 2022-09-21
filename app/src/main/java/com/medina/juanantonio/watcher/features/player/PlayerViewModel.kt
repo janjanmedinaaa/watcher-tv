@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ class PlayerViewModel @Inject constructor(
 
     val savedProgress = MutableLiveData<Event<Long>>()
     val exitPlayer = MutableLiveData<Event<Unit>>()
+    val episodeList = MutableLiveData<Event<VideoGroup>>()
 
     val isFirstEpisode: Boolean
         get() = video?.let { v ->
@@ -109,6 +111,41 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Used for handling Movie Recommendations, no need to
+     * navigate to new PlayerFragment
+     */
+    fun getVideoMedia(video: Video) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            val videoMedia = mediaRepository.getVideo(
+                id = video.contentId,
+                category = video.category ?: -1,
+                episodeNumber = video.episodeNumber
+            )
+            videoMedia?.let {
+                mediaRepository.currentlyPlayingVideo = video
+                onStateChange(VideoPlaybackState.Load(it))
+            }
+        }
+    }
+
+    /**
+     * Used for handling Series Recommendations
+     */
+    fun getEpisodeList(video: Video) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            val videoMedia = mediaRepository.getSeriesEpisodes(video)
+            videoMedia?.let {
+                this@PlayerViewModel.episodeList.value = Event(it)
+            }
+        }
+    }
+
+    /**
+     * Used for getting the previous or next VideoMedia
+     */
     private fun getNewVideoMedia(playNext: Boolean) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
