@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.databinding.FragmentSplashBinding
+import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +36,7 @@ class SplashFragment : Fragment() {
 
     private fun listenVM() {
         viewModel.navigateToHomeScreen.observeEvent(viewLifecycleOwner) {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 SplashFragmentDirections.actionSplashFragmentToHomeFragment()
             )
         }

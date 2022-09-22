@@ -30,6 +30,7 @@ import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -123,7 +124,7 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         setOnSearchClickedListener {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentToVideoSearchFragment()
             )
         }
@@ -155,7 +156,7 @@ class HomeFragment : BrowseSupportFragment() {
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
             showDefaultBackground()
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentToPlayerFragment(it)
             )
         }
@@ -175,7 +176,7 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         viewModel.episodeList.observeEvent(viewLifecycleOwner) {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentSelf(it)
             )
         }

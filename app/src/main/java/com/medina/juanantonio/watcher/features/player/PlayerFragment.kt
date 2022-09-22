@@ -38,7 +38,9 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
+import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -87,7 +89,7 @@ class PlayerFragment : VideoSupportFragment() {
                     // and the user returns to browse.
                 }
                 is VideoPlaybackState.Error -> {
-                    findNavController().navigate(
+                    findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
                             state.videoMedia,
                             state.exception
@@ -196,7 +198,7 @@ class PlayerFragment : VideoSupportFragment() {
         }
 
         viewModel.episodeList.observeEvent(viewLifecycleOwner) {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(it)
             )
         }
@@ -291,6 +293,11 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun setupVideoMedia(videoMedia: VideoMedia) {
+        // Updating the fragment's videoMedia is required
+        // in playing the previous/next episode's or movie's
+        // connected and related videos
+        this.videoMedia = videoMedia
+
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
         val subtitleData = videoMedia.getPreferredSubtitle()
         val subtitleUri = Uri.parse(subtitleData?.subtitlingUrl)
@@ -323,12 +330,25 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun setupRelatedVideos() {
+        val connectedVideoListRow =
+            getListRow(getString(R.string.connected_videos), videoMedia.connectedVideos)
+        val relatedVideosListRow =
+            getListRow(getString(R.string.related_videos), videoMedia.videoSuggestions)
+
+        if (rowsAdapter.size() > 1) {
+            rowsAdapter.replace(1, connectedVideoListRow)
+            rowsAdapter.replace(2, relatedVideosListRow)
+        } else {
+            rowsAdapter.add(1, connectedVideoListRow)
+            rowsAdapter.add(2, relatedVideosListRow)
+        }
+    }
+
+    private fun getListRow(title: String, videos: List<VideoSuggestion>?): ListRow {
         val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter(glide))
-        listRowAdapter.addAll(0, videoMedia.videoSuggestions?.map { Video(it) })
-        val headerItem = HeaderItem(getString(R.string.related_videos))
-        val listRow = ListRow(headerItem, listRowAdapter)
-        if (rowsAdapter.size() > 1) rowsAdapter.replace(1, listRow)
-        else rowsAdapter.add(1, listRow)
+        listRowAdapter.addAll(0, videos?.map { Video(it) })
+        val headerItem = HeaderItem(title)
+        return ListRow(headerItem, listRowAdapter)
     }
 
     inner class PlayerEventListener : Player.Listener {

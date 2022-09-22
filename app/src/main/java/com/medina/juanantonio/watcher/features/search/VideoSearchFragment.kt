@@ -25,6 +25,7 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.HomeFragment
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -134,13 +135,13 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
             showDefaultBackground()
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 VideoSearchFragmentDirections.actionVideoSearchFragmentToPlayerFragment(it)
             )
         }
 
         viewModel.episodeList.observeEvent(viewLifecycleOwner) {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 VideoSearchFragmentDirections.actionVideoSearchFragmentToHomeFragment(it)
             )
         }

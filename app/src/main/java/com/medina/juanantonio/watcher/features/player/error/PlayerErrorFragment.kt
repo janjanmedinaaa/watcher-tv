@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.databinding.FragmentPlayerErrorBinding
+import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -79,7 +80,7 @@ class PlayerErrorFragment : Fragment() {
 
     private fun listenVM() {
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
-            findNavController().navigate(
+            findNavController().safeNavigate(
                 PlayerErrorFragmentDirections
                     .actionPlayerErrorFragmentToPlayerFragment(it)
             )

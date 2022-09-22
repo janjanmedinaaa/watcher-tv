@@ -13,6 +13,7 @@ data class VideoMedia(
     val introduction: String,
     val mediaUrl: String,
     val subtitles: List<Subtitle>?,
+    val connectedVideos: List<VideoSuggestion>?,
     val videoSuggestions: List<VideoSuggestion>?
 ) : Parcelable {
 
@@ -33,9 +34,8 @@ data class VideoMedia(
         subtitles = detailsResponse.episodeVo.firstOrNull {
             it.id == episodeBean.id
         }?.subtitlingList,
-        videoSuggestions = (detailsResponse.refList + detailsResponse.likeList).filter {
-            it.name != detailsResponse.name
-        }
+        connectedVideos = detailsResponse.refList,
+        videoSuggestions = detailsResponse.likeList
     )
 
     fun getPreferredSubtitle(): Subtitle? {
