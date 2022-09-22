@@ -55,7 +55,8 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
             resource: Bitmap,
             transition: Transition<in Bitmap>?
         ) {
-            backgroundManager.setBitmap(resource)
+            if (findNavController().currentDestination?.id == R.id.videoSearchFragment)
+                backgroundManager.setBitmap(resource)
         }
 
         override fun onLoadFailed(errorDrawable: Drawable?) {

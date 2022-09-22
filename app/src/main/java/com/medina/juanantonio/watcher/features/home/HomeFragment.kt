@@ -69,7 +69,8 @@ class HomeFragment : BrowseSupportFragment() {
             resource: Bitmap,
             transition: Transition<in Bitmap>?
         ) {
-            backgroundManager.setBitmap(resource)
+            if (findNavController().currentDestination?.id == R.id.homeFragment)
+                backgroundManager.setBitmap(resource)
         }
 
         override fun onLoadFailed(errorDrawable: Drawable?) = Unit

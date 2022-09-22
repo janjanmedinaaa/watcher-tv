@@ -32,7 +32,7 @@ class PlayerErrorFragment : Fragment() {
         error = PlayerErrorFragmentArgs.fromBundle(requireArguments()).error
         videoMedia = PlayerErrorFragmentArgs.fromBundle(requireArguments()).videoMedia
 
-        val onBackPressedCallback = object : OnBackPressedCallback(/* enabled= */ true) {
+        val onBackPressedCallback = object : OnBackPressedCallback(/* enabled = */ true) {
             override fun handleOnBackPressed() {
                 // Upon selecting back, return the user to the browse fragment and clean up the
                 // parent node in the nav graph, PlaybackFragment, from the back stack when popping.
@@ -52,7 +52,7 @@ class PlayerErrorFragment : Fragment() {
         binding = FragmentPlayerErrorBinding.inflate(
             themedInflater,
             container,
-            /* attachToParent= */ false
+            /* attachToParent = */ false
         )
         return binding.root
     }
