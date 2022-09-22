@@ -193,8 +193,12 @@ class PlayerFragment : VideoSupportFragment() {
             )
         }
 
-        viewModel.exitPlayer.observeEvent(viewLifecycleOwner) {
-            findNavController().popBackStack()
+        viewModel.handleVideoEndNavigation.observeEvent(viewLifecycleOwner) {
+            if (videoMedia.connectedVideos.isNullOrEmpty()) {
+                findNavController().popBackStack()
+            } else {
+                showConnectedVideos()
+            }
         }
 
         viewModel.episodeList.observeEvent(viewLifecycleOwner) {
@@ -349,6 +353,13 @@ class PlayerFragment : VideoSupportFragment() {
         listRowAdapter.addAll(0, videos?.map { Video(it) })
         val headerItem = HeaderItem(title)
         return ListRow(headerItem, listRowAdapter)
+    }
+
+    private fun showConnectedVideos() {
+        val listItemAdapter = (rowsAdapter.get(1) as? ListRow)?.adapter
+        val listItem = listItemAdapter?.get(0)
+        val listPresenter = listItemAdapter?.getPresenter(listItem) as? VideoCardPresenter
+        listPresenter?.viewHolder?.view?.requestFocus()
     }
 
     inner class PlayerEventListener : Player.Listener {

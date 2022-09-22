@@ -21,7 +21,7 @@ class PlayerViewModel @Inject constructor(
     private var job: Job? = null
 
     val savedProgress = MutableLiveData<Event<Long>>()
-    val exitPlayer = MutableLiveData<Event<Unit>>()
+    val handleVideoEndNavigation = MutableLiveData<Event<Unit>>()
     val episodeList = MutableLiveData<Event<VideoGroup>>()
 
     val isFirstEpisode: Boolean
@@ -82,7 +82,7 @@ class PlayerViewModel @Inject constructor(
             video?.let {
                 if (isLastEpisode) {
                     mediaRepository.removeOnGoingVideo(it.contentId)
-                    exitPlayer.value = Event(Unit)
+                    handleVideoEndNavigation.value = Event(Unit)
                 } else {
                     mediaRepository.addOnGoingVideo(
                         it.copy().apply {

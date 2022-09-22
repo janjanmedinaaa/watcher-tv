@@ -12,6 +12,9 @@ import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
+
+    var viewHolder: ViewHolder? = null
+
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
         val binding = ViewVideoCardBinding.inflate(LayoutInflater.from(context), parent, false)
@@ -30,6 +33,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         checkNotNull(item)
         val video = item as Video
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
+        this.viewHolder = viewHolder
 
         binding.root.titleText = video.title
         binding.root.contentText = getContentText(binding.root.resources, video)
@@ -42,6 +46,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
+        this.viewHolder = null
         binding.root.mainImage = null
     }
 
