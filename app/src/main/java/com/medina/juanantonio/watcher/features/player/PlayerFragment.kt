@@ -37,7 +37,6 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
-import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
@@ -145,11 +144,8 @@ class PlayerFragment : VideoSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
-            when (item.contentType) {
-                HomePageBean.ContentType.MOVIE -> viewModel.getVideoMedia(item)
-                HomePageBean.ContentType.DRAMA -> viewModel.getEpisodeList(item)
-                else -> Unit
-            }
+            if (item.isMovie) viewModel.getVideoMedia(item)
+            else viewModel.getEpisodeList(item)
         }
 
         setOnItemViewSelectedListener { _, item, _, _ ->

@@ -22,4 +22,8 @@
     <color name="action_button_text_unfocused_color">@color/screen_white_70</color>
 
     <color name="error_text">#EF9A9A</color>
+
+    <color name="low_score">@android:color/holo_red_light</color>
+    <color name="average_score">@android:color/holo_orange_light</color>
+    <color name="high_score">@android:color/holo_green_light</color>
 </resources>

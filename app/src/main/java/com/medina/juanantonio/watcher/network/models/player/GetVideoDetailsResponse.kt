@@ -13,6 +13,7 @@ data class GetVideoDetailsResponse(
         val introduction: String,
         val episodeCount: Int?,
         val episodeVo: List<EpisodeBean>,
+        val score: Double,
 
         // Movie/Series Suggestions
         val likeList: List<VideoSuggestion>,

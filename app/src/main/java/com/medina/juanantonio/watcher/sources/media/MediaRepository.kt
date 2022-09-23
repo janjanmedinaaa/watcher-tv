@@ -51,7 +51,7 @@ class MediaRepository(
             VideoGroup(
                 category = videoDetails.name,
                 videoList = videoDetails.episodeVo.map { episodeBean ->
-                    Video(video, episodeBean, videoDetails.episodeVo.size)
+                    Video(video, episodeBean, videoDetails.episodeVo.size, videoDetails.score)
                 }
             )
         } else null

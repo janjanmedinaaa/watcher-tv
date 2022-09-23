@@ -14,69 +14,78 @@ import kotlinx.android.parcel.Parcelize
 @Entity
 data class Video(
     val category: Int?,
-    val contentType: HomePageBean.ContentType,
     @PrimaryKey val contentId: Int,
     val imageUrl: String,
     val title: String,
     var episodeNumber: Int,
-    val episodeCount: Int
+    val episodeCount: Int,
+    val score: Double?
 ) : Parcelable {
 
     @Ignore
     var isSearchResult = false
 
+    @get:Ignore
+    val isMovie: Boolean
+        get() = category == 0
+
     var videoProgress: Long = 0L
 
     var lastWatchTime: Long = System.currentTimeMillis()
 
+    // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
-        contentType = bean.contentType,
         contentId = bean.id,
         imageUrl = bean.imageUrl,
         title = bean.title,
         episodeNumber = 0,
-        episodeCount = bean.resourceNum ?: 0
+        episodeCount = bean.resourceNum ?: 0,
+        score = bean.score
     )
 
-    constructor(video: Video, bean: EpisodeBean, episodeCount: Int) : this(
+    // Home Page Episode display item
+    constructor(video: Video, bean: EpisodeBean, episodeCount: Int, score: Double) : this(
         category = video.category,
-        contentType = video.contentType,
         contentId = video.contentId,
         imageUrl = video.imageUrl,
         title = video.title,
         episodeNumber = bean.seriesNo,
-        episodeCount = episodeCount
+        episodeCount = episodeCount,
+        score = score
     )
 
+    // Search Page item
     constructor(bean: SearchResultBean) : this(
-        category = when (bean.dramaType?.code) {
-            SearchResultBean.DramaCode.MOVIE -> 0
-            else -> 1
-        },
-        contentType = when (bean.dramaType?.code) {
-            SearchResultBean.DramaCode.MOVIE -> HomePageBean.ContentType.MOVIE
-            else -> HomePageBean.ContentType.DRAMA
-        },
+        category = bean.domainType,
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
         title = bean.name,
         episodeNumber = 0,
-        episodeCount = 0
+        episodeCount = 0,
+        score = null
     ) {
         isSearchResult = true
     }
 
-    constructor(videoSuggestion: VideoSuggestion): this(
+    // Player item
+    constructor(videoSuggestion: VideoSuggestion) : this(
         category = videoSuggestion.category,
-        contentType = when (videoSuggestion.category) {
-            0 -> HomePageBean.ContentType.MOVIE
-            else -> HomePageBean.ContentType.DRAMA
-        },
         contentId = videoSuggestion.id,
         imageUrl = videoSuggestion.coverVerticalUrl,
         title = videoSuggestion.name,
         episodeNumber = 0,
-        episodeCount = 0
+        episodeCount = 0,
+        score = videoSuggestion.score
     )
+
+    fun getSeriesTitleDescription(): Pair<String, String> {
+        val titleSplit = title.split(" ")
+        val lastTwoWords = titleSplit.takeLast(2).joinToString(" ")
+
+        return if (lastTwoWords.startsWith("Season", ignoreCase = true)) {
+            val firstWords = titleSplit.dropLast(2).joinToString(" ")
+            Pair(firstWords, lastTwoWords)
+        } else Pair(title, "")
+    }
 }

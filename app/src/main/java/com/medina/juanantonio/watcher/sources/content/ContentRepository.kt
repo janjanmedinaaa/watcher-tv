@@ -61,7 +61,7 @@ class ContentRepository(
 
         return if (result is Result.Success) {
             val data = result.data?.data ?: return null
-            val filteredList = data.searchResults.filter { it.dramaType != null }
+            val filteredList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank()  }
 
             filteredList.map { Video(it) }
         } else null

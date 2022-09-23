@@ -21,9 +21,8 @@ data class EpisodeBean(
     }
 
     fun getDefinition(): DefinitionCode {
-        val preferred = DefinitionCode.GROOT_HD
-        return (definitionList.firstOrNull { definition ->
-            definition.code == preferred
-        } ?: definitionList.firstOrNull())?.code ?: preferred
+        return definitionList.firstOrNull { definition ->
+            definition.code == DefinitionCode.GROOT_HD
+        }?.code ?: definitionList.first().code
     }
 }

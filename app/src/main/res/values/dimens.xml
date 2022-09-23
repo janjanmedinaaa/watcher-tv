@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="image_card_width">152dp</dimen>
+    <dimen name="image_card_width">144dp</dimen>
     <dimen name="image_card_height">203dp</dimen>
 
     <!-- Text sizes. -->
@@ -22,4 +22,11 @@
     <dimen name="action_button_base_elevation">0dp</dimen>
     <dimen name="action_button_focused_elevation">4dp</dimen>
     <dimen name="action_button_padding_horizontal">20dp</dimen>
+
+    <dimen name="dp_0">0dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_6">6dp</dimen>
+    <dimen name="dp_8">8dp</dimen>
+
+    <dimen name="sp_12">12sp</dimen>
 </resources>

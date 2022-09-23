@@ -9,7 +9,6 @@ data class HomePageBean(
 
     inner class Content(
         val category: Int?,
-        val contentType: ContentType,
         val id: Int,
         val imageUrl: String,
         val jumpAddress: String,

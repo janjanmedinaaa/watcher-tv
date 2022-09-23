@@ -13,19 +13,20 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(Lis
     fun addContent(videoGroup: List<VideoGroup>) {
         val cardPresenter = VideoCardPresenter(glide)
         videoGroup.forEach {
-            val listRowAdapter = ArrayObjectAdapter(cardPresenter)
-            listRowAdapter.addAll(0, it.videoList)
-            val headerItem = HeaderItem(it.category)
-            add(ListRow(headerItem, listRowAdapter))
+            add(getListRow(it, cardPresenter))
         }
     }
 
     fun addVideoGroupOnStart(videoGroup: VideoGroup, replace: Boolean) {
         val cardPresenter = VideoCardPresenter(glide)
-        val listRowAdapter = ArrayObjectAdapter(cardPresenter)
+        val listRow = getListRow(videoGroup, cardPresenter)
+        if (replace) replace(0, listRow) else add(0, listRow)
+    }
+
+    private fun getListRow(videoGroup: VideoGroup, presenter: VideoCardPresenter): ListRow {
+        val listRowAdapter = ArrayObjectAdapter(presenter)
         listRowAdapter.addAll(0, videoGroup.videoList)
         val headerItem = HeaderItem(videoGroup.category)
-        val listRow = ListRow(headerItem, listRowAdapter)
-        if (replace) replace(0, listRow) else add(0, listRow)
+        return ListRow(headerItem, listRowAdapter)
     }
 }

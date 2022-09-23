@@ -6,9 +6,9 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class VideoMedia(
-    val id: Int,
-    val contentId: Int,
-    val categoryId: Int,
+    val id: Int, // The id of the specific video media
+    val contentId: Int, // The id of the show or movie
+    val categoryId: Int, // The id indicator if the show is a movie or series
     val title: String,
     val introduction: String,
     val mediaUrl: String,
@@ -34,7 +34,9 @@ data class VideoMedia(
         subtitles = detailsResponse.episodeVo.firstOrNull {
             it.id == episodeBean.id
         }?.subtitlingList,
-        connectedVideos = detailsResponse.refList,
+        connectedVideos = detailsResponse.refList.filter {
+            it.name != detailsResponse.name
+        },
         videoSuggestions = detailsResponse.likeList
     )
 

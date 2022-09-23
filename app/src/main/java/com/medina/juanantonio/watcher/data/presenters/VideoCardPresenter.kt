@@ -3,13 +3,14 @@ package com.medina.juanantonio.watcher.data.presenters
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
-import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
 
@@ -17,13 +18,9 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
-        val binding = ViewVideoCardBinding.inflate(LayoutInflater.from(context), parent, false)
-
-        // Set the image size ahead of time since loading can take a while.
-        val resources = context.resources
-        binding.root.setMainImageDimensions(
-            resources.getDimensionPixelSize(R.dimen.image_card_width),
-            resources.getDimensionPixelSize(R.dimen.image_card_height)
+        val binding = ViewVideoCardBinding.inflate(
+            LayoutInflater.from(context),
+            parent, false
         )
 
         return ViewHolder(binding.root)
@@ -35,37 +32,62 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
         this.viewHolder = viewHolder
 
-        binding.root.titleText = video.title
-        binding.root.contentText = getContentText(binding.root.resources, video)
+        val (title, _) = video.getSeriesTitleDescription()
+        binding.textviewTitle.text = title
+        binding.textviewDescription.text = getContentText(binding.root.resources, video)
+        binding.textviewScore.apply {
+            isVisible = video.score != null && video.score != 0.0
+            if (video.score == null) return@apply
+
+            text = "${video.score}"
+            val color = when (video.score) {
+                in 8.0..10.0 -> R.color.high_score
+                in 5.0..7.9 -> R.color.average_score
+                else -> R.color.low_score
+            }
+            setTextColor(ContextCompat.getColor(context, color))
+        }
+
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(152 * 2, 203 * 2)
             .error(R.drawable.image_placeholder)
-            .into(binding.root.mainImageView)
+            .into(binding.imageviewPoster)
     }
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
         this.viewHolder = null
-        binding.root.mainImage = null
+        binding.imageviewPoster.setImageBitmap(null)
     }
 
-    private fun getContentText(resources: Resources, video: Video): String? {
-        return when (video.contentType) {
-            HomePageBean.ContentType.MOVIE -> resources.getString(R.string.content_type_movie)
-            HomePageBean.ContentType.DRAMA -> {
-                if (video.episodeNumber == 0) {
-                    if (video.episodeCount != 0) {
-                        resources.getString(
-                            R.string.episode_count,
-                            video.episodeCount
-                        )
-                    } else {
-                        resources.getString(R.string.content_type_series)
-                    }
-                } else "Episode ${video.episodeNumber}"
+    private fun getContentText(resources: Resources, video: Video): String {
+        if (video.isMovie) {
+            return resources.getString(R.string.content_type_movie)
+        }
+
+        val (_, description) = video.getSeriesTitleDescription()
+        return if (video.episodeNumber == 0) {
+            description.ifBlank {
+                if (video.episodeCount != 0) {
+                    // Some shows don't have a "Season {number}" in their title
+                    // because they're either a limited series or has only 1 season
+                    resources.getString(
+                        R.string.episode_count_without_season,
+                        video.episodeCount
+                    )
+                } else {
+                    // The episodeCount will always be 0 on Search
+                    // results and Player video recommendations
+                    resources.getString(R.string.content_type_series)
+                }
             }
-            else -> null
+        } else {
+            // Video will only have an episodeNumber if it is displaying an Episode
+            resources.getString(
+                R.string.episode_number,
+                video.episodeNumber
+            )
         }
     }
 }

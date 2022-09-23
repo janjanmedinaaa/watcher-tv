@@ -6,10 +6,12 @@
     <string name="no_internet_connection">Please check your internet connection and try again later.</string>
     <string name="something_went_wrong">Something went wrong. Try again later.</string>
 
-    <!-- Content types -->
+    <!-- Video Display Texts -->
     <string name="content_type_movie">Movie</string>
     <string name="content_type_series">Series</string>
-    <string name="episode_count">%d Episodes</string>
+    <string name="episode_count_with_season">%s: %d Episodes</string>
+    <string name="episode_count_without_season">%d Episodes</string>
+    <string name="episode_number">Episode %d</string>
 
     <!-- Playback error actions -->
     <string name="retry">Retry</string>
@@ -20,6 +22,7 @@
     <string name="continue_watching">Continue Watching</string>
     <string name="related_videos">Related Videos</string>
     <string name="connected_videos">Connected Videos</string>
+    <string name="search_results">Search Results for %s</string>
 
     <!-- Dialogs -->
     <string name="continue_watching_title">Continue Watching?</string>
