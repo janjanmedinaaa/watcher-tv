@@ -46,7 +46,9 @@ class VideoSearchViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video
+                mediaRepository.currentlyPlayingVideo = video.apply {
+                    score = videoMedia.score
+                }
                 this@VideoSearchViewModel.videoMedia.value = Event(it)
             }
         }

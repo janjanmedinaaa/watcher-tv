@@ -36,16 +36,18 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         binding.textviewTitle.text = title
         binding.textviewDescription.text = getContentText(binding.root.resources, video)
         binding.textviewScore.apply {
-            isVisible = video.score != null && video.score != 0.0
+            isVisible = video.showScore
             if (video.score == null) return@apply
 
-            text = "${video.score}"
-            val color = when (video.score) {
-                in 8.0..10.0 -> R.color.high_score
-                in 5.0..7.9 -> R.color.average_score
-                else -> R.color.low_score
+            video.score?.let { score ->
+                text = "$score"
+                val color = when (score) {
+                    in 8.0..10.0 -> R.color.high_score
+                    in 4.0..7.9 -> R.color.average_score
+                    else -> R.color.low_score
+                }
+                setTextColor(ContextCompat.getColor(context, color))
             }
-            setTextColor(ContextCompat.getColor(context, color))
         }
 
         glide.load(video.imageUrl)

@@ -124,7 +124,9 @@ class PlayerViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video
+                mediaRepository.currentlyPlayingVideo = video.apply {
+                    score = videoMedia.score
+                }
                 onStateChange(VideoPlaybackState.Load(it))
             }
         }

@@ -17,12 +17,17 @@ data class VideoMedia(
     val videoSuggestions: List<VideoSuggestion>?
 ) : Parcelable {
 
+    // Storing the score in the videoMedia so that
+    // the video can use it when saving to local storage
+    var score: Double = 0.0
+
     constructor(
         contentId: Int,
         categoryId: Int,
         episodeBean: EpisodeBean,
         detailsResponse: GetVideoDetailsResponse.Data,
-        mediaResponse: GetVideoResourceResponse.Data
+        mediaResponse: GetVideoResourceResponse.Data,
+        score: Double
     ) : this(
         id = episodeBean.id,
         contentId = contentId,
@@ -38,7 +43,9 @@ data class VideoMedia(
             it.name != detailsResponse.name
         },
         videoSuggestions = detailsResponse.likeList
-    )
+    ) {
+        this.score = score
+    }
 
     fun getPreferredSubtitle(): Subtitle? {
         return subtitles?.firstOrNull { it.languageAbbr == "en" } ?: subtitles?.firstOrNull()

@@ -76,6 +76,7 @@ class HomeViewModel @Inject constructor(
                 mediaRepository.currentlyPlayingVideo = video.apply {
                     // Reset video progress
                     videoProgress = 0L
+                    score = videoMedia.score
                 }
                 this@HomeViewModel.videoMedia.value = Event(it)
             }

@@ -16,11 +16,18 @@ data class Video(
     val category: Int?,
     @PrimaryKey val contentId: Int,
     val imageUrl: String,
-    val title: String,
-    var episodeNumber: Int,
-    val episodeCount: Int,
-    val score: Double?
+    val title: String
 ) : Parcelable {
+
+    var episodeNumber: Int = 0
+
+    var episodeCount: Int = 0
+
+    var score: Double = 0.0
+
+    var videoProgress: Long = 0L
+
+    var lastWatchTime: Long = System.currentTimeMillis()
 
     @Ignore
     var isSearchResult = false
@@ -29,41 +36,41 @@ data class Video(
     val isMovie: Boolean
         get() = category == 0
 
-    var videoProgress: Long = 0L
-
-    var lastWatchTime: Long = System.currentTimeMillis()
+    @Ignore
+    var showScore = true
+        get() = score != 0.0 && field
 
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
         contentId = bean.id,
         imageUrl = bean.imageUrl,
-        title = bean.title,
-        episodeNumber = 0,
-        episodeCount = bean.resourceNum ?: 0,
+        title = bean.title
+    ) {
+        episodeNumber = 0
+        episodeCount = bean.resourceNum ?: 0
         score = bean.score
-    )
+    }
 
     // Home Page Episode display item
     constructor(video: Video, bean: EpisodeBean, episodeCount: Int, score: Double) : this(
         category = video.category,
         contentId = video.contentId,
         imageUrl = video.imageUrl,
-        title = video.title,
-        episodeNumber = bean.seriesNo,
-        episodeCount = episodeCount,
-        score = score
-    )
+        title = video.title
+    ) {
+        showScore = false
+        episodeNumber = bean.seriesNo
+        this.episodeCount = episodeCount
+        this.score = score
+    }
 
     // Search Page item
     constructor(bean: SearchResultBean) : this(
         category = bean.domainType,
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
-        title = bean.name,
-        episodeNumber = 0,
-        episodeCount = 0,
-        score = null
+        title = bean.name
     ) {
         isSearchResult = true
     }
@@ -73,11 +80,10 @@ data class Video(
         category = videoSuggestion.category,
         contentId = videoSuggestion.id,
         imageUrl = videoSuggestion.coverVerticalUrl,
-        title = videoSuggestion.name,
-        episodeNumber = 0,
-        episodeCount = 0,
+        title = videoSuggestion.name
+    ) {
         score = videoSuggestion.score
-    )
+    }
 
     fun getSeriesTitleDescription(): Pair<String, String> {
         val titleSplit = title.split(" ")

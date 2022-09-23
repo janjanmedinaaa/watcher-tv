@@ -37,7 +37,8 @@ class MediaRepository(
                     categoryId = category,
                     episodeBean = episode ?: return null,
                     detailsResponse = videoDetailsResult.data?.data ?: return null,
-                    mediaResponse = videoMediaResult.data?.data ?: return null
+                    mediaResponse = videoMediaResult.data?.data ?: return null,
+                    score = videoDetails?.score ?: return null
                 )
             } else null
         } else null
