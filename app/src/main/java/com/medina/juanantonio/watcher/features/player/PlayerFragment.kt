@@ -29,7 +29,7 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.text.CueGroup
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.CaptionStyleCompat
-import com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_NONE
+import com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_RAISED
 import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
@@ -80,13 +80,7 @@ class PlayerFragment : VideoSupportFragment() {
             when (state) {
                 is VideoPlaybackState.Load -> setupVideoMedia(state.videoMedia)
                 is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
-                is VideoPlaybackState.End -> {
-                    viewModel.handleVideoEnd()
-                    // To get to playback, the user always goes through browse first. Deep links for
-                    // directly playing a video also go to browse before playback. If playback
-                    // finishes the entire video, the PlaybackFragment is popped off the back stack
-                    // and the user returns to browse.
-                }
+                is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
                     findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
@@ -133,8 +127,8 @@ class PlayerFragment : VideoSupportFragment() {
                 Color.WHITE,
                 Color.TRANSPARENT,
                 Color.TRANSPARENT,
-                EDGE_TYPE_NONE,
-                Color.WHITE,
+                EDGE_TYPE_RAISED,
+                Color.BLACK,
                 null
             )
             setStyle(style)

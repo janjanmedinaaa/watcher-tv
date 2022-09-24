@@ -85,11 +85,11 @@ class PlayerViewModel @Inject constructor(
                     handleVideoEndNavigation.value = Event(Unit)
                 } else {
                     mediaRepository.addOnGoingVideo(
-                        it.copy().apply {
-                            episodeNumber += 1
-                            videoProgress = 0L
+                        it.createNew(
+                            episodeNumber = it.episodeNumber + 1,
+                            videoProgress = 0L,
                             lastWatchTime = System.currentTimeMillis()
-                        }
+                        )
                     )
                     getNewVideoMedia(playNext = true)
                 }

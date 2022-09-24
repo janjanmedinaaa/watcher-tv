@@ -85,6 +85,25 @@ data class Video(
         score = videoSuggestion.score
     }
 
+    /**
+     * Deep copy Video object
+     */
+    fun createNew(
+        episodeNumber: Int? = null,
+        episodeCount: Int? = null,
+        score: Double? = null,
+        videoProgress: Long? = null,
+        lastWatchTime: Long? = null
+    ): Video {
+        return copy().apply {
+            this.episodeNumber = episodeNumber ?: this@Video.episodeNumber
+            this.episodeCount = episodeCount ?: this@Video.episodeCount
+            this.score = score ?: this@Video.score
+            this.videoProgress = videoProgress ?: this@Video.videoProgress
+            this.lastWatchTime = lastWatchTime ?: this@Video.lastWatchTime
+        }
+    }
+
     fun getSeriesTitleDescription(): Pair<String, String> {
         val titleSplit = title.split(" ")
         val lastTwoWords = titleSplit.takeLast(2).joinToString(" ")
