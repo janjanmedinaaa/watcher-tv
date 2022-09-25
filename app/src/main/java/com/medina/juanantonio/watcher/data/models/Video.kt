@@ -105,7 +105,7 @@ data class Video(
     }
 
     fun getSeriesTitleDescription(): Pair<String, String> {
-        val titleSplit = title.split(" ")
+        val titleSplit = title.trim().split(" ")
         val lastTwoWords = titleSplit.takeLast(2).joinToString(" ")
 
         return if (lastTwoWords.startsWith("Season", ignoreCase = true)) {

@@ -31,6 +31,7 @@ class ContentRepository(
     }
 
     override fun clearHomePage() {
+        currentPage = 0
         homeContentList.clear()
     }
 
