@@ -330,12 +330,13 @@ class PlayerFragment : VideoSupportFragment() {
         val relatedVideosListRow =
             getListRow(getString(R.string.related_videos), videoMedia.videoSuggestions)
 
-        if (rowsAdapter.size() > 1) {
-            rowsAdapter.replace(1, connectedVideoListRow)
-            rowsAdapter.replace(2, relatedVideosListRow)
-        } else {
-            rowsAdapter.add(1, connectedVideoListRow)
-            rowsAdapter.add(2, relatedVideosListRow)
+        rowsAdapter.removeItems(1, 2)
+        if (!videoMedia.connectedVideos.isNullOrEmpty()) {
+            rowsAdapter.add(connectedVideoListRow)
+        }
+
+        if (!videoMedia.videoSuggestions.isNullOrEmpty()) {
+            rowsAdapter.add(relatedVideosListRow)
         }
     }
 

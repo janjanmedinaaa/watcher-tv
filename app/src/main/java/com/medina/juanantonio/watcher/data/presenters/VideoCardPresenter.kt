@@ -70,9 +70,9 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         val (_, description) = video.getSeriesTitleDescription()
         return if (video.episodeNumber == 0) {
             description.ifBlank {
+                // Some shows don't have a "Season {number}" in their title
+                // because they're either a limited series or has only 1 season
                 if (video.episodeCount != 0) {
-                    // Some shows don't have a "Season {number}" in their title
-                    // because they're either a limited series or has only 1 season
                     resources.getString(
                         R.string.episode_count_without_season,
                         video.episodeCount
