@@ -23,6 +23,7 @@
     <string name="related_videos">Related Videos</string>
     <string name="connected_videos">Connected Videos</string>
     <string name="search_results">Search Results for %s</string>
+    <string name="search_leaderboard">Search Leaderboard</string>
 
     <!-- Dialogs -->
     <string name="continue_watching_title">Continue Watching?</string>

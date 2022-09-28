@@ -64,6 +64,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     override fun onQueryTextChange(newQuery: String?): Boolean {
+        if (currentQuery == newQuery?.trim()) return true
         currentQuery = newQuery.orEmpty()
         mRowsAdapter.clear()
         viewModel.searchKeyword(newQuery.orEmpty())
@@ -78,7 +79,10 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         viewModel.searchResults.observeEvent(viewLifecycleOwner) {
             val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter(glide))
             listRowAdapter.addAll(0, it)
-            val headerItem = HeaderItem(getString(R.string.search_results, currentQuery))
+            val headerTitle =
+                if (currentQuery.isBlank()) getString(R.string.search_leaderboard)
+                else getString(R.string.search_results, currentQuery)
+            val headerItem = HeaderItem(headerTitle)
             mRowsAdapter.add(ListRow(headerItem, listRowAdapter))
         }
 

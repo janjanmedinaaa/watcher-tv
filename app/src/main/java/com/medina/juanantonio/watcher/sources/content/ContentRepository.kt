@@ -62,7 +62,7 @@ class ContentRepository(
 
         return if (result is Result.Success) {
             val data = result.data?.data ?: return null
-            val filteredList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank()  }
+            val filteredList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank() }
 
             filteredList.map { Video(it) }
         } else null
@@ -70,6 +70,15 @@ class ContentRepository(
 
     override suspend fun getOnGoingVideos(): List<Video> {
         return database.getOnGoingVideos()
+    }
+
+    override suspend fun getSearchLeaderboard(): List<Video>? {
+        val result = remoteSource.getSearchLeaderboard()
+
+        return if (result is Result.Success) {
+            val data = result.data?.data ?: return null
+            data.list.map { Video(it) }
+        } else null
     }
 }
 
@@ -80,4 +89,5 @@ interface IContentRepository {
 
     suspend fun searchByKeyword(keyword: String): List<Video>?
     suspend fun getOnGoingVideos(): List<Video>
+    suspend fun getSearchLeaderboard(): List<Video>?
 }

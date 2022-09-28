@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
+import com.medina.juanantonio.watcher.network.models.search.LeaderboardBean
 import com.medina.juanantonio.watcher.network.models.search.SearchResultBean
 import kotlinx.android.parcel.Parcelize
 
@@ -65,7 +66,7 @@ data class Video(
         this.score = score
     }
 
-    // Search Page item
+    // Search Result item
     constructor(bean: SearchResultBean) : this(
         category = bean.domainType,
         contentId = bean.id,
@@ -75,7 +76,7 @@ data class Video(
         isSearchResult = true
     }
 
-    // Player item
+    // Video Suggestion item
     constructor(videoSuggestion: VideoSuggestion) : this(
         category = videoSuggestion.category,
         contentId = videoSuggestion.id,
@@ -84,6 +85,14 @@ data class Video(
     ) {
         score = videoSuggestion.score
     }
+
+    // Leaderboard item
+    constructor(bean: LeaderboardBean) : this(
+        category = bean.domainType,
+        contentId = bean.id,
+        imageUrl = bean.cover,
+        title = bean.title
+    )
 
     /**
      * Deep copy Video object

@@ -3,6 +3,7 @@ package com.medina.juanantonio.watcher.network
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
+import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
 import retrofit2.Response
@@ -36,4 +37,7 @@ interface ApiService {
     suspend fun searchByKeyword(
         @Body request: SearchByKeywordRequest
     ): Response<SearchByKeywordResponse>
+
+    @GET("cms/app/search/v1/searchLeaderboard")
+    suspend fun getSearchLeaderboard(): Response<GetSearchLeaderboardResponse>
 }

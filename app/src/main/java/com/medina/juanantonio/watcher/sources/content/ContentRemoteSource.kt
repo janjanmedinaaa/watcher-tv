@@ -6,6 +6,7 @@ import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.wrapWithResult
 import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
+import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
@@ -54,6 +55,19 @@ class ContentRemoteSource(
             getDefaultErrorResponse()
         }
     }
+
+    override suspend fun getSearchLeaderboard(): Result<GetSearchLeaderboardResponse> {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                apiService.getSearchLeaderboard()
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
 }
 
 interface IContentRemoteSource {
@@ -64,4 +78,6 @@ interface IContentRemoteSource {
         sort: String = "",
         searchType: String = ""
     ): Result<SearchByKeywordResponse>
+
+    suspend fun getSearchLeaderboard(): Result<GetSearchLeaderboardResponse>
 }

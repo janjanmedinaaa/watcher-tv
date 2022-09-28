@@ -27,10 +27,29 @@ class VideoSearchViewModel @Inject constructor(
 
     private var displaysEpisodes = false
 
+    init {
+        getLeaderboard()
+    }
+
     fun searchKeyword(keyword: String) {
         if (job?.isActive == true) job?.cancel()
+        if (keyword.isBlank()) {
+            getLeaderboard()
+            return
+        }
+
         job = viewModelScope.launch {
             val results = contentRepository.searchByKeyword(keyword)
+            if (!results.isNullOrEmpty()) {
+                searchResults.value = Event(results.sortedBy { it.title.trim() })
+            }
+        }
+    }
+
+    private fun getLeaderboard() {
+        if (job?.isActive == true) job?.cancel()
+        job = viewModelScope.launch {
+            val results = contentRepository.getSearchLeaderboard()
             if (!results.isNullOrEmpty()) {
                 searchResults.value = Event(results.sortedBy { it.title.trim() })
             }
