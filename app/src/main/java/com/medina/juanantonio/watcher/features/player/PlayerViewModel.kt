@@ -26,13 +26,17 @@ class PlayerViewModel @Inject constructor(
 
     val isFirstEpisode: Boolean
         get() = video?.let { v ->
-            v.episodeNumber - 1 <= 0
+            val currentEpisodeIndex = episodeNumbers.indexOf(v.episodeNumber)
+            currentEpisodeIndex == 0
         } ?: false
 
     private val isLastEpisode: Boolean
         get() = video?.let { v ->
-            v.episodeNumber + 1 > v.episodeCount
+            val currentEpisodeIndex = episodeNumbers.indexOf(v.episodeNumber)
+            currentEpisodeIndex == episodeNumbers.lastIndex
         } ?: false
+
+    private var episodeNumbers = listOf<Int>()
 
     private val playbackStateListeners = arrayListOf<PlaybackStateListener>()
 
@@ -58,6 +62,10 @@ class PlayerViewModel @Inject constructor(
 
     override fun onCleared() {
         playbackStateListeners.forEach { it.onDestroy() }
+    }
+
+    fun setEpisodeNumbers(episodeNumbers: List<Int>) {
+        this.episodeNumbers = episodeNumbers
     }
 
     fun saveVideo(progress: Long) {
@@ -86,7 +94,7 @@ class PlayerViewModel @Inject constructor(
                 } else {
                     mediaRepository.addOnGoingVideo(
                         it.createNew(
-                            episodeNumber = it.episodeNumber + 1,
+                            episodeNumber = getNewEpisodeNumber(it.episodeNumber, next = true),
                             videoProgress = 0L,
                             lastWatchTime = System.currentTimeMillis()
                         )
@@ -145,6 +153,12 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    private fun getNewEpisodeNumber(currentEpisode: Int, next: Boolean): Int {
+        val currentEpisodeIndex = episodeNumbers.indexOf(currentEpisode)
+        return if (next) episodeNumbers[currentEpisodeIndex + 1]
+        else episodeNumbers[currentEpisodeIndex - 1]
+    }
+
     /**
      * Used for getting the previous or next VideoMedia
      */
@@ -152,9 +166,8 @@ class PlayerViewModel @Inject constructor(
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             video?.let { currentlyPlayingVideo ->
-                val newEpisodeNumber = currentlyPlayingVideo.episodeNumber.let { number ->
-                    if (playNext) number + 1 else number - 1
-                }
+                val newEpisodeNumber =
+                    getNewEpisodeNumber(currentlyPlayingVideo.episodeNumber, playNext)
 
                 val videoMedia = mediaRepository.getVideo(
                     id = currentlyPlayingVideo.contentId,
@@ -164,10 +177,10 @@ class PlayerViewModel @Inject constructor(
 
                 videoMedia?.let {
                     mediaRepository.currentlyPlayingVideo =
-                        currentlyPlayingVideo.copy().apply {
-                            episodeNumber = newEpisodeNumber
+                        currentlyPlayingVideo.createNew(
+                            episodeNumber = newEpisodeNumber,
                             videoProgress = 0L
-                        }
+                        )
                     onStateChange(VideoPlaybackState.Load(it))
                 }
             }

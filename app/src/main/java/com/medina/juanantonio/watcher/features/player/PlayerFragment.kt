@@ -291,6 +291,7 @@ class PlayerFragment : VideoSupportFragment() {
         // in playing the previous/next episode's or movie's
         // connected and related videos
         this.videoMedia = videoMedia
+        viewModel.setEpisodeNumbers(videoMedia.episodeNumbers)
 
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
         val subtitleData = videoMedia.getPreferredSubtitle()
