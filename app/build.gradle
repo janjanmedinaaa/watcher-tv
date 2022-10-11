@@ -9,6 +9,10 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
 }
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdk 32
 
@@ -18,19 +22,34 @@ android {
         targetSdk 32
         versionCode 1
         versionName "1.0"
+    }
 
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
-    buildFeatures {
-        viewBinding true
-        dataBinding true
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "Watcher TV v${variant.versionName} ${variant.name.capitalize()}.apk"
+        }
     }
 }
 
