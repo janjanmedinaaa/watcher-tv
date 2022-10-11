@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.database.WatcherDb
+import com.medina.juanantonio.watcher.github.GithubApiService
+import com.medina.juanantonio.watcher.github.sources.GithubRemoteSource
+import com.medina.juanantonio.watcher.github.sources.GithubRepository
+import com.medina.juanantonio.watcher.github.sources.IGithubRemoteSource
+import com.medina.juanantonio.watcher.github.sources.IGithubRepository
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
@@ -66,6 +71,42 @@ class AppModule {
 
     @Provides
     @Singleton
+    fun provideGithubApiService(
+        @ApplicationContext context: Context
+    ): GithubApiService {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val requiredHeaderInterceptor = Interceptor { chain ->
+            val requestBuilder =
+                chain.request()
+                    .newBuilder()
+                    .addHeader("Accept", "application/vnd.github+json")
+                    .also {
+                        val tempApiKey = chain.request().header("temp_api_key")
+                        it.addHeader("Authorization", "Bearer $tempApiKey")
+                    }
+
+            chain.proceed(requestBuilder.build())
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(requiredHeaderInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(context.getString(R.string.github_api_base_url))
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(GithubApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideWatcherDb(@ApplicationContext context: Context): WatcherDb {
         return Room.databaseBuilder(context, WatcherDb::class.java, "watcher.db")
             .fallbackToDestructiveMigration()
@@ -114,5 +155,23 @@ class AppModule {
         database: IVideoDatabase
     ): IMediaRepository {
         return MediaRepository(remoteSource, database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGithubRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: GithubApiService
+    ): IGithubRemoteSource {
+        return GithubRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGithubRepository(
+        @ApplicationContext context: Context,
+        remoteSource: IGithubRemoteSource
+    ): IGithubRepository {
+        return GithubRepository(context, remoteSource)
     }
 }

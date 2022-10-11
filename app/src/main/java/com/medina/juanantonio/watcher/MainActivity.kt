@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -18,7 +19,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.fondesa.kpermissions.allGranted
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.extension.send
 import com.medina.juanantonio.watcher.databinding.ActivityMainBinding
+import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.gpu.BrightnessFilterTransformation
@@ -100,6 +105,12 @@ class MainActivity : FragmentActivity() {
                 null -> cancelBackgroundImageLoading()
                 "" -> showDefaultBackground()
                 else -> updateBackgroundDelayed(it)
+            }
+        }
+
+        viewModel.requestPermissions.observeEvent(this) {
+            permissionsBuilder(WRITE_EXTERNAL_STORAGE).build().send {
+                viewModel.startDownload(it.allGranted())
             }
         }
     }
