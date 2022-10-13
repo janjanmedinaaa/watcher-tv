@@ -33,7 +33,7 @@
     <string name="update_available_title">Update Watcher TV?</string>
     <string name="update_available_description">%s is available for download. You can keep using the app while downloading the update.</string>
     <string name="update_button">Update</string>
-    <string name="no_thanks_button">No thanks</string>
+    <string name="no_thanks_button">Remind Me Tomorrow</string>
 
     <!-- Downloader -->
     <string name="title_file_download">Downloading Watcher TV Update</string>

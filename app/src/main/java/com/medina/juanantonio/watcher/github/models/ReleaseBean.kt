@@ -5,12 +5,12 @@ import com.medina.juanantonio.watcher.BuildConfig
 data class ReleaseBean(
     val name: String,
     val assets: List<Assets>,
-    val draft: Boolean,
-    val prerelease: Boolean,
+    private val draft: Boolean,
+    private val prerelease: Boolean,
     private val tag_name: String
 ) {
 
-    inner class Assets(
+    class Assets(
         val id: Int,
         private val content_type: String,
         private val browser_download_url: String

@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 32
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
     }
 
     buildFeatures {
@@ -136,4 +136,6 @@ dependencies {
     runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.5') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
+
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 }

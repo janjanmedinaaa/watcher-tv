@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.databinding.FragmentSplashBinding
@@ -51,10 +52,9 @@ class SplashFragment : Fragment() {
                     mainViewModel.requestPermission()
                 }
                 DialogFragment.ACTION_ID_NEGATIVE -> {
-                    viewModel.navigateToHomeScreen()
+                    viewModel.saveLastUpdateReminder()
                 }
             }
-
         }
 
         listenVM()
@@ -76,7 +76,9 @@ class SplashFragment : Fragment() {
                     description = getString(
                         R.string.update_available_description,
                         it.name
-                    )
+                    ),
+                    positiveButton = getString(R.string.update_button),
+                    negativeButton = getString(R.string.no_thanks_button)
                 )
             )
         }
@@ -90,6 +92,8 @@ class SplashFragment : Fragment() {
     }
 
     private fun downloadLatestAPK() {
+        if (BuildConfig.DEBUG) return
+
         val downloadUrl = viewModel.assetToDownload?.downloadUrl ?: return
         val downloadController = DownloadController(requireContext(), downloadUrl)
 
