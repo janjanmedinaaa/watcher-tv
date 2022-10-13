@@ -2,13 +2,13 @@ package com.medina.juanantonio.watcher.di
 
 import android.content.Context
 import androidx.room.Room
+import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.manager.DataStoreManager
+import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
-import com.medina.juanantonio.watcher.github.sources.GithubRemoteSource
-import com.medina.juanantonio.watcher.github.sources.GithubRepository
-import com.medina.juanantonio.watcher.github.sources.IGithubRemoteSource
-import com.medina.juanantonio.watcher.github.sources.IGithubRepository
+import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
@@ -168,10 +168,20 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideGithubRepository(
+    fun provideDataStoreManager(
+        @ApplicationContext context: Context
+    ): IDataStoreManager {
+        return DataStoreManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateRepository(
         @ApplicationContext context: Context,
-        remoteSource: IGithubRemoteSource
-    ): IGithubRepository {
-        return GithubRepository(context, remoteSource)
+        remoteSource: IGithubRemoteSource,
+        dataStoreManager: IDataStoreManager
+    ): IUpdateRepository {
+        return if (BuildConfig.DEBUG) MockUpdateRepository()
+        else UpdateRepository(context, remoteSource, dataStoreManager)
     }
 }

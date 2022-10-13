@@ -4,17 +4,24 @@ import android.content.Context
 import android.util.Base64
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.github.models.GetAccessTokenRequest
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository.Companion.LAST_UPDATE_REMINDER_KEY
 import com.medina.juanantonio.watcher.network.Result
 import io.jsonwebtoken.Jwts
 import java.security.KeyFactory
 import java.security.spec.PKCS8EncodedKeySpec
+import java.util.concurrent.TimeUnit
 
-class GithubRepository(
+class UpdateRepository(
     private val context: Context,
-    private val remoteSource: IGithubRemoteSource
-) : IGithubRepository {
+    private val remoteSource: IGithubRemoteSource,
+    private val dataStoreManager: IDataStoreManager
+) : IUpdateRepository {
+
+    override val reminderInterval: Long
+        get() = TimeUnit.HOURS.toMillis(6)
 
     override suspend fun getLatestRelease(): ReleaseBean? {
         val apiKey = generateAPIKey()
@@ -57,8 +64,28 @@ class GithubRepository(
 
         return Jwts.builder().setClaims(claims).signWith(privateKey).compact()
     }
+
+    override suspend fun shouldGetUpdate(): Boolean {
+        val lastUpdateReminder = dataStoreManager.getString(LAST_UPDATE_REMINDER_KEY)
+        if (lastUpdateReminder.isBlank()) return true
+
+        return System.currentTimeMillis() > lastUpdateReminder.toLong() + reminderInterval
+    }
+
+    override suspend fun saveLastUpdateReminder() {
+        val currentTime = "${System.currentTimeMillis()}"
+        dataStoreManager.putString(LAST_UPDATE_REMINDER_KEY, currentTime)
+    }
 }
 
-interface IGithubRepository {
+interface IUpdateRepository {
+    val reminderInterval: Long
+
     suspend fun getLatestRelease(): ReleaseBean?
+    suspend fun shouldGetUpdate(): Boolean
+    suspend fun saveLastUpdateReminder()
+
+    companion object {
+        const val LAST_UPDATE_REMINDER_KEY = "LAST_UPDATE_REMINDER_KEY"
+    }
 }
