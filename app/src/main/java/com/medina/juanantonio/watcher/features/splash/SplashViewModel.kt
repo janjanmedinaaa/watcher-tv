@@ -24,7 +24,7 @@ class SplashViewModel @Inject constructor(
 
     val navigateToHomeScreen = MutableLiveData<Event<Unit>>()
     val newerRelease = MutableLiveData<Event<ReleaseBean>>()
-    var assetToDownload: ReleaseBean.Assets? = null
+    var assetToDownload: ReleaseBean.Asset? = null
 
     private val isEmulator: Boolean
         get() = Build.FINGERPRINT.contains("generic")
@@ -47,7 +47,8 @@ class SplashViewModel @Inject constructor(
             val latestRelease = results.firstOrNull { it is ReleaseBean } as? ReleaseBean
 
             latestRelease?.let { releaseBean ->
-                if (shouldDownloadRelease(releaseBean)) {
+                val developerModeEnabled = updateRepository.isDeveloperMode()
+                if (shouldDownloadRelease(releaseBean, developerModeEnabled)) {
                     assetToDownload = releaseBean.assets.first { it.isAPK() }
                     newerRelease.value = Event(releaseBean)
                 } else navigateToHomeScreen()
@@ -67,9 +68,12 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun shouldDownloadRelease(releaseBean: ReleaseBean): Boolean {
+    private fun shouldDownloadRelease(
+        releaseBean: ReleaseBean,
+        developerModeEnabled: Boolean
+    ): Boolean {
         return releaseBean.run {
-            isForDownload()
+            (developerModeEnabled || isForDownload())
                 && isNewerVersion()
                 && assets.any { it.isAPK() }
                 && (!BuildConfig.DEBUG || isEmulator)

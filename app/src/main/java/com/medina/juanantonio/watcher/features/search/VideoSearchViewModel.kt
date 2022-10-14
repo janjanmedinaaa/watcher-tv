@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository.Companion.DEVELOPER_KEYWORD
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VideoSearchViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
-    private val mediaRepository: IMediaRepository
+    private val mediaRepository: IMediaRepository,
+    private val updateRepository: IUpdateRepository
 ) : ViewModel() {
 
     val searchResults = MutableLiveData<Event<List<Video>>>()
@@ -35,6 +38,14 @@ class VideoSearchViewModel @Inject constructor(
         if (job?.isActive == true) job?.cancel()
         if (keyword.isBlank()) {
             getLeaderboard()
+            return
+        }
+
+        if (keyword.equals(DEVELOPER_KEYWORD, ignoreCase = true)) {
+            viewModelScope.launch {
+                if (!updateRepository.isDeveloperMode())
+                    getEnableDeveloperMode()
+            }
             return
         }
 
@@ -78,6 +89,12 @@ class VideoSearchViewModel @Inject constructor(
         else getEpisodeList(video)
     }
 
+    fun enableDeveloperMode() {
+        viewModelScope.launch {
+            updateRepository.enableDeveloperMode()
+        }
+    }
+
     private fun getEpisodeList(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
@@ -86,5 +103,18 @@ class VideoSearchViewModel @Inject constructor(
                 this@VideoSearchViewModel.episodeList.value = Event(it)
             }
         }
+    }
+
+    private fun getEnableDeveloperMode() {
+        val enableDeveloperModeItem = Video(
+            category = 0,
+            contentId = -1,
+            imageUrl = "",
+            title = "Enable Developer Mode"
+        ).apply {
+            enableDeveloperMode = true
+        }
+
+        searchResults.value = Event(listOf(enableDeveloperModeItem))
     }
 }

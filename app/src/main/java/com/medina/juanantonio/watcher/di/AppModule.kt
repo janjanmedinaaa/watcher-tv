@@ -110,6 +110,7 @@ class AppModule {
     fun provideWatcherDb(@ApplicationContext context: Context): WatcherDb {
         return Room.databaseBuilder(context, WatcherDb::class.java, "watcher.db")
             .fallbackToDestructiveMigration()
+            .addMigrations(WatcherDb.MIGRATION_2_3)
             .build()
     }
 

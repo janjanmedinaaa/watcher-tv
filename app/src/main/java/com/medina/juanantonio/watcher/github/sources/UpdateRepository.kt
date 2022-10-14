@@ -7,6 +7,7 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.github.models.GetAccessTokenRequest
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository.Companion.DEVELOPER_MODE_KEY
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository.Companion.LAST_UPDATE_REMINDER_KEY
 import com.medina.juanantonio.watcher.network.Result
 import io.jsonwebtoken.Jwts
@@ -45,7 +46,9 @@ class UpdateRepository(
             apiKey = accessTokenResult.data?.token ?: return null
         )
 
-        return releasesResult.data?.firstOrNull()
+        return releasesResult.data?.firstOrNull()?.apply {
+            assets.map { it.setupApiKey(accessTokenResult.data.token) }
+        }
     }
 
     private fun generateAPIKey(): String {
@@ -76,6 +79,14 @@ class UpdateRepository(
         val currentTime = "${System.currentTimeMillis()}"
         dataStoreManager.putString(LAST_UPDATE_REMINDER_KEY, currentTime)
     }
+
+    override suspend fun enableDeveloperMode() {
+        dataStoreManager.putBoolean(DEVELOPER_MODE_KEY, true)
+    }
+
+    override suspend fun isDeveloperMode(): Boolean {
+        return dataStoreManager.getBoolean(DEVELOPER_MODE_KEY)
+    }
 }
 
 interface IUpdateRepository {
@@ -83,9 +94,14 @@ interface IUpdateRepository {
 
     suspend fun getLatestRelease(): ReleaseBean?
     suspend fun shouldGetUpdate(): Boolean
+
     suspend fun saveLastUpdateReminder()
+    suspend fun enableDeveloperMode()
+    suspend fun isDeveloperMode(): Boolean
 
     companion object {
         const val LAST_UPDATE_REMINDER_KEY = "LAST_UPDATE_REMINDER_KEY"
+        const val DEVELOPER_MODE_KEY = "DEVELOPER_MODE_KEY"
+        const val DEVELOPER_KEYWORD = "Make me a Developer"
     }
 }

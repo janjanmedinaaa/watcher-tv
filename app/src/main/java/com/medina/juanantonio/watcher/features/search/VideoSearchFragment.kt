@@ -36,8 +36,14 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
-            if (item.isMovie) viewModel.getVideoMedia(item)
-            else viewModel.handleSeries(item)
+            when {
+                item.enableDeveloperMode -> {
+                    viewModel.enableDeveloperMode()
+                    setSearchQuery("", false)
+                }
+                item.isMovie -> viewModel.getVideoMedia(item)
+                else -> viewModel.handleSeries(item)
+            }
         }
 
         setOnItemViewSelectedListener { _, item, _, _ ->

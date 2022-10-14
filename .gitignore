@@ -15,3 +15,4 @@
 local.properties
 keystore.properties
 secret.properties
+/app/schemas

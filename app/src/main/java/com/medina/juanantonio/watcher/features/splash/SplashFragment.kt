@@ -94,9 +94,9 @@ class SplashFragment : Fragment() {
     private fun downloadLatestAPK() {
         if (BuildConfig.DEBUG) return
 
-        val downloadUrl = viewModel.assetToDownload?.downloadUrl ?: return
-        val downloadController = DownloadController(requireContext(), downloadUrl)
+        val asset = viewModel.assetToDownload ?: return
+        val downloadController = DownloadController(requireContext())
 
-        downloadController.enqueueDownload()
+        downloadController.enqueueDownload(asset)
     }
 }
