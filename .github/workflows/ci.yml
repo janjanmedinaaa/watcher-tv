@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - 'testBranch'
+      - 'master'
 
 jobs:
   verifyBranch:
