@@ -1,4 +1,4 @@
-name: Upload to Firebase App Distribution
+name: Deploy to Github Release
 
 on:
   pull_request:
@@ -50,7 +50,7 @@ jobs:
         run: |
           apkLocation="${{ env.APK_LOCATION }}"
           filename=${apkLocation##*/}
-          echo "TAG_NAME=$(cut -d "v" -f2 <<< "${string%Release.apk*}")" >> $GITHUB_ENV
+          echo "TAG_NAME=$(cut -d "v" -f2 <<< "${filename%Release.apk*}")" >> $GITHUB_ENV
 
       - name: Create Release
         if: env.APK_LOCATION != ''
