@@ -10,6 +10,7 @@ class MockUpdateRepository : IUpdateRepository {
 
     companion object {
         private var lastUpdateReminder = ""
+        private var developerModeEnabled = false
     }
 
     override val reminderInterval: Long
@@ -25,10 +26,11 @@ class MockUpdateRepository : IUpdateRepository {
         return ReleaseBean(
             name = "Watcher TV v${newVersion}",
             assets = listOf(
-                ReleaseBean.Assets(
+                ReleaseBean.Asset(
                     id = 1,
                     content_type = "application/vnd.android.package-archive",
-                    browser_download_url = ""
+                    browser_download_url = "",
+                    url = ""
                 )
             ),
             draft = false,
@@ -44,5 +46,13 @@ class MockUpdateRepository : IUpdateRepository {
 
     override suspend fun saveLastUpdateReminder() {
         lastUpdateReminder = "${System.currentTimeMillis()}"
+    }
+
+    override suspend fun enableDeveloperMode() {
+        developerModeEnabled = true
+    }
+
+    override suspend fun isDeveloperMode(): Boolean {
+        return developerModeEnabled
     }
 }

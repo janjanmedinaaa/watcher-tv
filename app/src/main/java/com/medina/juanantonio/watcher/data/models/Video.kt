@@ -41,6 +41,9 @@ data class Video(
     var showScore = true
         get() = score != 0.0 && field
 
+    @Ignore
+    var enableDeveloperMode = false
+
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,

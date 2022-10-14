@@ -4,23 +4,31 @@ import com.medina.juanantonio.watcher.BuildConfig
 
 data class ReleaseBean(
     val name: String,
-    val assets: List<Assets>,
+    val assets: List<Asset>,
     private val draft: Boolean,
     private val prerelease: Boolean,
     private val tag_name: String
 ) {
 
-    class Assets(
+    class Asset(
         val id: Int,
         private val content_type: String,
-        private val browser_download_url: String
+        private val browser_download_url: String, // This should work for public repositories
+        private val url: String
     ) {
 
+        var apiKey: String = ""
+            private set
+
         val downloadUrl: String
-            get() = browser_download_url
+            get() = url
 
         fun isAPK(): Boolean =
             content_type == "application/vnd.android.package-archive"
+
+        fun setupApiKey(apiKey: String) {
+            this.apiKey = apiKey
+        }
     }
 
     fun isForDownload(): Boolean =

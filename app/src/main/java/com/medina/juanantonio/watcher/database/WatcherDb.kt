@@ -2,7 +2,7 @@ package com.medina.juanantonio.watcher.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.medina.juanantonio.watcher.BuildConfig
+import androidx.room.migration.Migration
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.database.dao.VideoDao
 
@@ -10,9 +10,15 @@ import com.medina.juanantonio.watcher.database.dao.VideoDao
     entities = [
         Video::class
     ],
-    version = BuildConfig.VERSION_CODE,
+    version = WatcherDb.VERSION_CODE,
     exportSchema = true
 )
 abstract class WatcherDb : RoomDatabase() {
     abstract fun videoDao(): VideoDao
+
+    companion object {
+        const val VERSION_CODE = 3
+
+        val MIGRATION_2_3 = Migration(2, 3) {}
+    }
 }

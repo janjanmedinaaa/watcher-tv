@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 32
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.3"
     }
 
     buildFeatures {
@@ -54,6 +54,8 @@ android {
         variant.outputs.all {
             buildConfigField "String", "PRIVATE_KEY", "\"${secretProperties['privateKey']}\""
             buildConfigField "String", "APP_ID", "\"${secretProperties['appId']}\""
+
+            resValue "string", "app_name_version", "Watcher TV v${variant.versionName}"
 
             outputFileName = "Watcher TV v${variant.versionName} ${variant.name.capitalize()}.apk"
         }

@@ -11,14 +11,14 @@ import android.os.Environment
 import androidx.core.content.FileProvider
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import java.io.File
 
 /**
  * https://androidwave.com/download-and-install-apk-programmatically/
  */
 class DownloadController(
-    private val context: Context,
-    private val url: String
+    private val context: Context
 ) {
 
     companion object {
@@ -29,7 +29,7 @@ class DownloadController(
         private const val APP_INSTALL_PATH = "\"application/vnd.android.package-archive\""
     }
 
-    fun enqueueDownload() {
+    fun enqueueDownload(asset: ReleaseBean.Asset) {
         var destination =
             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
         destination += FILE_NAME
@@ -40,14 +40,20 @@ class DownloadController(
         if (file.exists()) file.delete()
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadUri = Uri.parse(url)
-        val request = DownloadManager.Request(downloadUri)
-        request.setMimeType(MIME_TYPE)
-        request.setTitle(context.getString(R.string.title_file_download))
-        request.setDescription(context.getString(R.string.downloading))
+        val downloadUri = Uri.parse(asset.downloadUrl)
+        val request = DownloadManager.Request(downloadUri).apply {
+            setMimeType(MIME_TYPE)
 
-        // set destination
-        request.setDestinationUri(uri)
+            // This is required since we're requesting from a private repository
+            addRequestHeader("Authorization", "token ${asset.apiKey}")
+            addRequestHeader("Accept", "application/octet-stream")
+
+            setTitle(context.getString(R.string.title_file_download))
+            setDescription(context.getString(R.string.downloading))
+
+            // set destination
+            setDestinationUri(uri)
+        }
 
         showInstallOption(destination, uri)
         // Enqueue a new download and same the referenceId
