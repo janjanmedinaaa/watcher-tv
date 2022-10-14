@@ -50,12 +50,15 @@ jobs:
         run: |
           apkLocation="${{ env.APK_LOCATION }}"
           filename=${apkLocation##*/}
-          echo "TAG_NAME=$(cut -d "v" -f2 <<< "${filename%Release.apk*}")" >> $GITHUB_ENV
+          releaseName=${filename%Release.apk*}
+          echo "RELEASE_NAME=$(echo $releaseName)" >> $GITHUB_ENV
+          echo "TAG_NAME=$(cut -d "v" -f2 <<< "$releaseName")" >> $GITHUB_ENV
 
       - name: Create Release
         if: env.APK_LOCATION != ''
         uses: ncipollo/release-action@v1
         with:
+          name: ${{ env.RELEASE_NAME }}
           artifacts: ${{ env.APK_LOCATION }}
           tag: ${{ env.TAG_NAME }}
           token: ${{ secrets.PAT }}
