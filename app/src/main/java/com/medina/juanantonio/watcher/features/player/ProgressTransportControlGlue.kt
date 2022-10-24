@@ -59,10 +59,15 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     val justStarted: Boolean
         get() = currentPosition < FIVE_SECONDS
 
-    var skipForwardAction = FastForwardAction(context)
-        private set
-    var skipBackwardAction = RewindAction(context)
-        private set
+    private var autoPlayedVideoCount = 0
+
+    private var bedtimeModeEnabled = false
+
+    val autoPlayVideos: Boolean
+        get() = autoPlayedVideoCount <= MAX_VIDEO_AUTO_PLAYBACK || !bedtimeModeEnabled
+
+    private var skipForwardAction = FastForwardAction(context)
+    private var skipBackwardAction = RewindAction(context)
     var skipNextAction = SkipNextAction(context)
         private set
     var skipPreviousAction = SkipPreviousAction(context)
@@ -73,7 +78,18 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         context,
         ACTION_SPEEDUP,
         intArrayOf(R.drawable.ic_speed_increase),
-        intArrayOf(R.string.app_name)
+        intArrayOf(R.string.control_action_increase_speed_disabled)
+    )
+        private set
+
+    var bedtimeModeAction = CustomMultiAction(
+        context,
+        ACTION_BEDTIME,
+        intArrayOf(R.drawable.ic_bedtime_mode_disabled, R.drawable.ic_bedtime_mode_enabled),
+        intArrayOf(
+            R.string.control_action_bedtime_mode_disabled,
+            R.string.control_action_bedtime_mode_enabled
+        )
     )
         private set
 
@@ -83,14 +99,21 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         // super.onCreatePrimaryActions() will create the play / pause action.
         super.onCreatePrimaryActions(primaryActionsAdapter)
 
-        // Add the rewind and fast forward actions following the play / pause action.
         primaryActionsAdapter.apply {
             add(skipPreviousAction)
             add(skipBackwardAction)
             add(skipForwardAction)
             add(skipNextAction)
+        }
+    }
+
+    override fun onCreateSecondaryActions(secondaryActionsAdapter: ArrayObjectAdapter) {
+        super.onCreateSecondaryActions(secondaryActionsAdapter)
+
+        secondaryActionsAdapter.apply {
             add(increaseSpeedAction)
             add(closedCaptioningAction)
+            add(bedtimeModeAction)
         }
     }
 
@@ -110,6 +133,9 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         }
         onActionListener.invoke(action)
         if (action is MultiAction) notifyActionChanged(action)
+
+        // Reset auto play counter since the user is still watching
+        resetAutoPlayedVideoCount()
     }
 
     fun setOnActionListener(listener: (Action) -> Unit) {
@@ -120,9 +146,21 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         playerAdapter.seekTo(duration)
     }
 
+    fun enableBedtimeMode(enable: Boolean) {
+        bedtimeModeEnabled = enable
+    }
+
+    fun incrementAutoPlayedVideoCount() {
+        autoPlayedVideoCount++
+    }
+
+    private fun resetAutoPlayedVideoCount() {
+        autoPlayedVideoCount = 1
+    }
+
     private fun notifyActionChanged(action: MultiAction) {
         var index: Int
-        (controlsRow.primaryActionsAdapter as? ArrayObjectAdapter)?.let {
+        (controlsRow.secondaryActionsAdapter as? ArrayObjectAdapter)?.let {
             index = it.indexOf(action)
             if (index >= 0) {
                 it.notifyArrayItemRangeChanged(index, 1)
@@ -147,6 +185,9 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     companion object {
         // Custom Action IDs
         private const val ACTION_SPEEDUP = 19
+        private const val ACTION_BEDTIME = 20
+
+        private const val MAX_VIDEO_AUTO_PLAYBACK = 5
 
         val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
         private val FIVE_SECONDS = TimeUnit.SECONDS.toMillis(5)

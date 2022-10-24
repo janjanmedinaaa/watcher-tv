@@ -78,7 +78,10 @@ class PlayerFragment : VideoSupportFragment() {
             view?.keepScreenOn = state is VideoPlaybackState.Play
 
             when (state) {
-                is VideoPlaybackState.Load -> setupVideoMedia(state.videoMedia)
+                is VideoPlaybackState.Load -> {
+                    controlGlue.incrementAutoPlayedVideoCount()
+                    setupVideoMedia(state.videoMedia)
+                }
                 is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
                 is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
@@ -100,7 +103,7 @@ class PlayerFragment : VideoSupportFragment() {
     private fun startPlaybackFromWatchProgress(startPosition: Long) {
         exoPlayer?.apply {
             seekTo(startPosition)
-            playWhenReady = true
+            playWhenReady = controlGlue.autoPlayVideos
         }
     }
 
@@ -278,6 +281,10 @@ class PlayerFragment : VideoSupportFragment() {
                         closedCaptioningAction.nextIndex()
                         subtitleView.isVisible = closedCaptioningAction.index == INDEX_ON
                     }
+                    bedtimeModeAction -> {
+                        bedtimeModeAction.nextIndex()
+                        enableBedtimeMode(bedtimeModeAction.index == INDEX_ON)
+                    }
                 }
             }
 
@@ -295,7 +302,7 @@ class PlayerFragment : VideoSupportFragment() {
 
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
         val subtitleData = videoMedia.getPreferredSubtitle()
-        val subtitleUri = Uri.parse(subtitleData?.subtitlingUrl)
+        val subtitleUri = Uri.parse(subtitleData?.subtitlingUrl ?: "")
         val subtitleMediaItem = MediaItem.SubtitleConfiguration.Builder(subtitleUri)
             .setMimeType(MimeTypes.APPLICATION_SUBRIP)
             .setLanguage(subtitleData?.languageAbbr)

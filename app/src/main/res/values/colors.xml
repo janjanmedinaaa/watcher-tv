@@ -26,4 +26,6 @@
     <color name="low_score">@android:color/holo_red_light</color>
     <color name="average_score">@android:color/holo_orange_light</color>
     <color name="high_score">@android:color/holo_green_light</color>
+
+    <color name="enabled_multi_action">#90C9C3</color>
 </resources>
