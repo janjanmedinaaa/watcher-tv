@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
+import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,11 +16,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    private val mediaRepository: IMediaRepository
+    private val mediaRepository: IMediaRepository,
+    private val loaderUseCase: LoaderUseCase
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
     private var job: Job? = null
+
+    lateinit var videoMedia: VideoMedia
 
     val savedProgress = MutableLiveData<Event<Long>>()
     val handleVideoEndNavigation = MutableLiveData<Event<Unit>>()
@@ -88,7 +93,7 @@ class PlayerViewModel @Inject constructor(
     fun handleVideoEnd() {
         viewModelScope.launch {
             video?.let {
-                if (isLastEpisode) {
+                if ((isLastEpisode && !it.isMovie) || it.isMovie) {
                     mediaRepository.removeOnGoingVideo(it.contentId)
                     handleVideoEndNavigation.value = Event(Unit)
                 } else {
@@ -126,6 +131,7 @@ class PlayerViewModel @Inject constructor(
     fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
@@ -137,6 +143,7 @@ class PlayerViewModel @Inject constructor(
                 }
                 onStateChange(VideoPlaybackState.Load(it))
             }
+            loaderUseCase.hide()
         }
     }
 
@@ -146,10 +153,12 @@ class PlayerViewModel @Inject constructor(
     fun getEpisodeList(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
                 this@PlayerViewModel.episodeList.value = Event(it)
             }
+            loaderUseCase.hide()
         }
     }
 
@@ -165,6 +174,7 @@ class PlayerViewModel @Inject constructor(
     private fun getNewVideoMedia(playNext: Boolean) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             video?.let { currentlyPlayingVideo ->
                 val newEpisodeNumber =
                     getNewEpisodeNumber(currentlyPlayingVideo.episodeNumber, playNext)
@@ -184,6 +194,7 @@ class PlayerViewModel @Inject constructor(
                     onStateChange(VideoPlaybackState.Load(it))
                 }
             }
+            loaderUseCase.hide()
         }
     }
 }

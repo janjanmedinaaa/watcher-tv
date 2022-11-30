@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
-    private val mediaRepository: IMediaRepository
+    private val mediaRepository: IMediaRepository,
+    private val loaderUseCase: LoaderUseCase
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -67,6 +69,7 @@ class HomeViewModel @Inject constructor(
     fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
@@ -80,6 +83,7 @@ class HomeViewModel @Inject constructor(
                 }
                 this@HomeViewModel.videoMedia.value = Event(it)
             }
+            loaderUseCase.hide()
         }
     }
 
@@ -111,10 +115,12 @@ class HomeViewModel @Inject constructor(
     private fun getEpisodeList(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
                 this@HomeViewModel.episodeList.value = Event(it)
             }
+            loaderUseCase.hide()
         }
     }
 }

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.BackgroundManager
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,7 @@ import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.medina.juanantonio.watcher.databinding.ActivityMainBinding
+import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -30,6 +32,7 @@ import jp.wasabeef.glide.transformations.gpu.BrightnessFilterTransformation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -40,6 +43,9 @@ class MainActivity : FragmentActivity() {
         private const val BACKGROUND_UPDATE_DELAY_MILLIS = 300L
         private const val BACKGROUND_RESOURCE_ID = R.drawable.image_placeholder
     }
+
+    @Inject
+    lateinit var loaderUseCase: LoaderUseCase
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -80,6 +86,7 @@ class MainActivity : FragmentActivity() {
         }
 
         listenVM()
+        setupLoading()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -158,5 +165,11 @@ class MainActivity : FragmentActivity() {
         val drawable =
             ResourcesCompat.getDrawable(resources, BACKGROUND_RESOURCE_ID, null)
         backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
+    }
+
+    private fun setupLoading() {
+        loaderUseCase.loadingStatus.observe(this) {
+            binding.spinKit.isVisible = it
+        }
     }
 }

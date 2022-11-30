@@ -56,7 +56,8 @@ class PlayerFragment : VideoSupportFragment() {
         private const val MEDIA_SESSION_TAG = "MEDIA_SESSION_TAG"
     }
 
-    private lateinit var videoMedia: VideoMedia
+    val videoMedia: VideoMedia
+        get() = viewModel.videoMedia
 
     private var exoPlayer: ExoPlayer? = null
     private val viewModel: PlayerViewModel by viewModels()
@@ -85,6 +86,8 @@ class PlayerFragment : VideoSupportFragment() {
                 is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
                 is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
+                    viewModel.saveVideo(controlGlue.currentPosition)
+
                     findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
                             state.videoMedia,
@@ -110,7 +113,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        videoMedia = PlayerFragmentArgs.fromBundle(requireArguments()).videoMedia
+        viewModel.videoMedia = PlayerFragmentArgs.fromBundle(requireArguments()).videoMedia
         glide = Glide.with(requireContext())
 
         classPresenterSelector = ClassPresenterSelector()
@@ -297,7 +300,7 @@ class PlayerFragment : VideoSupportFragment() {
         // Updating the fragment's videoMedia is required
         // in playing the previous/next episode's or movie's
         // connected and related videos
-        this.videoMedia = videoMedia
+        viewModel.videoMedia = videoMedia
         viewModel.setEpisodeNumbers(videoMedia.episodeNumbers)
 
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())

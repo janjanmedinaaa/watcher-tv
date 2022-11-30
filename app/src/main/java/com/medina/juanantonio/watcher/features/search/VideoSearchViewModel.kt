@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository.Companion.DEVELOPER_KEYWORD
 import com.medina.juanantonio.watcher.shared.utils.Event
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class VideoSearchViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
     private val mediaRepository: IMediaRepository,
-    private val updateRepository: IUpdateRepository
+    private val updateRepository: IUpdateRepository,
+    private val loaderUseCase: LoaderUseCase
 ) : ViewModel() {
 
     val searchResults = MutableLiveData<Event<List<Video>>>()
@@ -70,6 +72,7 @@ class VideoSearchViewModel @Inject constructor(
     fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
@@ -81,6 +84,7 @@ class VideoSearchViewModel @Inject constructor(
                 }
                 this@VideoSearchViewModel.videoMedia.value = Event(it)
             }
+            loaderUseCase.hide()
         }
     }
 
@@ -98,10 +102,12 @@ class VideoSearchViewModel @Inject constructor(
     private fun getEpisodeList(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
+            loaderUseCase.show()
             val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
                 this@VideoSearchViewModel.episodeList.value = Event(it)
             }
+            loaderUseCase.hide()
         }
     }
 
