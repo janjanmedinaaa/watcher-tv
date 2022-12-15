@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.features.search
 
 import android.os.Bundle
+import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
@@ -104,5 +105,20 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
                 VideoSearchFragmentDirections.actionVideoSearchFragmentToHomeFragment(it)
             )
         }
+
+        activityViewModel.onKeyDown.observeEvent(viewLifecycleOwner) {
+            if (it != KEYCODE_DPAD_UP) return@observeEvent
+            focusSearchEditText()
+        }
+    }
+
+    private fun focusSearchEditText() {
+        val rootView = view ?: return
+
+        val searchFrame = rootView.findViewById<BrowseFrameLayout>(R.id.lb_search_frame)
+        val searchBar = searchFrame.findViewById<SearchBar>(R.id.lb_search_bar)
+        val searchEditText = searchBar.findViewById<SearchEditText>(R.id.lb_search_text_editor)
+
+        if (!searchEditText.hasFocus()) searchEditText.requestFocus()
     }
 }

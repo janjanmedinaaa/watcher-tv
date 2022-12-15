@@ -97,6 +97,7 @@ class MainActivity : FragmentActivity() {
         return if (event.flags and KeyEvent.FLAG_LONG_PRESS == KeyEvent.FLAG_LONG_PRESS) {
             true
         } else {
+            viewModel.setKeyDown(keyCode)
             super.onKeyDown(keyCode, event)
         }
     }

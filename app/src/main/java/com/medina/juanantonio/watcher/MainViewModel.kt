@@ -13,6 +13,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
     val requestPermissions = MutableLiveData<Event<Unit>>()
     val startDownload = MutableLiveData<Event<Boolean>>()
 
+    private val _onKeyDown = MutableLiveData<Event<Int>>()
+    val onKeyDown: LiveData<Event<Int>>
+        get() = _onKeyDown
+
     private val _backgroundImageUrl = MutableLiveData<String?>()
     val backgroundImageUrl: LiveData<String?>
         get() = _backgroundImageUrl
@@ -43,5 +47,9 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun startDownload(permissionGranted: Boolean) {
         startDownload.value = Event(permissionGranted)
+    }
+
+    fun setKeyDown(keyCode: Int) {
+        _onKeyDown.value = Event(keyCode)
     }
 }
