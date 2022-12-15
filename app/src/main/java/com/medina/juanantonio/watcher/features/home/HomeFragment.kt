@@ -35,14 +35,14 @@ class HomeFragment : BrowseSupportFragment() {
 
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
 
-    private var episodeList: VideoGroup? = null
+    private var selectedVideoGroup: VideoGroup? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         headersState = HEADERS_DISABLED
 
-        episodeList = HomeFragmentArgs.fromBundle(requireArguments()).episodeList
+        selectedVideoGroup = HomeFragmentArgs.fromBundle(requireArguments()).selectedVideoGroup
         glide = Glide.with(requireContext())
         contentAdapter = ContentAdapter(glide)
 
@@ -60,16 +60,19 @@ class HomeFragment : BrowseSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
-            if (item.isMovie) viewModel.getVideoMedia(item)
-            else viewModel.handleSeries(item)
+            when {
+                item.isAlbum -> viewModel.getAlbumDetails(item)
+                item.isMovie -> viewModel.getVideoMedia(item)
+                else -> viewModel.handleSeries(item)
+            }
         }
 
         setOnItemViewSelectedListener { _, item, _, row ->
             if (item !is Video) return@setOnItemViewSelectedListener
             val isLastItem = contentAdapter.size() == contentAdapter.indexOf(row) + 1
-            val isEpisodeList = episodeList != null
+            val isSelectedVideos = selectedVideoGroup != null
 
-            if (isLastItem && !isEpisodeList) viewModel.addNewContent()
+            if (isLastItem && !isSelectedVideos) viewModel.addNewContent()
             activityViewModel.setBackgroundImage(item.imageUrl)
         }
 
@@ -95,7 +98,7 @@ class HomeFragment : BrowseSupportFragment() {
     override fun onResume() {
         super.onResume()
 
-        viewModel.setupVideoList(episodeList)
+        viewModel.setupVideoList(selectedVideoGroup)
         activityViewModel.resetBackgroundImage()
     }
 
@@ -125,7 +128,7 @@ class HomeFragment : BrowseSupportFragment() {
             )
         }
 
-        viewModel.episodeList.observeEvent(viewLifecycleOwner) {
+        viewModel.selectedVideoGroup.observeEvent(viewLifecycleOwner) {
             findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentSelf(it)
             )

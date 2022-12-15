@@ -40,7 +40,11 @@ class ContentRepository(
 
         return if (result is Result.Success) {
             val filteredVideos = result.data?.data?.recommendItems?.filter {
-                it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM
+                val areContentsValid =
+                    it.recommendContentVOList.all { content -> content.title.isNotBlank() }
+
+                it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM ||
+                        (it.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP && areContentsValid)
             }
 
             val listVideoGroup = filteredVideos?.map {
@@ -48,12 +52,45 @@ class ContentRepository(
                     category = it.homeSectionName,
                     videoList = it.recommendContentVOList.map { videoItem ->
                         Video(videoItem)
-                    }
+                    },
+                    contentType = getVideoGroupContentType(it)
                 )
             }
 
             homeContentList.add(listVideoGroup ?: emptyList())
             listVideoGroup
+        } else null
+    }
+
+    private fun getVideoGroupContentType(bean: HomePageBean): VideoGroup.ContentType {
+        val areContentsValid =
+            bean.recommendContentVOList.all { content -> content.title.isNotBlank() }
+
+        return when {
+            bean.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM -> {
+                VideoGroup.ContentType.VIDEOS
+            }
+            bean.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP
+                    && areContentsValid -> {
+                VideoGroup.ContentType.PERSONS
+            }
+            else -> VideoGroup.ContentType.VIDEOS
+        }
+    }
+
+    override suspend fun getAlbumDetails(id: Int): VideoGroup? {
+        val result = remoteSource.getAlbumDetails(id = id)
+
+        return if (result is Result.Success) {
+            val resultData = result.data?.data
+
+            VideoGroup(
+                category = resultData?.name ?: "",
+                videoList = resultData?.content?.map { videoItem ->
+                    Video(videoItem)
+                } ?: emptyList(),
+                contentType = VideoGroup.ContentType.VIDEOS
+            )
         } else null
     }
 
@@ -86,6 +123,7 @@ interface IContentRepository {
     suspend fun setupHomePage(startingPage: Int = 0)
     fun getHomePage(): List<VideoGroup>
     fun clearHomePage()
+    suspend fun getAlbumDetails(id: Int): VideoGroup?
 
     suspend fun searchByKeyword(keyword: String): List<Video>?
     suspend fun getOnGoingVideos(): List<Video>

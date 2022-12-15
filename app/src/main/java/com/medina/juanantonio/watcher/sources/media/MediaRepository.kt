@@ -53,7 +53,8 @@ class MediaRepository(
                 category = videoDetails.name,
                 videoList = videoDetails.episodeVo.map { episodeBean ->
                     Video(video, episodeBean, videoDetails.episodeVo.size, videoDetails.score)
-                }
+                },
+                contentType = VideoGroup.ContentType.VIDEOS
             )
         } else null
     }

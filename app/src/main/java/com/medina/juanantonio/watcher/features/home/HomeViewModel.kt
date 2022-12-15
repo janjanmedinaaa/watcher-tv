@@ -25,39 +25,45 @@ class HomeViewModel @Inject constructor(
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
     val videoMedia = MutableLiveData<Event<VideoMedia>>()
-    val episodeList = MutableLiveData<Event<VideoGroup>>()
+    val selectedVideoGroup = MutableLiveData<Event<VideoGroup>>()
     val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
     val episodeToAutoPlay = MutableLiveData<Event<Video>>()
 
-    private var displaysEpisodes = false
+    private var isDisplayingEpisodes = false
     var contentLoaded = false
 
     private var job: Job? = null
 
-    fun setupVideoList(episodeList: VideoGroup?) {
+    fun setupVideoList(videoGroup: VideoGroup?) {
         if (contentLoaded) {
-            if (episodeList == null) getOnGoingVideoGroup()
+            if (videoGroup == null) getOnGoingVideoGroup()
             return
         }
         contentLoaded = true
 
         viewModelScope.launch {
-            if (episodeList != null) {
-                displaysEpisodes = true
-                contentList.value = Event(listOf(episodeList))
+            if (videoGroup != null) {
+                val isSeries = videoGroup.videoList.all { !it.isMovie }
 
-                // 1. Gets a Content id of the Series
-                episodeList.videoList.firstOrNull()?.contentId?.let { seriesId ->
-                    // 2. Check if there is an on going playing episode
-                    mediaRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
-                        // 3. If there is, get the specific episode to play
-                        episodeList.videoList.firstOrNull {
-                            it.episodeNumber == onGoingVideo.episodeNumber
-                        }?.let { episodeToPlay ->
-                            delay(250)
-                            episodeToAutoPlay.value = Event(episodeToPlay)
+                if (isSeries) {
+                    isDisplayingEpisodes = true
+                    contentList.value = Event(listOf(videoGroup))
+
+                    // 1. Gets a Content id of the Series
+                    videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
+                        // 2. Check if there is an on going playing episode
+                        mediaRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                            // 3. If there is, get the specific episode to play
+                            videoGroup.videoList.firstOrNull {
+                                it.episodeNumber == onGoingVideo.episodeNumber
+                            }?.let { episodeToPlay ->
+                                delay(250)
+                                episodeToAutoPlay.value = Event(episodeToPlay)
+                            }
                         }
                     }
+                } else {
+                    contentList.value = Event(listOf(videoGroup))
                 }
             } else {
                 contentList.value = Event(contentRepository.getHomePage())
@@ -90,21 +96,36 @@ class HomeViewModel @Inject constructor(
     private fun getOnGoingVideoGroup() {
         viewModelScope.launch {
             val onGoingVideos = contentRepository.getOnGoingVideos()
+            val latestOnGoingVideos = onGoingVideos.map {
+                it.episodeNumber = 0
+                it
+            }.sortedByDescending { it.lastWatchTime }.take(10)
+
             val onGoingVideoGroup =
                 VideoGroup(
-                    "Continue Watching",
-                    onGoingVideos.map {
-                        it.episodeNumber = 0
-                        it
-                    }.sortedByDescending { it.lastWatchTime }.take(10)
+                    category = "Continue Watching",
+                    videoList = latestOnGoingVideos,
+                    contentType = VideoGroup.ContentType.VIDEOS
                 )
 
             onGoingVideosList.value = Event(onGoingVideoGroup)
         }
     }
 
+    fun getAlbumDetails(video: Video) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            loaderUseCase.show()
+            val albumDetails = contentRepository.getAlbumDetails(video.contentId)
+            albumDetails?.let {
+                this@HomeViewModel.selectedVideoGroup.value = Event(it)
+            }
+            loaderUseCase.hide()
+        }
+    }
+
     fun handleSeries(video: Video) {
-        if (displaysEpisodes) getVideoMedia(video)
+        if (isDisplayingEpisodes) getVideoMedia(video)
         else getEpisodeList(video)
     }
 
@@ -118,7 +139,7 @@ class HomeViewModel @Inject constructor(
             loaderUseCase.show()
             val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
-                this@HomeViewModel.episodeList.value = Event(it)
+                this@HomeViewModel.selectedVideoGroup.value = Event(it)
             }
             loaderUseCase.hide()
         }
