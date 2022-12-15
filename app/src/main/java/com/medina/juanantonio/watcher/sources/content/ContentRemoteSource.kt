@@ -6,6 +6,7 @@ import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.wrapWithResult
 import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
+import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
@@ -22,6 +23,23 @@ class ContentRemoteSource(
         return try {
             val response = withContext(Dispatchers.IO) {
                 apiService.getHomePage(page)
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
+
+    override suspend fun getAlbumDetails(
+        page: Int,
+        size: Int,
+        id: Int
+    ): Result<GetAlbumDetailsResponse> {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                apiService.getAlbumDetails(page, size, id)
             }
             response.wrapWithResult()
         } catch (exception: CancellationException) {
@@ -72,6 +90,12 @@ class ContentRemoteSource(
 
 interface IContentRemoteSource {
     suspend fun getHomePage(page: Int): Result<GetHomePageResponse>
+    suspend fun getAlbumDetails(
+        page: Int = 0,
+        size: Int = 50,
+        id: Int
+    ): Result<GetAlbumDetailsResponse>
+
     suspend fun searchByKeyword(
         searchKeyword: String,
         size: Int = 50,

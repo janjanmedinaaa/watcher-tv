@@ -291,8 +291,9 @@ class PlayerFragment : VideoSupportFragment() {
                 }
             }
 
-            // Set Caption On by default
+            // Set Actions that are On by default
             onActionClicked(closedCaptioningAction)
+            onActionClicked(bedtimeModeAction)
         }
     }
 

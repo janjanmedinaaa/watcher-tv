@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.medina.juanantonio.watcher.network.models.home.AlbumItemBean
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
@@ -14,6 +15,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @Entity
 data class Video(
+    // Category Ids are null for non-video contents (Album Groups, People, Banners)
     val category: Int?,
     @PrimaryKey val contentId: Int,
     val imageUrl: String,
@@ -37,6 +39,10 @@ data class Video(
     val isMovie: Boolean
         get() = category == 0
 
+    @get:Ignore
+    val isAlbum: Boolean
+        get() = category == null
+
     @Ignore
     var showScore = true
         get() = score != 0.0 && field
@@ -47,7 +53,7 @@ data class Video(
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.category,
-        contentId = bean.id,
+        contentId = if (bean.category == null) bean.getIdFromJumpAddress() else bean.id,
         imageUrl = bean.imageUrl,
         title = bean.title
     ) {
@@ -96,6 +102,16 @@ data class Video(
         imageUrl = bean.cover,
         title = bean.title
     )
+
+    // Album item
+    constructor(bean: AlbumItemBean) : this(
+        category = bean.domainType,
+        contentId = bean.contentId.toInt(),
+        imageUrl = bean.image,
+        title = bean.name
+    ) {
+        score = bean.score
+    }
 
     /**
      * Deep copy Video object

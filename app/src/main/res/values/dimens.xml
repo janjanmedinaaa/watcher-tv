@@ -4,6 +4,10 @@
     <dimen name="image_card_width">144dp</dimen>
     <dimen name="image_card_height">203dp</dimen>
 
+    <dimen name="person_image_card_length">174dp</dimen>
+    <dimen name="person_image_card_radius">60dp</dimen>
+    <dimen name="person_image_card_size">120dp</dimen>
+
     <!-- Text sizes. -->
     <dimen name="text_size_h3">16sp</dimen>
 
@@ -27,7 +31,9 @@
     <dimen name="dp_4">4dp</dimen>
     <dimen name="dp_6">6dp</dimen>
     <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
 
     <dimen name="sp_12">12sp</dimen>
     <dimen name="sp_16">16sp</dimen>
+    <dimen name="sp_18">18sp</dimen>
 </resources>

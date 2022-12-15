@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.network
 
+import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
@@ -18,6 +19,13 @@ interface ApiService {
     suspend fun getHomePage(
         @Query("page") page: Int
     ): Response<GetHomePageResponse>
+
+    @GET("cms/app/album/detail")
+    suspend fun getAlbumDetails(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Query("id") id: Int,
+    ): Response<GetAlbumDetailsResponse>
 
     @GET("cms/app/movieDrama/get")
     suspend fun getVideoDetails(

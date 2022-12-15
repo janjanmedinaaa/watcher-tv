@@ -1,5 +1,7 @@
 package com.medina.juanantonio.watcher.network.models.home
 
+import android.net.Uri
+
 data class HomePageBean(
     val bannerProportion: Double,
     val homeSectionName: String,
@@ -11,12 +13,23 @@ data class HomePageBean(
         val category: Int?,
         val id: Int,
         val imageUrl: String,
-        val jumpAddress: String,
+        private val jumpAddress: String,
         val needLogin: Boolean,
         val score: Double,
         val title: String,
         val resourceNum: Int?
-    )
+    ) {
+
+        fun getIdFromJumpAddress(): Int {
+            return try {
+                val uri = Uri.parse(jumpAddress)
+                val idParam = uri.getQueryParameter("id")
+                idParam?.toInt() ?: -1
+            } catch (e: Exception) {
+                -1
+            }
+        }
+    }
 
     enum class SectionType {
         BANNER,
