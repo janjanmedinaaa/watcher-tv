@@ -1,6 +1,8 @@
 package com.medina.juanantonio.watcher.di
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.provider.Settings
 import androidx.room.Room
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
@@ -32,6 +34,7 @@ import javax.inject.Singleton
 @Module
 class AppModule {
 
+    @SuppressLint("HardwareIds")
     @Provides
     @Singleton
     fun provideApiService(
@@ -42,13 +45,19 @@ class AppModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        val deviceId = Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+
         val requiredHeaderInterceptor = Interceptor { chain ->
             val requestBuilder =
                 chain.request()
                     .newBuilder()
                     .addHeader("lang", "en")
-                    .addHeader("versioncode", "11")
-                    .addHeader("clienttype", "ios_jike_default")
+                    .addHeader("versioncode", "32")
+                    .addHeader("clienttype", "android_tem3")
+                    .addHeader("deviceid", deviceId)
 
             chain.proceed(requestBuilder.build())
         }
@@ -116,9 +125,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideVideoDatabase(
-        watcherDb: WatcherDb
-    ): IVideoDatabase {
+    fun provideVideoDatabase(watcherDb: WatcherDb): IVideoDatabase {
         return VideoDatabase(watcherDb)
     }
 
