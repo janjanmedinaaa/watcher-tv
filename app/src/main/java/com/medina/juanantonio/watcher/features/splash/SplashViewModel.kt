@@ -34,7 +34,7 @@ class SplashViewModel @Inject constructor(
             contentRepository.clearHomePage()
 
             val requestList = arrayListOf<Deferred<Any?>>(
-                async { contentRepository.setupHomePage(startingPage = 0) }
+                async { contentRepository.setupNavigationBar() }
             )
 
             if (updateRepository.shouldGetUpdate()) {
@@ -57,8 +57,13 @@ class SplashViewModel @Inject constructor(
     }
 
     fun navigateToHomeScreen() {
-        assetToDownload = null
-        navigateToHomeScreen.value = Event(Unit)
+        viewModelScope.launch {
+            val homePageId = contentRepository.navigationItems.firstOrNull()?.contentId
+            contentRepository.setupHomePage(homePageId)
+
+            assetToDownload = null
+            navigateToHomeScreen.value = Event(Unit)
+        }
     }
 
     fun saveLastUpdateReminder() {

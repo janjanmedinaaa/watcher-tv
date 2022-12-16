@@ -4,6 +4,7 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.sources.media.IVideoDatabase
 
 class ContentRepository(
@@ -11,19 +12,48 @@ class ContentRepository(
     private val database: IVideoDatabase
 ) : IContentRepository {
 
-    private val homeContentList: ArrayList<List<VideoGroup>> = arrayListOf()
+    override val navigationItems: ArrayList<Video> = arrayListOf()
+    private var currentNavigationPage = -1
 
+    private val homeContentMap: MutableMap<Int, ArrayList<List<VideoGroup>>> = mutableMapOf()
     private var currentPage = 0
 
-    override suspend fun setupHomePage(startingPage: Int) {
-        val result = getHomePage(startingPage)
+    override suspend fun setupNavigationBar() {
+        val result = remoteSource.getNavigationBar()
+
+        if (result is Result.Success) {
+            val sortedItems =
+                result.data?.data?.navigationBarItemList?.sortedBy { it.sequence }
+            val filteredItems = sortedItems?.filter {
+                it.redirectContentType == NavigationItemBean.RedirectContentType.HOME
+            }
+
+            navigationItems.apply {
+                clear()
+                addAll(filteredItems?.map { Video(it) } ?: emptyList())
+            }
+        }
+    }
+
+    override fun resetPage() {
+        currentPage = 0
+    }
+
+    override suspend fun setupHomePage(navigationId: Int?, startingPage: Int) {
+        if (startingPage == 0 && homeContentMap[navigationId] != null) {
+            currentNavigationPage = navigationId ?: -1
+            return
+        }
+
+        val result = getHomePage(navigationId, startingPage)
         if (!result.isNullOrEmpty()) {
-            setupHomePage(startingPage + 1)
+            currentNavigationPage = navigationId ?: -1
+            setupHomePage(navigationId, startingPage + 1)
         }
     }
 
     override fun getHomePage(): List<VideoGroup> {
-        val page = homeContentList.getOrNull(currentPage)
+        val page = homeContentMap[currentNavigationPage]?.getOrNull(currentPage)
         return if (!page.isNullOrEmpty()) {
             currentPage++
             page
@@ -31,12 +61,12 @@ class ContentRepository(
     }
 
     override fun clearHomePage() {
-        currentPage = 0
-        homeContentList.clear()
+        resetPage()
+        homeContentMap.clear()
     }
 
-    private suspend fun getHomePage(page: Int): List<VideoGroup>? {
-        val result = remoteSource.getHomePage(page)
+    private suspend fun getHomePage(navigationId: Int?, page: Int): List<VideoGroup>? {
+        val result = remoteSource.getHomePage(page, navigationId)
 
         return if (result is Result.Success) {
             val filteredVideos = result.data?.data?.recommendItems?.filter {
@@ -57,7 +87,14 @@ class ContentRepository(
                 )
             }
 
-            homeContentList.add(listVideoGroup ?: emptyList())
+            val mapId = navigationId ?: -1
+            val mapItem = listVideoGroup ?: emptyList()
+            if (homeContentMap[mapId] == null) {
+                homeContentMap[mapId] = arrayListOf(mapItem)
+            } else {
+                homeContentMap[mapId]?.add(mapItem)
+            }
+
             listVideoGroup
         } else null
     }
@@ -72,7 +109,7 @@ class ContentRepository(
             }
             bean.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP
                     && areContentsValid -> {
-                VideoGroup.ContentType.PERSONS
+                VideoGroup.ContentType.ARTISTS
             }
             else -> VideoGroup.ContentType.VIDEOS
         }
@@ -120,7 +157,11 @@ class ContentRepository(
 }
 
 interface IContentRepository {
-    suspend fun setupHomePage(startingPage: Int = 0)
+    val navigationItems: List<Video>
+
+    suspend fun setupNavigationBar()
+    fun resetPage()
+    suspend fun setupHomePage(navigationId: Int?, startingPage: Int = 0)
     fun getHomePage(): List<VideoGroup>
     fun clearHomePage()
     suspend fun getAlbumDetails(id: Int): VideoGroup?

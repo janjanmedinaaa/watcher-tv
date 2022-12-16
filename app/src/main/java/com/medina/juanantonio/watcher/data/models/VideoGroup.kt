@@ -15,6 +15,7 @@ class VideoGroup(
 
     enum class ContentType {
         VIDEOS,
-        PERSONS
+        ARTISTS,
+        NAVIGATION
     }
 }
