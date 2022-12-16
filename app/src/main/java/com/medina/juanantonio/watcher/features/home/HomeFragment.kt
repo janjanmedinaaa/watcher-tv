@@ -73,7 +73,7 @@ class HomeFragment : BrowseSupportFragment() {
             val isSelectedVideos = selectedVideoGroup != null
 
             if (isLastItem && !isSelectedVideos) viewModel.addNewContent()
-            activityViewModel.setBackgroundImage(item.imageUrl)
+            if (!item.isAlbum) activityViewModel.setBackgroundImage(item.imageUrl)
         }
 
         setOnSearchClickedListener {
