@@ -2,6 +2,7 @@ package com.medina.juanantonio.watcher.network
 
 import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
+import com.medina.juanantonio.watcher.network.models.home.GetNavigationBarResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
@@ -15,9 +16,13 @@ import retrofit2.http.Query
 
 interface ApiService {
 
+    @GET("cms/app/homePage/navigationBar")
+    suspend fun getNavigationBar(): Response<GetNavigationBarResponse>
+
     @GET("cms/app/homePage/getHome")
     suspend fun getHomePage(
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("navigationId") navigationId: Int?
     ): Response<GetHomePageResponse>
 
     @GET("cms/app/album/detail")
@@ -26,6 +31,14 @@ interface ApiService {
         @Query("size") size: Int,
         @Query("id") id: Int,
     ): Response<GetAlbumDetailsResponse>
+
+    @POST("cms/app/search/v1/searchWithKeyWord")
+    suspend fun searchByKeyword(
+        @Body request: SearchByKeywordRequest
+    ): Response<SearchByKeywordResponse>
+
+    @GET("cms/app/search/v1/searchLeaderboard")
+    suspend fun getSearchLeaderboard(): Response<GetSearchLeaderboardResponse>
 
     @GET("cms/app/movieDrama/get")
     suspend fun getVideoDetails(
@@ -40,12 +53,4 @@ interface ApiService {
         @Query("episodeId") episodeId: Int,
         @Query("definition") definition: String
     ): Response<GetVideoResourceResponse>
-
-    @POST("cms/app/search/v1/searchWithKeyWord")
-    suspend fun searchByKeyword(
-        @Body request: SearchByKeywordRequest
-    ): Response<SearchByKeywordResponse>
-
-    @GET("cms/app/search/v1/searchLeaderboard")
-    suspend fun getSearchLeaderboard(): Response<GetSearchLeaderboardResponse>
 }

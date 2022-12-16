@@ -6,10 +6,12 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.AlbumItemBean
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
+import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.network.models.search.LeaderboardBean
 import com.medina.juanantonio.watcher.network.models.search.SearchResultBean
+import com.medina.juanantonio.watcher.shared.Constants.ImageURL.NavigationBackgroundURL
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -22,6 +24,10 @@ data class Video(
     val title: String
 ) : Parcelable {
 
+    companion object {
+        const val NAVIGATION_CATEGORY_ID = -6969
+    }
+
     var episodeNumber: Int = 0
 
     var episodeCount: Int = 0
@@ -32,16 +38,22 @@ data class Video(
 
     var lastWatchTime: Long = System.currentTimeMillis()
 
-    @Ignore
-    var isSearchResult = false
-
     @get:Ignore
     val isMovie: Boolean
-        get() = category == 0
+        get() = categoryType == ItemCategory.MOVIE
 
     @get:Ignore
     val isAlbum: Boolean
-        get() = category == null
+        get() = categoryType == ItemCategory.ALBUM
+
+    @get:Ignore
+    val categoryType: ItemCategory
+        get() = when (category) {
+            NAVIGATION_CATEGORY_ID -> ItemCategory.NAVIGATION
+            0 -> ItemCategory.MOVIE
+            1 -> ItemCategory.SERIES
+            else -> ItemCategory.ALBUM
+        }
 
     @Ignore
     var showScore = true
@@ -81,9 +93,7 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
         title = bean.name
-    ) {
-        isSearchResult = true
-    }
+    )
 
     // Video Suggestion item
     constructor(videoSuggestion: VideoSuggestion) : this(
@@ -113,6 +123,14 @@ data class Video(
         score = bean.score
     }
 
+    // Navigation Items
+    constructor(bean: NavigationItemBean) : this(
+        category = NAVIGATION_CATEGORY_ID,
+        contentId = bean.id,
+        imageUrl = NavigationBackgroundURL,
+        title = bean.name
+    )
+
     /**
      * Deep copy Video object
      */
@@ -141,4 +159,11 @@ data class Video(
             Pair(firstWords, lastTwoWords)
         } else Pair(title, "")
     }
+}
+
+enum class ItemCategory {
+    NAVIGATION,
+    MOVIE,
+    SERIES,
+    ALBUM
 }

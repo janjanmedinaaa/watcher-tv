@@ -21,7 +21,6 @@
     <string name="error_title_with_video">Something terrible happened with %s</string>
 
     <!-- Custom List Titles -->
-    <string name="continue_watching">Continue Watching</string>
     <string name="related_videos">More like this</string>
     <string name="connected_videos">Collection</string>
     <string name="search_results">Search Results for %s</string>

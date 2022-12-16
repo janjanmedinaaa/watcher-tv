@@ -7,6 +7,8 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
+import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.CategoriesTitle
+import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
@@ -28,6 +30,7 @@ class HomeViewModel @Inject constructor(
     val selectedVideoGroup = MutableLiveData<Event<VideoGroup>>()
     val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
     val episodeToAutoPlay = MutableLiveData<Event<Video>>()
+    val removeNavigationContent = MutableLiveData<Event<Unit>>()
 
     private var isDisplayingEpisodes = false
     var contentLoaded = false
@@ -66,7 +69,16 @@ class HomeViewModel @Inject constructor(
                     contentList.value = Event(listOf(videoGroup))
                 }
             } else {
-                contentList.value = Event(contentRepository.getHomePage())
+                val navigationVideoGroupList = listOf(
+                    VideoGroup(
+                        category = CategoriesTitle,
+                        videoList = contentRepository.navigationItems,
+                        contentType = VideoGroup.ContentType.NAVIGATION
+                    )
+                )
+
+                contentList.value =
+                    Event(navigationVideoGroupList + contentRepository.getHomePage())
                 getOnGoingVideoGroup()
             }
         }
@@ -103,7 +115,7 @@ class HomeViewModel @Inject constructor(
 
             val onGoingVideoGroup =
                 VideoGroup(
-                    category = "Continue Watching",
+                    category = ContinueWatchingTitle,
                     videoList = latestOnGoingVideos,
                     contentType = VideoGroup.ContentType.VIDEOS
                 )
@@ -127,6 +139,22 @@ class HomeViewModel @Inject constructor(
     fun handleSeries(video: Video) {
         if (isDisplayingEpisodes) getVideoMedia(video)
         else getEpisodeList(video)
+    }
+
+    fun handleNavigationItem(video: Video) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            loaderUseCase.show()
+            contentRepository.setupHomePage(video.contentId)
+            contentRepository.resetPage()
+            removeNavigationContent()
+            addNewContent()
+            loaderUseCase.hide()
+        }
+    }
+
+    private fun removeNavigationContent() {
+        removeNavigationContent.value = Event(Unit)
     }
 
     fun addNewContent() {

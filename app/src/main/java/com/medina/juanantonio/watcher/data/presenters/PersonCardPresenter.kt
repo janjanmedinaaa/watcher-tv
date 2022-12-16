@@ -11,8 +11,6 @@ import com.medina.juanantonio.watcher.databinding.ViewPersonCardBinding
 
 class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
 
-    var viewHolder: ViewHolder? = null
-
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
         val binding = ViewPersonCardBinding.inflate(
@@ -27,10 +25,8 @@ class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
         checkNotNull(item)
         val video = item as Video
         val binding = ViewPersonCardBinding.bind(viewHolder.view)
-        this.viewHolder = viewHolder
 
-        val (title, _) = video.getSeriesTitleDescription()
-        binding.textviewTitle.text = title
+        binding.textviewTitle.text = video.title
 
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -41,7 +37,6 @@ class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
         val binding = ViewPersonCardBinding.bind(viewHolder.view)
-        this.viewHolder = null
         binding.imageviewPoster.setImageBitmap(null)
     }
 }

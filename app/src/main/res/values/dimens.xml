@@ -8,6 +8,8 @@
     <dimen name="person_image_card_radius">60dp</dimen>
     <dimen name="person_image_card_size">120dp</dimen>
 
+    <dimen name="navigation_image_card_height">44dp</dimen>
+
     <!-- Text sizes. -->
     <dimen name="text_size_h3">16sp</dimen>
 

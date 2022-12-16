@@ -17,9 +17,11 @@ import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
 import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.ItemCategory
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
+import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +38,10 @@ class HomeFragment : BrowseSupportFragment() {
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
 
     private var selectedVideoGroup: VideoGroup? = null
+
+    companion object {
+        private const val CONTINUE_WATCHING_POSITION = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,10 +66,11 @@ class HomeFragment : BrowseSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
-            when {
-                item.isAlbum -> viewModel.getAlbumDetails(item)
-                item.isMovie -> viewModel.getVideoMedia(item)
-                else -> viewModel.handleSeries(item)
+            when (item.categoryType) {
+                ItemCategory.NAVIGATION -> viewModel.handleNavigationItem(item)
+                ItemCategory.ALBUM -> viewModel.getAlbumDetails(item)
+                ItemCategory.MOVIE -> viewModel.getVideoMedia(item)
+                ItemCategory.SERIES -> viewModel.handleSeries(item)
             }
         }
 
@@ -135,18 +142,30 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         viewModel.onGoingVideosList.observeEvent(viewLifecycleOwner) { onGoingVideoGroup ->
-            if (contentAdapter.size() == 0) return@observeEvent
-            val firstRow = contentAdapter.get(0) as? ListRow
-            firstRow?.let { first ->
-                if (first.headerItem?.name == getString(R.string.continue_watching)) {
-                    if (onGoingVideoGroup.videoList.isEmpty())
-                        contentAdapter.removeItems(0, 1)
-                    else
-                        contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, true)
-                } else if (onGoingVideoGroup.videoList.isNotEmpty()) {
-                    contentAdapter.addVideoGroupOnStart(onGoingVideoGroup, false)
-                }
+            if (isContinueWatchingDisplayed()) {
+                if (onGoingVideoGroup.videoList.isEmpty())
+                    contentAdapter.removeItems(CONTINUE_WATCHING_POSITION, 1)
+                else
+                    contentAdapter.addVideoGroup(
+                        onGoingVideoGroup,
+                        true,
+                        position = CONTINUE_WATCHING_POSITION
+                    )
+            } else if (onGoingVideoGroup.videoList.isNotEmpty()) {
+                contentAdapter.addVideoGroup(
+                    onGoingVideoGroup,
+                    false,
+                    position = CONTINUE_WATCHING_POSITION
+                )
             }
+        }
+
+        viewModel.removeNavigationContent.observeEvent(viewLifecycleOwner) {
+            val itemCount = contentAdapter.size()
+            if (isContinueWatchingDisplayed())
+                contentAdapter.removeItems(CONTINUE_WATCHING_POSITION + 1, itemCount)
+            else
+                contentAdapter.removeItems(1, itemCount)
         }
     }
 
@@ -154,5 +173,11 @@ class HomeFragment : BrowseSupportFragment() {
         super.onDestroy()
         viewModel.contentLoaded = false
         activityViewModel.cancelBackgroundImage()
+    }
+
+    private fun isContinueWatchingDisplayed(): Boolean {
+        if (contentAdapter.size() <= 1) return false
+        val continueWatchingRow = contentAdapter.get(CONTINUE_WATCHING_POSITION) as? ListRow
+        return continueWatchingRow?.headerItem?.name == ContinueWatchingTitle
     }
 }

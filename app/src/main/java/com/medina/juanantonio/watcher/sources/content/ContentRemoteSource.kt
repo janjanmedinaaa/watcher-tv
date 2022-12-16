@@ -7,6 +7,7 @@ import com.medina.juanantonio.watcher.network.wrapWithResult
 import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
+import com.medina.juanantonio.watcher.network.models.home.GetNavigationBarResponse
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
@@ -19,10 +20,23 @@ class ContentRemoteSource(
     private val apiService: ApiService
 ) : BaseRemoteSource(context), IContentRemoteSource {
 
-    override suspend fun getHomePage(page: Int): Result<GetHomePageResponse> {
+    override suspend fun getNavigationBar(): Result<GetNavigationBarResponse> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                apiService.getHomePage(page)
+                apiService.getNavigationBar()
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
+
+    override suspend fun getHomePage(page: Int, navigationId: Int?): Result<GetHomePageResponse> {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                apiService.getHomePage(page, navigationId)
             }
             response.wrapWithResult()
         } catch (exception: CancellationException) {
@@ -89,7 +103,8 @@ class ContentRemoteSource(
 }
 
 interface IContentRemoteSource {
-    suspend fun getHomePage(page: Int): Result<GetHomePageResponse>
+    suspend fun getNavigationBar(): Result<GetNavigationBarResponse>
+    suspend fun getHomePage(page: Int, navigationId: Int? = null): Result<GetHomePageResponse>
     suspend fun getAlbumDetails(
         page: Int = 0,
         size: Int = 50,
