@@ -56,6 +56,9 @@ data class Video(
         }
 
     @Ignore
+    var isAlbumItem = false
+
+    @Ignore
     var showScore = true
         get() = score != 0.0 && field
 
@@ -120,7 +123,7 @@ data class Video(
         imageUrl = bean.image,
         title = bean.name
     ) {
-        score = bean.score
+        isAlbumItem = true
     }
 
     // Navigation Items
