@@ -74,7 +74,8 @@ class ContentRepository(
                     it.recommendContentVOList.all { content -> content.title.isNotBlank() }
 
                 it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM ||
-                        (it.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP && areContentsValid)
+                        (it.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP &&
+                                areContentsValid && it.bannerProportion == 1.0)
             }
 
             val listVideoGroup = filteredVideos?.map {
@@ -108,7 +109,7 @@ class ContentRepository(
                 VideoGroup.ContentType.VIDEOS
             }
             bean.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP
-                    && areContentsValid -> {
+                    && areContentsValid && bean.bannerProportion == 1.0 -> {
                 VideoGroup.ContentType.ARTISTS
             }
             else -> VideoGroup.ContentType.VIDEOS

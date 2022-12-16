@@ -46,9 +46,9 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (videoGroup != null) {
-                val isSeries = videoGroup.videoList.all { !it.isMovie }
+                val areAlbumItems = videoGroup.videoList.any { it.isAlbumItem }
 
-                if (isSeries) {
+                if (!areAlbumItems) {
                     isDisplayingEpisodes = true
                     contentList.value = Event(listOf(videoGroup))
 
