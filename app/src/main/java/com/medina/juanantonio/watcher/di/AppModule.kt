@@ -114,8 +114,8 @@ class AppModule {
                     .newBuilder()
                     .addHeader("Accept", "application/vnd.github+json")
                     .also {
-                        val tempApiKey = chain.request().header("temp_api_key")
-                        it.addHeader("Authorization", "Bearer $tempApiKey")
+                        val accessToken = UpdateRepository.temporaryAccessToken
+                        it.addHeader("Authorization", "Bearer $accessToken")
                     }
 
             chain.proceed(requestBuilder.build())

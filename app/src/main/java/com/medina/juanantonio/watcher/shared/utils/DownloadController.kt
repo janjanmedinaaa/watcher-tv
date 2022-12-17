@@ -12,6 +12,7 @@ import androidx.core.content.FileProvider
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
+import com.medina.juanantonio.watcher.github.sources.UpdateRepository
 import java.io.File
 
 /**
@@ -45,7 +46,10 @@ class DownloadController(
             setMimeType(MIME_TYPE)
 
             // This is required since we're requesting from a private repository
-            addRequestHeader("Authorization", "token ${asset.apiKey}")
+            addRequestHeader(
+                "Authorization",
+                "token ${UpdateRepository.temporaryAccessToken}"
+            )
             addRequestHeader("Accept", "application/octet-stream")
 
             setTitle(context.getString(R.string.title_file_download))

@@ -17,18 +17,11 @@ data class ReleaseBean(
         private val url: String
     ) {
 
-        var apiKey: String = ""
-            private set
-
         val downloadUrl: String
             get() = url
 
         fun isAPK(): Boolean =
             content_type == "application/vnd.android.package-archive"
-
-        fun setupApiKey(apiKey: String) {
-            this.apiKey = apiKey
-        }
     }
 
     fun isForDownload(): Boolean =
