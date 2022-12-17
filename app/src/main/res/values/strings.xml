@@ -47,4 +47,5 @@
     <string name="input_hint_phone_number">Phone Number</string>
     <string name="label_send_otp">Send OTP</string>
     <string name="input_hint_code">Code</string>
+    <string name="label_continue_without_logging_in">Continue without logging in</string>
 </resources>

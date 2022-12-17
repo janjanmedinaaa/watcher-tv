@@ -2,7 +2,6 @@ package com.medina.juanantonio.watcher.sources.auth
 
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.network.Result
-import com.medina.juanantonio.watcher.network.models.auth.*
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 
 class AuthRepository(
@@ -45,12 +44,8 @@ class AuthRepository(
         } else false
     }
 
-    override suspend fun getUserInfo(): GetUserInfoResponse.Data? {
-        val result = remoteSource.getUserInfo()
-
-        return if (result is Result.Success) {
-            result.data?.data
-        } else null
+    override suspend fun clearToken() {
+        dataStoreManager.putString(AUTH_TOKEN, "")
     }
 
     override suspend fun isUserAuthenticated(): Boolean {
@@ -62,7 +57,7 @@ interface IAuthRepository {
     suspend fun getOTPForLogin(phoneNumber: String): Boolean
     suspend fun login(phoneNumber: String, captcha: String): Boolean
     suspend fun refreshToken(): Boolean
-    suspend fun getUserInfo(): GetUserInfoResponse.Data?
+    suspend fun clearToken()
     suspend fun isUserAuthenticated(): Boolean
 
     companion object {

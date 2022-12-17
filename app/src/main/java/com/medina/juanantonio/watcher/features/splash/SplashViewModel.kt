@@ -117,6 +117,8 @@ class SplashViewModel @Inject constructor(
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch
+                } else {
+                    authRepository.clearToken()
                 }
             }
 
@@ -125,7 +127,7 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToHomeScreen(showLoading: Boolean = false) {
+    fun navigateToHomeScreen(showLoading: Boolean = false) {
         viewModelScope.launch {
             if (showLoading) loaderUseCase.show()
             val homePageId = contentRepository.navigationItems.firstOrNull()?.contentId

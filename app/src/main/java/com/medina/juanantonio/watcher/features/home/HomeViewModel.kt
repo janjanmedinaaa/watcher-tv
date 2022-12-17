@@ -11,6 +11,7 @@ import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.Categorie
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
     private val mediaRepository: IMediaRepository,
-    private val loaderUseCase: LoaderUseCase
+    private val loaderUseCase: LoaderUseCase,
+    private val watchHistoryUseCase: WatchHistoryUseCase
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -55,7 +57,7 @@ class HomeViewModel @Inject constructor(
                     // 1. Gets a Content id of the Series
                     videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
                         // 2. Check if there is an on going playing episode
-                        mediaRepository.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                        watchHistoryUseCase.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
                             // 3. If there is, get the specific episode to play
                             videoGroup.videoList.firstOrNull {
                                 it.episodeNumber == onGoingVideo.episodeNumber
@@ -107,7 +109,7 @@ class HomeViewModel @Inject constructor(
 
     private fun getOnGoingVideoGroup() {
         viewModelScope.launch {
-            val onGoingVideos = contentRepository.getOnGoingVideos()
+            val onGoingVideos = watchHistoryUseCase.getOnGoingVideos()
             val latestOnGoingVideos = onGoingVideos.map {
                 it.episodeNumber = 0
                 it

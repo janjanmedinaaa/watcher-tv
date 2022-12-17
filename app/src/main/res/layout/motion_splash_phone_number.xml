@@ -45,10 +45,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/dp_14"
+        android:alpha="1"
         android:background="@null"
         android:clickable="true"
         android:focusable="true"
-        android:alpha="1"
         android:fontFamily="sans-serif-condensed"
         android:text="@string/label_send_otp"
         android:textColor="@color/text_color_send_otp"
@@ -56,6 +56,7 @@
         app:layout_constraintBottom_toBottomOf="@id/edit_text_phone_number"
         app:layout_constraintEnd_toEndOf="@id/edit_text_phone_number"
         app:layout_constraintTop_toTopOf="@id/edit_text_phone_number" />
+
 
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/edit_text_code"
@@ -70,13 +71,29 @@
         android:padding="@dimen/dp_14"
         android:textSize="@dimen/sp_12"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/text_view_version"
+        app:layout_constraintBottom_toTopOf="@id/text_view_continue_without_login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/edit_text_phone_number"
         app:layout_constraintWidth_percent=".45" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_continue_without_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_4"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="sans-serif-condensed"
+        android:text="@string/label_continue_without_logging_in"
+        android:textColor="@color/text_color_send_otp"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintBottom_toTopOf="@id/text_view_version"
+        app:layout_constraintEnd_toEndOf="@id/image_view_logo"
+        app:layout_constraintStart_toStartOf="@id/image_view_logo"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_code" />
+
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -87,5 +104,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/image_view_logo"
         app:layout_constraintStart_toStartOf="@id/image_view_logo"
-        app:layout_constraintTop_toBottomOf="@id/edit_text_code" />
+        app:layout_constraintTop_toBottomOf="@id/text_view_continue_without_login" />
 </androidx.constraintlayout.widget.ConstraintLayout>

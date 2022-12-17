@@ -80,20 +80,6 @@ class AuthRemoteSource(
             getDefaultErrorResponse()
         }
     }
-
-    override suspend fun getUserInfo(): Result<GetUserInfoResponse> {
-        return try {
-            val response = withContext(Dispatchers.IO) {
-                apiService.getUserInfo()
-            }
-            response.wrapWithResult()
-        } catch (exception: CancellationException) {
-            Result.Cancelled()
-        } catch (exception: Exception) {
-            getDefaultErrorResponse()
-        }
-    }
-
 }
 
 interface IAuthRemoteSource {
@@ -113,5 +99,4 @@ interface IAuthRemoteSource {
     ): Result<LoginResponse>
 
     suspend fun refreshToken(): Result<RefreshTokenResponse>
-    suspend fun getUserInfo(): Result<GetUserInfoResponse>
 }

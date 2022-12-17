@@ -20,6 +20,7 @@ import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment
 import com.medina.juanantonio.watcher.shared.extensions.hideKeyboard
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
+import com.medina.juanantonio.watcher.shared.extensions.showKeyboard
 import com.medina.juanantonio.watcher.shared.utils.DownloadController
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
@@ -66,13 +67,31 @@ class SplashFragment : Fragment() {
             }
         }
 
+        listenViews()
         listenVM()
         listenActivityVM()
     }
 
+    private fun listenViews() {
+        binding.editTextPhoneNumber.setOnFocusChangeListener { view, onFocus ->
+            if (onFocus) view.showKeyboard()
+            else view.hideKeyboard()
+        }
+
+        binding.editTextCode.setOnFocusChangeListener { view, onFocus ->
+            if (onFocus) view.showKeyboard()
+            else view.hideKeyboard()
+        }
+    }
+
     private fun listenVM() {
         viewModel.otpCode.observe(viewLifecycleOwner) {
-            if (!it.isNullOrBlank() && it.length == 6) viewModel.login()
+            if (!it.isNullOrBlank() && it.length == 6) {
+                binding.editTextCode.clearFocus()
+                viewModel.login()
+            } else if (it.isNullOrBlank()) {
+                binding.editTextCode.requestFocus()
+            }
         }
 
         viewModel.navigateToHomeScreen.observeEvent(viewLifecycleOwner) {

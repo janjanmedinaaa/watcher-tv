@@ -22,6 +22,10 @@ import com.medina.juanantonio.watcher.sources.content.ContentRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.media.*
+import com.medina.juanantonio.watcher.sources.user.IUserRemoteSource
+import com.medina.juanantonio.watcher.sources.user.IUserRepository
+import com.medina.juanantonio.watcher.sources.user.UserRemoteSource
+import com.medina.juanantonio.watcher.sources.user.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -69,7 +73,9 @@ class AppModule {
                     .also {
                         runBlocking {
                             val authToken = dataStoreManager.getString(AUTH_TOKEN)
-                            it.addHeader("token", authToken)
+                            if (authToken.isNotBlank()) {
+                                it.addHeader("token", authToken)
+                            }
                         }
                     }
 
@@ -155,10 +161,9 @@ class AppModule {
     @Provides
     @Singleton
     fun provideContentRepository(
-        remoteSource: IContentRemoteSource,
-        database: IVideoDatabase
+        remoteSource: IContentRemoteSource
     ): IContentRepository {
-        return ContentRepository(remoteSource, database)
+        return ContentRepository(remoteSource)
     }
 
     @Provides
@@ -172,11 +177,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideMediaRepository(
-        remoteSource: IMediaRemoteSource,
-        database: IVideoDatabase
-    ): IMediaRepository {
-        return MediaRepository(remoteSource, database)
+    fun provideMediaRepository(remoteSource: IMediaRemoteSource): IMediaRepository {
+        return MediaRepository(remoteSource)
     }
 
     @Provides
@@ -223,5 +225,20 @@ class AppModule {
         dataStoreManager: IDataStoreManager
     ): IAuthRepository {
         return AuthRepository(remoteSource, dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IUserRemoteSource {
+        return UserRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(remoteSource: IUserRemoteSource): IUserRepository {
+        return UserRepository(remoteSource)
     }
 }

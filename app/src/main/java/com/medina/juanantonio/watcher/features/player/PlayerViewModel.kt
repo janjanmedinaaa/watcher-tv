@@ -8,6 +8,7 @@ import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository,
-    private val loaderUseCase: LoaderUseCase
+    private val loaderUseCase: LoaderUseCase,
+    private val watchHistoryUseCase: WatchHistoryUseCase
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
@@ -76,11 +78,12 @@ class PlayerViewModel @Inject constructor(
     fun saveVideo(progress: Long) {
         viewModelScope.launch {
             video?.let {
-                mediaRepository.addOnGoingVideo(
+                watchHistoryUseCase.addOnGoingVideo(
                     it.apply {
                         videoProgress = progress
                         lastWatchTime = System.currentTimeMillis()
-                    }
+                    },
+                    videoMedia
                 )
             }
         }
@@ -94,16 +97,9 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             video?.let {
                 if ((isLastEpisode && !it.isMovie) || it.isMovie) {
-                    mediaRepository.removeOnGoingVideo(it.contentId)
+                    watchHistoryUseCase.removeOnGoingVideo(it.contentId)
                     handleVideoEndNavigation.value = Event(Unit)
                 } else {
-                    mediaRepository.addOnGoingVideo(
-                        it.createNew(
-                            episodeNumber = getNewEpisodeNumber(it.episodeNumber, next = true),
-                            videoProgress = 0L,
-                            lastWatchTime = System.currentTimeMillis()
-                        )
-                    )
                     getNewVideoMedia(playNext = true)
                 }
             }
@@ -112,7 +108,7 @@ class PlayerViewModel @Inject constructor(
 
     fun getVideoDetails(id: Int) {
         viewModelScope.launch {
-            val onGoingVideo = mediaRepository.getOnGoingVideo(id)
+            val onGoingVideo = watchHistoryUseCase.getOnGoingVideo(id)
             val currentlyPlayingVideo = mediaRepository.currentlyPlayingVideo
 
             // Check if the user played a different episode in an on going series

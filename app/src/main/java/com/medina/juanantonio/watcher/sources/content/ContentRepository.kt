@@ -5,11 +5,9 @@ import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
-import com.medina.juanantonio.watcher.sources.media.IVideoDatabase
 
 class ContentRepository(
-    private val remoteSource: IContentRemoteSource,
-    private val database: IVideoDatabase
+    private val remoteSource: IContentRemoteSource
 ) : IContentRepository {
 
     override val navigationItems: ArrayList<Video> = arrayListOf()
@@ -143,10 +141,6 @@ class ContentRepository(
         } else null
     }
 
-    override suspend fun getOnGoingVideos(): List<Video> {
-        return database.getOnGoingVideos()
-    }
-
     override suspend fun getSearchLeaderboard(): List<Video>? {
         val result = remoteSource.getSearchLeaderboard()
 
@@ -168,6 +162,5 @@ interface IContentRepository {
     suspend fun getAlbumDetails(id: Int): VideoGroup?
 
     suspend fun searchByKeyword(keyword: String): List<Video>?
-    suspend fun getOnGoingVideos(): List<Video>
     suspend fun getSearchLeaderboard(): List<Video>?
 }

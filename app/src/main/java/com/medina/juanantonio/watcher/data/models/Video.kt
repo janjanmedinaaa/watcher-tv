@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.AlbumItemBean
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
+import com.medina.juanantonio.watcher.network.models.home.WatchHistoryBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.network.models.search.LeaderboardBean
@@ -133,6 +134,17 @@ data class Video(
         imageUrl = NavigationBackgroundURL,
         title = bean.name
     )
+
+    // Watch History Items
+    constructor(bean: WatchHistoryBean) : this(
+        category = bean.category,
+        contentId = bean.contentId.toInt(),
+        imageUrl = bean.verticalUrl,
+        title = bean.contentTitle
+    ) {
+        episodeNumber = bean.episodeNo
+        videoProgress = bean.progress * 1000L
+    }
 
     /**
      * Deep copy Video object

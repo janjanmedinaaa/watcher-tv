@@ -6,8 +6,7 @@ import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 
 class MediaRepository(
-    private val remoteSource: IMediaRemoteSource,
-    private val database: IVideoDatabase
+    private val remoteSource: IMediaRemoteSource
 ) : IMediaRepository {
 
     override var currentlyPlayingVideo: Video? = null
@@ -58,18 +57,6 @@ class MediaRepository(
             )
         } else null
     }
-
-    override suspend fun addOnGoingVideo(video: Video) {
-        database.addVideo(video)
-    }
-
-    override suspend fun getOnGoingVideo(id: Int): Video? {
-        return database.getVideo(id)
-    }
-
-    override suspend fun removeOnGoingVideo(id: Int) {
-        database.removeVideo(id)
-    }
 }
 
 interface IMediaRepository {
@@ -78,7 +65,4 @@ interface IMediaRepository {
 
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
-    suspend fun addOnGoingVideo(video: Video)
-    suspend fun getOnGoingVideo(id: Int): Video?
-    suspend fun removeOnGoingVideo(id: Int)
 }

@@ -73,9 +73,6 @@ class PlayerFragment : VideoSupportFragment() {
 
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
-            // While a video is playing, the screen should stay on and the device should not go to
-            // sleep. When in any other state such as if the user pauses the video, the app should
-            // not prevent the device from going to sleep.
             view?.keepScreenOn = state is VideoPlaybackState.Play
 
             when (state) {
@@ -83,7 +80,10 @@ class PlayerFragment : VideoSupportFragment() {
                     controlGlue.incrementAutoPlayedVideoCount()
                     setupVideoMedia(state.videoMedia)
                 }
-                is VideoPlaybackState.Prepare -> startPlaybackFromWatchProgress(state.startPosition)
+                is VideoPlaybackState.Prepare -> {
+                    startPlaybackFromWatchProgress(state.startPosition)
+                    viewModel.saveVideo(state.startPosition)
+                }
                 is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
                     viewModel.saveVideo(controlGlue.currentPosition)
@@ -182,10 +182,7 @@ class PlayerFragment : VideoSupportFragment() {
     private fun listenVM() {
         viewModel.savedProgress.observeEvent(viewLifecycleOwner) {
             viewModel.onStateChange(
-                VideoPlaybackState.Prepare(
-                    videoMedia,
-                    it
-                )
+                VideoPlaybackState.Prepare(videoMedia, it)
             )
         }
 
