@@ -12,6 +12,11 @@ import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
+import com.medina.juanantonio.watcher.sources.auth.AuthRemoteSource
+import com.medina.juanantonio.watcher.sources.auth.AuthRepository
+import com.medina.juanantonio.watcher.sources.auth.IAuthRemoteSource
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
@@ -22,6 +27,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,7 +44,8 @@ class AppModule {
     @Provides
     @Singleton
     fun provideApiService(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        dataStoreManager: IDataStoreManager
     ): ApiService {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.apply {
@@ -54,10 +61,17 @@ class AppModule {
             val requestBuilder =
                 chain.request()
                     .newBuilder()
+                    .addHeader("User-Agent", "Dart/2.16 (dart:io)")
                     .addHeader("lang", "en")
                     .addHeader("versioncode", "32")
                     .addHeader("clienttype", "android_tem3")
                     .addHeader("deviceid", deviceId)
+                    .also {
+                        runBlocking {
+                            val authToken = dataStoreManager.getString(AUTH_TOKEN)
+                            it.addHeader("token", authToken)
+                        }
+                    }
 
             chain.proceed(requestBuilder.build())
         }
@@ -191,5 +205,23 @@ class AppModule {
     ): IUpdateRepository {
         return if (BuildConfig.DEBUG) MockUpdateRepository()
         else UpdateRepository(context, remoteSource, dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IAuthRemoteSource {
+        return AuthRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        remoteSource: IAuthRemoteSource,
+        dataStoreManager: IDataStoreManager
+    ): IAuthRepository {
+        return AuthRepository(remoteSource, dataStoreManager)
     }
 }

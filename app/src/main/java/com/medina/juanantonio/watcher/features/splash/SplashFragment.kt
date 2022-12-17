@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -17,6 +18,7 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.databinding.FragmentSplashBinding
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment
+import com.medina.juanantonio.watcher.shared.extensions.hideKeyboard
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.DownloadController
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
@@ -37,7 +39,14 @@ class SplashFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentSplashBinding.inflate(inflater, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_splash,
+            container,
+            false
+        )
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.viewModel = viewModel
         return binding.root
     }
 
@@ -62,7 +71,12 @@ class SplashFragment : Fragment() {
     }
 
     private fun listenVM() {
+        viewModel.otpCode.observe(viewLifecycleOwner) {
+            if (!it.isNullOrBlank() && it.length == 6) viewModel.login()
+        }
+
         viewModel.navigateToHomeScreen.observeEvent(viewLifecycleOwner) {
+            binding.root.hideKeyboard()
             findNavController().safeNavigate(
                 SplashFragmentDirections.actionSplashFragmentToHomeFragment()
             )
@@ -82,12 +96,35 @@ class SplashFragment : Fragment() {
                 )
             )
         }
+
+        viewModel.splashState.observeEvent(viewLifecycleOwner) {
+            when (it) {
+                SplashState.INPUT_PHONE_NUMBER -> {
+                    binding.motionLayout.run {
+                        setTransition(R.id.transition_show_phone_number)
+                        transitionToEnd {
+                            binding.editTextPhoneNumber.requestFocus()
+                        }
+                    }
+                }
+                SplashState.INPUT_CODE -> {
+                    binding.editTextPhoneNumber.isEnabled = false
+                    binding.buttonSendOtp.isEnabled = false
+                    binding.motionLayout.run {
+                        setTransition(R.id.transition_show_code)
+                        transitionToEnd {
+                            binding.editTextCode.requestFocus()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun listenActivityVM() {
         mainViewModel.startDownload.observeEvent(viewLifecycleOwner) { permissionGranted ->
             if (permissionGranted) downloadLatestAPK()
-            viewModel.navigateToHomeScreen()
+            viewModel.checkAuthentication()
         }
     }
 

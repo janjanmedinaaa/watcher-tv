@@ -28,4 +28,6 @@
     <color name="high_score">@android:color/holo_green_light</color>
 
     <color name="enabled_multi_action">#90C9C3</color>
+
+    <color name="edit_text_login_border">#37363E</color>
 </resources>

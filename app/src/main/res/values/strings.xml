@@ -42,4 +42,9 @@
     <string name="control_action_increase_speed_disabled">Increase Speed</string>
     <string name="control_action_bedtime_mode_disabled">Enable Bedtime Mode</string>
     <string name="control_action_bedtime_mode_enabled">Disable Bedtime Mode</string>
+
+    <!-- Login Screen -->
+    <string name="input_hint_phone_number">Phone Number</string>
+    <string name="label_send_otp">Send OTP</string>
+    <string name="input_hint_code">Code</string>
 </resources>

@@ -34,6 +34,7 @@
     <dimen name="dp_6">6dp</dimen>
     <dimen name="dp_8">8dp</dimen>
     <dimen name="dp_12">12dp</dimen>
+    <dimen name="dp_14">14dp</dimen>
 
     <dimen name="sp_12">12sp</dimen>
     <dimen name="sp_16">16sp</dimen>
