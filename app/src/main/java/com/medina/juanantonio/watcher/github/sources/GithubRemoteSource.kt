@@ -18,10 +18,10 @@ class GithubRemoteSource(
     private val apiService: GithubApiService
 ) : BaseRemoteSource(context), IGithubRemoteSource {
 
-    override suspend fun getInstallations(apiKey: String): Result<List<InstallationBean>> {
+    override suspend fun getInstallations(): Result<List<InstallationBean>> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                apiService.getInstallations(apiKey)
+                apiService.getInstallations()
             }
             response.wrapWithResult()
         } catch (exception: CancellationException) {
@@ -33,12 +33,11 @@ class GithubRemoteSource(
 
     override suspend fun getAccessToken(
         installationId: Int,
-        request: GetAccessTokenRequest,
-        apiKey: String
+        request: GetAccessTokenRequest
     ): Result<AccessTokenBean> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                apiService.getAccessToken(installationId, request, apiKey)
+                apiService.getAccessToken(installationId, request)
             }
             response.wrapWithResult()
         } catch (exception: CancellationException) {
@@ -48,13 +47,10 @@ class GithubRemoteSource(
         }
     }
 
-    override suspend fun getReleases(
-        repositoryUrl: String,
-        apiKey: String
-    ): Result<List<ReleaseBean>> {
+    override suspend fun getReleases(repositoryUrl: String): Result<List<ReleaseBean>> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                apiService.getReleases(repositoryUrl, apiKey)
+                apiService.getReleases(repositoryUrl)
             }
             response.wrapWithResult()
         } catch (exception: CancellationException) {
@@ -66,15 +62,11 @@ class GithubRemoteSource(
 }
 
 interface IGithubRemoteSource {
-    suspend fun getInstallations(apiKey: String): Result<List<InstallationBean>>
+    suspend fun getInstallations(): Result<List<InstallationBean>>
     suspend fun getAccessToken(
         installationId: Int,
-        request: GetAccessTokenRequest,
-        apiKey: String
+        request: GetAccessTokenRequest
     ): Result<AccessTokenBean>
 
-    suspend fun getReleases(
-        repositoryUrl: String,
-        apiKey: String
-    ): Result<List<ReleaseBean>>
+    suspend fun getReleases(repositoryUrl: String): Result<List<ReleaseBean>>
 }

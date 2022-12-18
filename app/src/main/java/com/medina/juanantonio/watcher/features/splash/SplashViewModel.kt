@@ -1,30 +1,51 @@
 package com.medina.juanantonio.watcher.features.splash
 
 import android.os.Build
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.BuildConfig
+import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
-    private val updateRepository: IUpdateRepository
+    private val updateRepository: IUpdateRepository,
+    private val authRepository: IAuthRepository,
+    private val loaderUseCase: LoaderUseCase
 ) : ViewModel() {
 
     val navigateToHomeScreen = MutableLiveData<Event<Unit>>()
     val newerRelease = MutableLiveData<Event<ReleaseBean>>()
+    val splashState = MutableLiveData<Event<SplashState>>()
     var assetToDownload: ReleaseBean.Asset? = null
+
+    val phoneNumber = MutableLiveData<String>()
+    val otpCode = MutableLiveData<String>()
+    val isPhoneNumberValid = MediatorLiveData<Boolean>().apply {
+        addSource(phoneNumber) {
+            value = !it.isNullOrBlank() && it.length == 10
+        }
+    }
+
+    // Bug fix: Keyboard opens and closes quickly before navigating to the Home Screen
+    var preventKeyboardPopup = false
+
+    private var job: Job? = null
 
     private val isEmulator: Boolean
         get() = Build.FINGERPRINT.contains("generic")
@@ -51,26 +72,79 @@ class SplashViewModel @Inject constructor(
                 if (shouldDownloadRelease(releaseBean, developerModeEnabled)) {
                     assetToDownload = releaseBean.assets.first { it.isAPK() }
                     newerRelease.value = Event(releaseBean)
-                } else navigateToHomeScreen()
-            } ?: navigateToHomeScreen()
-        }
-    }
-
-    fun navigateToHomeScreen() {
-        viewModelScope.launch {
-            val homePageId = contentRepository.navigationItems.firstOrNull()?.contentId
-            contentRepository.setupHomePage(homePageId)
-
-            assetToDownload = null
-            navigateToHomeScreen.value = Event(Unit)
+                } else checkAuthentication()
+            } ?: checkAuthentication()
         }
     }
 
     fun saveLastUpdateReminder() {
         viewModelScope.launch {
             updateRepository.saveLastUpdateReminder()
-            navigateToHomeScreen()
+            checkAuthentication()
         }
+    }
+
+    fun requestOTP() {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            loaderUseCase.show()
+            val phoneNumber = phoneNumber.value ?: ""
+            val isOTPRequestSuccess = authRepository.getOTPForLogin(phoneNumber)
+            if (isOTPRequestSuccess) setSplashState(SplashState.INPUT_CODE)
+            loaderUseCase.hide()
+        }
+    }
+
+    fun login() {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            loaderUseCase.show()
+            val phoneNumber = phoneNumber.value ?: ""
+            val otpCode = otpCode.value ?: ""
+            val isLoginSuccessful = authRepository.login(phoneNumber, otpCode)
+
+            if (isLoginSuccessful) {
+                navigateToHomeScreen(showLoading = true)
+            } else {
+                this@SplashViewModel.otpCode.value = ""
+                loaderUseCase.hide()
+            }
+        }
+    }
+
+    fun checkAuthentication() {
+        viewModelScope.launch {
+            val isUserAuthenticated = authRepository.isUserAuthenticated()
+            if (isUserAuthenticated) {
+                val isRefreshSuccessful = authRepository.refreshToken()
+                if (isRefreshSuccessful) {
+                    navigateToHomeScreen()
+                    return@launch
+                } else {
+                    authRepository.clearToken()
+                }
+            }
+
+            delay(1000L)
+            setSplashState(SplashState.INPUT_PHONE_NUMBER)
+        }
+    }
+
+    fun navigateToHomeScreen(showLoading: Boolean = false) {
+        viewModelScope.launch {
+            if (showLoading) loaderUseCase.show()
+            val homePageId = contentRepository.navigationItems.firstOrNull()?.contentId
+            contentRepository.setupHomePage(homePageId)
+
+            assetToDownload = null
+            preventKeyboardPopup = true
+            navigateToHomeScreen.value = Event(Unit)
+            if (showLoading) loaderUseCase.hide()
+        }
+    }
+
+    private fun setSplashState(state: SplashState) {
+        splashState.value = Event(state)
     }
 
     private fun shouldDownloadRelease(
@@ -84,4 +158,9 @@ class SplashViewModel @Inject constructor(
                 && (!BuildConfig.DEBUG || isEmulator)
         }
     }
+}
+
+enum class SplashState {
+    INPUT_PHONE_NUMBER,
+    INPUT_CODE,
 }

@@ -15,7 +15,7 @@
         tools:src="@mipmap/ic_app_banner" />
 
     <View
-        android:layout_width="@dimen/dp_0"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/dp_0"
         android:alpha="0.7"
         android:background="@android:color/black"

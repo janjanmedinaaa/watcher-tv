@@ -14,6 +14,7 @@ data class GetVideoDetailsResponse(
         val episodeCount: Int?,
         val episodeVo: List<EpisodeBean>,
         val score: Double,
+        val seriesNo: Int?,
 
         // Movie/Series Suggestions
         val likeList: List<VideoSuggestion>,

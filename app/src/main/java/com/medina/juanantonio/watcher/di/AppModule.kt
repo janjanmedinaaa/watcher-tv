@@ -12,16 +12,26 @@ import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
+import com.medina.juanantonio.watcher.sources.auth.AuthRemoteSource
+import com.medina.juanantonio.watcher.sources.auth.AuthRepository
+import com.medina.juanantonio.watcher.sources.auth.IAuthRemoteSource
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.media.*
+import com.medina.juanantonio.watcher.sources.user.IUserRemoteSource
+import com.medina.juanantonio.watcher.sources.user.IUserRepository
+import com.medina.juanantonio.watcher.sources.user.UserRemoteSource
+import com.medina.juanantonio.watcher.sources.user.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,7 +48,8 @@ class AppModule {
     @Provides
     @Singleton
     fun provideApiService(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        dataStoreManager: IDataStoreManager
     ): ApiService {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.apply {
@@ -54,10 +65,19 @@ class AppModule {
             val requestBuilder =
                 chain.request()
                     .newBuilder()
+                    .addHeader("User-Agent", "Dart/2.16 (dart:io)")
                     .addHeader("lang", "en")
                     .addHeader("versioncode", "32")
                     .addHeader("clienttype", "android_tem3")
                     .addHeader("deviceid", deviceId)
+                    .also {
+                        runBlocking {
+                            val authToken = dataStoreManager.getString(AUTH_TOKEN)
+                            if (authToken.isNotBlank()) {
+                                it.addHeader("token", authToken)
+                            }
+                        }
+                    }
 
             chain.proceed(requestBuilder.build())
         }
@@ -94,8 +114,8 @@ class AppModule {
                     .newBuilder()
                     .addHeader("Accept", "application/vnd.github+json")
                     .also {
-                        val tempApiKey = chain.request().header("temp_api_key")
-                        it.addHeader("Authorization", "Bearer $tempApiKey")
+                        val accessToken = UpdateRepository.temporaryAccessToken
+                        it.addHeader("Authorization", "Bearer $accessToken")
                     }
 
             chain.proceed(requestBuilder.build())
@@ -141,10 +161,9 @@ class AppModule {
     @Provides
     @Singleton
     fun provideContentRepository(
-        remoteSource: IContentRemoteSource,
-        database: IVideoDatabase
+        remoteSource: IContentRemoteSource
     ): IContentRepository {
-        return ContentRepository(remoteSource, database)
+        return ContentRepository(remoteSource)
     }
 
     @Provides
@@ -158,11 +177,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideMediaRepository(
-        remoteSource: IMediaRemoteSource,
-        database: IVideoDatabase
-    ): IMediaRepository {
-        return MediaRepository(remoteSource, database)
+    fun provideMediaRepository(remoteSource: IMediaRemoteSource): IMediaRepository {
+        return MediaRepository(remoteSource)
     }
 
     @Provides
@@ -191,5 +207,38 @@ class AppModule {
     ): IUpdateRepository {
         return if (BuildConfig.DEBUG) MockUpdateRepository()
         else UpdateRepository(context, remoteSource, dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IAuthRemoteSource {
+        return AuthRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        remoteSource: IAuthRemoteSource,
+        dataStoreManager: IDataStoreManager
+    ): IAuthRepository {
+        return AuthRepository(remoteSource, dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: ApiService
+    ): IUserRemoteSource {
+        return UserRemoteSource(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(remoteSource: IUserRemoteSource): IUserRepository {
+        return UserRepository(remoteSource)
     }
 }

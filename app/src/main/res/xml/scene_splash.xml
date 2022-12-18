@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        android:id="@+id/transition_show_phone_number"
+        motion:constraintSetEnd="@layout/motion_splash_phone_number"
+        motion:constraintSetStart="@layout/motion_splash_initial"
+        motion:duration="300"
+        motion:motionInterpolator="linear" />
+
+    <Transition
+        android:id="@+id/transition_show_code"
+        motion:constraintSetEnd="@layout/motion_splash_code"
+        motion:constraintSetStart="@layout/motion_splash_phone_number"
+        motion:duration="300"
+        motion:motionInterpolator="linear" />
+</MotionScene>

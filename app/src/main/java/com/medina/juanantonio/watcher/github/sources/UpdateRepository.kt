@@ -21,12 +21,16 @@ class UpdateRepository(
     private val dataStoreManager: IDataStoreManager
 ) : IUpdateRepository {
 
+    companion object {
+        var temporaryAccessToken = ""
+    }
+
     override val reminderInterval: Long
         get() = TimeUnit.HOURS.toMillis(6)
 
     override suspend fun getLatestRelease(): ReleaseBean? {
-        val apiKey = generateAPIKey()
-        val installationsResult = remoteSource.getInstallations(apiKey)
+        temporaryAccessToken = generateAPIKey()
+        val installationsResult = remoteSource.getInstallations()
         if (installationsResult !is Result.Success) return null
 
         val firstInstallationId = installationsResult.data?.firstOrNull()?.id ?: return null
@@ -36,19 +40,17 @@ class UpdateRepository(
         )
         val accessTokenResult = remoteSource.getAccessToken(
             installationId = firstInstallationId,
-            request = requestModel,
-            apiKey = apiKey
+            request = requestModel
         )
 
         if (accessTokenResult !is Result.Success) return null
+
+        temporaryAccessToken = accessTokenResult.data?.token ?: return null
         val releasesResult = remoteSource.getReleases(
-            repositoryUrl = context.getString(R.string.repository_releases_url),
-            apiKey = accessTokenResult.data?.token ?: return null
+            repositoryUrl = context.getString(R.string.repository_releases_url)
         )
 
-        return releasesResult.data?.firstOrNull()?.apply {
-            assets.map { it.setupApiKey(accessTokenResult.data.token) }
-        }
+        return releasesResult.data?.firstOrNull()
     }
 
     private fun generateAPIKey(): String {

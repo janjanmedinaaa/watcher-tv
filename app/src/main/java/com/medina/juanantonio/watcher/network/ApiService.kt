@@ -1,8 +1,7 @@
 package com.medina.juanantonio.watcher.network
 
-import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
-import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
-import com.medina.juanantonio.watcher.network.models.home.GetNavigationBarResponse
+import com.medina.juanantonio.watcher.network.models.auth.*
+import com.medina.juanantonio.watcher.network.models.home.*
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
@@ -53,4 +52,28 @@ interface ApiService {
         @Query("episodeId") episodeId: Int,
         @Query("definition") definition: String
     ): Response<GetVideoResourceResponse>
+
+    @POST("auth/sendCaptcha")
+    suspend fun getOTPForLogin(
+        @Body request: GetOTPRequest
+    ): Response<BasicResponse>
+
+    @POST("auth/mobile/login")
+    suspend fun login(
+        @Body request: LoginRequest
+    ): Response<LoginResponse>
+
+    @POST("auth/refresh")
+    suspend fun refreshToken(): Response<RefreshTokenResponse>
+
+    @POST("auth/userInfo")
+    suspend fun getUserInfo(): Response<GetUserInfoResponse>
+
+    @GET("user/behavior/app/findBatchWatchHistory")
+    suspend fun getWatchHistory(): Response<GetWatchHistoryResponse>
+
+    @POST("user/behavior/app/addWatchHistory")
+    suspend fun saveWatchHistory(
+        @Body request: List<SaveWatchHistoryRequest>
+    ): Response<BasicResponse>
 }

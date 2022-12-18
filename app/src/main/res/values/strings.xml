@@ -11,8 +11,8 @@
     <!-- Video Display Texts -->
     <string name="content_type_movie">Movie</string>
     <string name="content_type_series">Series</string>
-    <string name="episode_count_with_season">%s: %d Episodes</string>
     <string name="episode_count_without_season">%d Episodes</string>
+    <string name="episode_count_without_season_updated">Updated to Episode %d</string>
     <string name="episode_number">Episode %d</string>
 
     <!-- Playback error actions -->
@@ -42,4 +42,10 @@
     <string name="control_action_increase_speed_disabled">Increase Speed</string>
     <string name="control_action_bedtime_mode_disabled">Enable Bedtime Mode</string>
     <string name="control_action_bedtime_mode_enabled">Disable Bedtime Mode</string>
+
+    <!-- Login Screen -->
+    <string name="input_hint_phone_number">Phone Number</string>
+    <string name="label_send_otp">Send OTP</string>
+    <string name="input_hint_code">Code</string>
+    <string name="label_continue_without_logging_in">Continue without logging in</string>
 </resources>

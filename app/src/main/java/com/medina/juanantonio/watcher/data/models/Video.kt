@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.AlbumItemBean
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
+import com.medina.juanantonio.watcher.network.models.home.WatchHistoryBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.network.models.search.LeaderboardBean
@@ -38,6 +39,9 @@ data class Video(
 
     var lastWatchTime: Long = System.currentTimeMillis()
 
+    @Ignore
+    var resourceStatus: HomePageBean.ResourceStatus? = null
+
     @get:Ignore
     val isMovie: Boolean
         get() = categoryType == ItemCategory.MOVIE
@@ -67,13 +71,18 @@ data class Video(
 
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
-        category = bean.category,
-        contentId = if (bean.category == null) bean.getIdFromJumpAddress() else bean.id,
+        category = bean.contentType.category,
+        contentId = when (bean.contentType) {
+            HomePageBean.ContentType.APP_URL,
+            HomePageBean.ContentType.ALBUM -> bean.getIdFromJumpAddress()
+            else -> bean.id
+        },
         imageUrl = bean.imageUrl,
         title = bean.title
     ) {
         episodeNumber = 0
         episodeCount = bean.resourceNum ?: 0
+        resourceStatus = bean.resourceStatus
         score = bean.score
     }
 
@@ -133,6 +142,17 @@ data class Video(
         imageUrl = NavigationBackgroundURL,
         title = bean.name
     )
+
+    // Watch History Items
+    constructor(bean: WatchHistoryBean) : this(
+        category = bean.category,
+        contentId = bean.contentId.toInt(),
+        imageUrl = bean.verticalUrl,
+        title = bean.contentTitle
+    ) {
+        episodeNumber = bean.episodeNo
+        videoProgress = bean.progress * 1000L
+    }
 
     /**
      * Deep copy Video object

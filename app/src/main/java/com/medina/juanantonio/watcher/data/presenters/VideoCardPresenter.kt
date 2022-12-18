@@ -11,6 +11,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
+import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
 
@@ -73,10 +74,20 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
                 // Some shows don't have a "Season {number}" in their title
                 // because they're either a limited series or has only 1 season
                 if (video.episodeCount != 0) {
-                    resources.getString(
-                        R.string.episode_count_without_season,
-                        video.episodeCount
-                    )
+                    when (video.resourceStatus) {
+                        HomePageBean.ResourceStatus.UPDATED -> {
+                            resources.getString(
+                                R.string.episode_count_without_season_updated,
+                                video.episodeCount
+                            )
+                        }
+                        else -> {
+                            resources.getString(
+                                R.string.episode_count_without_season,
+                                video.episodeCount
+                            )
+                        }
+                    }
                 } else {
                     // The episodeCount will always be 0 on Search
                     // results and Player video recommendations

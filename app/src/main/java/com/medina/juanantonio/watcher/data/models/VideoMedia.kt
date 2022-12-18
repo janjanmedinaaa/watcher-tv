@@ -15,7 +15,9 @@ data class VideoMedia(
     val subtitles: List<Subtitle>?,
     val connectedVideos: List<VideoSuggestion>?,
     val videoSuggestions: List<VideoSuggestion>?,
-    val episodeNumbers: List<Int>
+    val episodeNumbers: List<Int>,
+    val totalDuration: Int,
+    val seriesNo: Int?
 ) : Parcelable {
 
     // Storing the score in the videoMedia so that
@@ -44,7 +46,9 @@ data class VideoMedia(
             it.name != detailsResponse.name
         },
         videoSuggestions = detailsResponse.likeList,
-        episodeNumbers = detailsResponse.episodeVo.map { it.seriesNo }
+        episodeNumbers = detailsResponse.episodeVo.map { it.seriesNo },
+        totalDuration = mediaResponse.totalDuration,
+        seriesNo = detailsResponse.seriesNo
     ) {
         this.score = score
     }
