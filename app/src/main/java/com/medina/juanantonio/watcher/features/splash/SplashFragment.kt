@@ -74,7 +74,7 @@ class SplashFragment : Fragment() {
 
     private fun listenViews() {
         binding.editTextPhoneNumber.setOnFocusChangeListener { view, onFocus ->
-            if (onFocus) view.showKeyboard()
+            if (onFocus && !viewModel.preventKeyboardPopup) view.showKeyboard()
             else view.hideKeyboard()
         }
 

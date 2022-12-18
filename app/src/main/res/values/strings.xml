@@ -11,8 +11,8 @@
     <!-- Video Display Texts -->
     <string name="content_type_movie">Movie</string>
     <string name="content_type_series">Series</string>
-    <string name="episode_count_with_season">%s: %d Episodes</string>
     <string name="episode_count_without_season">%d Episodes</string>
+    <string name="episode_count_without_season_updated">Updated to Episode %d</string>
     <string name="episode_number">Episode %d</string>
 
     <!-- Playback error actions -->

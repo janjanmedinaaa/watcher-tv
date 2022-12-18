@@ -42,6 +42,9 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    // Bug fix: Keyboard opens and closes quickly before navigating to the Home Screen
+    var preventKeyboardPopup = false
+
     private var job: Job? = null
 
     private val isEmulator: Boolean
@@ -134,6 +137,7 @@ class SplashViewModel @Inject constructor(
             contentRepository.setupHomePage(homePageId)
 
             assetToDownload = null
+            preventKeyboardPopup = true
             navigateToHomeScreen.value = Event(Unit)
             if (showLoading) loaderUseCase.hide()
         }

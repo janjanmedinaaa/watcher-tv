@@ -39,6 +39,9 @@ data class Video(
 
     var lastWatchTime: Long = System.currentTimeMillis()
 
+    @Ignore
+    var resourceStatus: HomePageBean.ResourceStatus? = null
+
     @get:Ignore
     val isMovie: Boolean
         get() = categoryType == ItemCategory.MOVIE
@@ -68,13 +71,18 @@ data class Video(
 
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
-        category = bean.category,
-        contentId = if (bean.category == null) bean.getIdFromJumpAddress() else bean.id,
+        category = bean.contentType.category,
+        contentId = when (bean.contentType) {
+            HomePageBean.ContentType.APP_URL,
+            HomePageBean.ContentType.ALBUM -> bean.getIdFromJumpAddress()
+            else -> bean.id
+        },
         imageUrl = bean.imageUrl,
         title = bean.title
     ) {
         episodeNumber = 0
         episodeCount = bean.resourceNum ?: 0
+        resourceStatus = bean.resourceStatus
         score = bean.score
     }
 
