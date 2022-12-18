@@ -3,6 +3,7 @@ package com.medina.juanantonio.watcher
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.medina.juanantonio.watcher.MainActivity.Companion.SHOW_MOVIE_BACKGROUND
 import com.medina.juanantonio.watcher.shared.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,6 +35,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun setDefaultBackgroundImage() {
         _backgroundImageUrl.value = ""
+    }
+
+    fun setMovieBackground() {
+        _backgroundImageUrl.value = SHOW_MOVIE_BACKGROUND
     }
 
     fun resetBackgroundImage() {

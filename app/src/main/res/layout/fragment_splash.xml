@@ -24,7 +24,7 @@
             android:id="@+id/image_view_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/edit_text_phone_number"
+            app:layout_constraintBottom_toTopOf="@id/text_view_version"
             app:layout_constraintDimensionRatio="16:4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,11 +32,24 @@
             app:layout_constraintVertical_chainStyle="packed"
             app:srcCompat="@mipmap/ic_launcher" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/app_name_version"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toTopOf="@id/edit_text_phone_number"
+            app:layout_constraintEnd_toEndOf="@id/image_view_logo"
+            app:layout_constraintStart_toStartOf="@id/image_view_logo"
+            app:layout_constraintTop_toBottomOf="@id/image_view_logo" />
+
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_text_phone_number"
             android:layout_width="@dimen/dp_0"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_4"
+            android:alpha="0"
             android:background="@drawable/edit_text_login_background"
             android:fontFamily="sans-serif-condensed"
             android:hint="@string/input_hint_phone_number"
@@ -48,7 +61,7 @@
             app:layout_constraintBottom_toTopOf="@id/edit_text_code"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/image_view_logo"
+            app:layout_constraintTop_toBottomOf="@id/text_view_version"
             app:layout_constraintWidth_percent=".45"
             tools:text="9123456789123456789123456789123456789" />
 
@@ -57,6 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dp_14"
+            android:alpha="0"
             android:background="@null"
             android:clickable="true"
             android:enabled="@{viewModel.isPhoneNumberValid}"
@@ -66,6 +80,7 @@
             android:text="@string/label_send_otp"
             android:textColor="@color/text_color_send_otp"
             android:textSize="@dimen/sp_12"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/edit_text_phone_number"
             app:layout_constraintEnd_toEndOf="@id/edit_text_phone_number"
             app:layout_constraintTop_toTopOf="@id/edit_text_phone_number" />
@@ -81,6 +96,7 @@
             android:hint="@string/input_hint_code"
             android:maxLength="6"
             android:padding="@dimen/dp_14"
+            android:text="@={viewModel.otpCode}"
             android:textSize="@dimen/sp_12"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/text_view_continue_without_login"
@@ -102,22 +118,9 @@
             android:textColor="@color/text_color_send_otp"
             android:textSize="@dimen/sp_12"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/text_view_version"
-            app:layout_constraintEnd_toEndOf="@id/image_view_logo"
-            app:layout_constraintStart_toStartOf="@id/image_view_logo"
-            app:layout_constraintTop_toBottomOf="@id/edit_text_code" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_4"
-            android:fontFamily="sans-serif-condensed"
-            android:text="@string/app_name_version"
-            android:textSize="@dimen/sp_16"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/image_view_logo"
             app:layout_constraintStart_toStartOf="@id/image_view_logo"
-            app:layout_constraintTop_toBottomOf="@id/text_view_continue_without_login" />
+            app:layout_constraintTop_toBottomOf="@id/edit_text_code" />
     </androidx.constraintlayout.motion.widget.MotionLayout>
 </layout>

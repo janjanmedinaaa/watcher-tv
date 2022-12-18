@@ -42,6 +42,8 @@ class MainActivity : FragmentActivity() {
 
         private const val BACKGROUND_UPDATE_DELAY_MILLIS = 300L
         private const val BACKGROUND_RESOURCE_ID = R.drawable.image_placeholder
+        private const val MOVIE_BACKGROUND_RESOURCE_ID = R.drawable.movie_black_background
+        const val SHOW_MOVIE_BACKGROUND = "SHOW_MOVIE_BACKGROUND"
     }
 
     @Inject
@@ -112,6 +114,7 @@ class MainActivity : FragmentActivity() {
             when (it) {
                 null -> cancelBackgroundImageLoading()
                 "" -> showDefaultBackground()
+                SHOW_MOVIE_BACKGROUND -> showMovieBackground()
                 else -> updateBackgroundDelayed(it)
             }
         }
@@ -165,6 +168,15 @@ class MainActivity : FragmentActivity() {
 
         val drawable =
             ResourcesCompat.getDrawable(resources, BACKGROUND_RESOURCE_ID, null)
+        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
+    }
+
+    private fun showMovieBackground() {
+        cancelBackgroundImageLoading()
+        backgroundManager.setThemeDrawableResourceId(MOVIE_BACKGROUND_RESOURCE_ID)
+
+        val drawable =
+            ResourcesCompat.getDrawable(resources, MOVIE_BACKGROUND_RESOURCE_ID, null)
         backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 

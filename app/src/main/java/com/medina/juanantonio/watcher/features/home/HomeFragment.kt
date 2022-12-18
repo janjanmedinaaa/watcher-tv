@@ -115,7 +115,7 @@ class HomeFragment : BrowseSupportFragment() {
         }
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
-            activityViewModel.setDefaultBackgroundImage()
+            activityViewModel.setMovieBackground()
             findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentToPlayerFragment(it)
             )
