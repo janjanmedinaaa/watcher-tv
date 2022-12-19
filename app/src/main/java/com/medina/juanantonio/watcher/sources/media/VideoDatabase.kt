@@ -21,6 +21,10 @@ class VideoDatabase(watcherDb: WatcherDb) : IVideoDatabase {
     override suspend fun removeVideo(id: Int) {
         videoDao.delete(id)
     }
+
+    override suspend fun clear() {
+        videoDao.clear()
+    }
 }
 
 interface IVideoDatabase {
@@ -28,4 +32,5 @@ interface IVideoDatabase {
     suspend fun getOnGoingVideos(): List<Video>
     suspend fun getVideo(id: Int): Video?
     suspend fun removeVideo(id: Int)
+    suspend fun clear()
 }

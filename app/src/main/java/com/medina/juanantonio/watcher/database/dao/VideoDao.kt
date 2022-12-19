@@ -20,4 +20,7 @@ interface VideoDao {
 
     @Query("DELETE FROM video WHERE contentId = :id")
     suspend fun delete(id: Int)
+
+    @Query("DELETE FROM video")
+    suspend fun clear()
 }

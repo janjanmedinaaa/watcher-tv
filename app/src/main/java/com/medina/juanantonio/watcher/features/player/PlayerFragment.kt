@@ -259,7 +259,10 @@ class PlayerFragment : VideoSupportFragment() {
 
             setOnActionListener { action ->
                 when (action) {
-                    skipNextAction -> endVideo()
+                    skipNextAction -> {
+                        if (viewModel.isPlayingMovie) playerAdapter.pause()
+                        endVideo()
+                    }
                     skipPreviousAction -> {
                         if (viewModel.isFirstEpisode || !justStarted) {
                             exoPlayer!!.seekTo(0L)
