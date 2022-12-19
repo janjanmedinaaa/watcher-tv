@@ -29,5 +29,6 @@
 
     <color name="enabled_multi_action">#90C9C3</color>
 
+    <color name="button_off_focused_grey">#46E8EAED</color>
     <color name="edit_text_login_border">#37363E</color>
 </resources>

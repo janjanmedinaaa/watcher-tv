@@ -2,5 +2,5 @@
     <item android:color="@android:color/white" android:state_focused="true" />
     <item android:color="@color/screen_white" android:state_pressed="true" />
     <item android:color="@color/screen_white_10" android:state_enabled="false" />
-    <item android:color="@color/screen_white_70" />
+    <item android:color="@color/button_off_focused_grey" />
 </selector>

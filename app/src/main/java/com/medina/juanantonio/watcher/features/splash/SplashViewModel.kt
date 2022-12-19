@@ -12,6 +12,7 @@ import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -26,7 +27,8 @@ class SplashViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
     private val updateRepository: IUpdateRepository,
     private val authRepository: IAuthRepository,
-    private val loaderUseCase: LoaderUseCase
+    private val loaderUseCase: LoaderUseCase,
+    private val watchHistoryUseCase: WatchHistoryUseCase
 ) : ViewModel() {
 
     val navigateToHomeScreen = MutableLiveData<Event<Unit>>()
@@ -104,6 +106,7 @@ class SplashViewModel @Inject constructor(
             val isLoginSuccessful = authRepository.login(phoneNumber, otpCode)
 
             if (isLoginSuccessful) {
+                watchHistoryUseCase.clearLocalCacheVideos()
                 navigateToHomeScreen(showLoading = true)
             } else {
                 this@SplashViewModel.otpCode.value = ""

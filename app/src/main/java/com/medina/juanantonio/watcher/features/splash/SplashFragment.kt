@@ -79,7 +79,7 @@ class SplashFragment : Fragment() {
         }
 
         binding.editTextCode.setOnFocusChangeListener { view, onFocus ->
-            if (onFocus) view.showKeyboard()
+            if (onFocus && !viewModel.preventKeyboardPopup) view.showKeyboard()
             else view.hideKeyboard()
         }
     }

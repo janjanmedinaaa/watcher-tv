@@ -16,38 +16,45 @@ class WatchHistoryUseCase @Inject constructor(
 ) {
 
     suspend fun getOnGoingVideos(): List<Video> {
-        return if (authRepository.isUserAuthenticated()) {
-            userRepository.getWatchHistory()
-        } else {
-            database.getOnGoingVideos()
+        if (authRepository.isUserAuthenticated()) {
+            val watchHistoryFromAPI = userRepository.getWatchHistory()
+            if (watchHistoryFromAPI.isNotEmpty())
+                return watchHistoryFromAPI
         }
+
+        return database.getOnGoingVideos()
     }
 
     suspend fun addOnGoingVideo(video: Video, videoMedia: VideoMedia) {
         if (authRepository.isUserAuthenticated()) {
             userRepository.saveWatchHistory(video, videoMedia)
-        } else {
-            database.addVideo(video)
         }
+
+        database.addVideo(video)
     }
 
     suspend fun getOnGoingVideo(id: Int): Video? {
-        return if (authRepository.isUserAuthenticated()) {
+        if (authRepository.isUserAuthenticated()) {
             val watchHistoryItem = userRepository.watchHistory.firstOrNull {
                 it.contentId.toIntOrNull() == id
             }
 
-            if (watchHistoryItem != null) Video(watchHistoryItem) else null
-        } else {
-            database.getVideo(id)
+            if (watchHistoryItem != null)
+                return Video(watchHistoryItem)
         }
+
+        return database.getVideo(id)
     }
 
     suspend fun removeOnGoingVideo(id: Int) {
         if (authRepository.isUserAuthenticated()) {
             userRepository.removeWatchHistory(id)
-        } else {
-            database.removeVideo(id)
         }
+
+        database.removeVideo(id)
+    }
+
+    suspend fun clearLocalCacheVideos() {
+        database.clear()
     }
 }
