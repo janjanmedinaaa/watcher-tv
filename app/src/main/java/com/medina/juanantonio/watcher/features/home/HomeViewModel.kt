@@ -7,7 +7,6 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
-import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.CategoriesTitle
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
@@ -73,7 +72,7 @@ class HomeViewModel @Inject constructor(
             } else {
                 val navigationVideoGroupList = listOf(
                     VideoGroup(
-                        category = CategoriesTitle,
+                        category = "",
                         videoList = contentRepository.navigationItems,
                         contentType = VideoGroup.ContentType.NAVIGATION
                     )

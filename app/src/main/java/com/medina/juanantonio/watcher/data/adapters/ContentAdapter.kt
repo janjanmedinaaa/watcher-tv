@@ -52,7 +52,10 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
     private fun getListRow(videoGroup: VideoGroup, presenter: Presenter): ListRow {
         val listRowAdapter = ArrayObjectAdapter(presenter)
         listRowAdapter.addAll(0, videoGroup.videoList)
-        val headerItem = HeaderItem(videoGroup.category)
-        return ListRow(headerItem, listRowAdapter)
+
+        return if (videoGroup.category.isNotBlank()) {
+            val headerItem = HeaderItem(videoGroup.category)
+            ListRow(headerItem, listRowAdapter)
+        } else ListRow(listRowAdapter)
     }
 }

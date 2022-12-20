@@ -8,7 +8,6 @@ object Constants {
     }
 
     object VideoGroupTitle {
-        const val CategoriesTitle = "Categories"
         const val ContinueWatchingTitle = "Continue Watching"
     }
 }
