@@ -6,13 +6,11 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.medina.juanantonio.watcher.network.models.home.AlbumItemBean
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
-import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.home.WatchHistoryBean
 import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.network.models.search.LeaderboardBean
 import com.medina.juanantonio.watcher.network.models.search.SearchResultBean
-import com.medina.juanantonio.watcher.shared.Constants.ImageURL.NavigationBackgroundURL
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -25,10 +23,6 @@ data class Video(
     val title: String
 ) : Parcelable {
 
-    companion object {
-        const val NAVIGATION_CATEGORY_ID = -6969
-    }
-
     var episodeNumber: Int = 0
 
     var episodeCount: Int = 0
@@ -38,6 +32,9 @@ data class Video(
     var videoProgress: Long = 0L
 
     var lastWatchTime: Long = System.currentTimeMillis()
+
+    @Ignore
+    var isHomeDisplay = false
 
     @Ignore
     var resourceStatus: HomePageBean.ResourceStatus? = null
@@ -53,7 +50,6 @@ data class Video(
     @get:Ignore
     val categoryType: ItemCategory
         get() = when (category) {
-            NAVIGATION_CATEGORY_ID -> ItemCategory.NAVIGATION
             0 -> ItemCategory.MOVIE
             1 -> ItemCategory.SERIES
             else -> ItemCategory.ALBUM
@@ -84,6 +80,7 @@ data class Video(
         episodeCount = bean.resourceNum ?: 0
         resourceStatus = bean.resourceStatus
         score = bean.score
+        isHomeDisplay = true
     }
 
     // Home Page Episode display item
@@ -133,15 +130,8 @@ data class Video(
         title = bean.name
     ) {
         isAlbumItem = true
+        isHomeDisplay = true
     }
-
-    // Navigation Items
-    constructor(bean: NavigationItemBean) : this(
-        category = NAVIGATION_CATEGORY_ID,
-        contentId = bean.id,
-        imageUrl = NavigationBackgroundURL,
-        title = bean.name
-    )
 
     // Watch History Items
     constructor(bean: WatchHistoryBean) : this(
@@ -152,6 +142,7 @@ data class Video(
     ) {
         episodeNumber = bean.episodeNo
         videoProgress = bean.progress * 1000L
+        isHomeDisplay = true
     }
 
     /**
@@ -185,7 +176,6 @@ data class Video(
 }
 
 enum class ItemCategory {
-    NAVIGATION,
     MOVIE,
     SERIES,
     ALBUM

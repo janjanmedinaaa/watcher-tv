@@ -10,7 +10,7 @@ class ContentRepository(
     private val remoteSource: IContentRemoteSource
 ) : IContentRepository {
 
-    override val navigationItems: ArrayList<Video> = arrayListOf()
+    override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
     private var currentNavigationPage = -1
 
     private val homeContentMap: MutableMap<Int, ArrayList<List<VideoGroup>>> = mutableMapOf()
@@ -28,7 +28,7 @@ class ContentRepository(
 
             navigationItems.apply {
                 clear()
-                addAll(filteredItems?.map { Video(it) } ?: emptyList())
+                addAll(filteredItems ?: emptyList())
             }
         }
     }
@@ -152,7 +152,7 @@ class ContentRepository(
 }
 
 interface IContentRepository {
-    val navigationItems: List<Video>
+    val navigationItems: List<NavigationItemBean>
 
     suspend fun setupNavigationBar()
     fun resetPage()

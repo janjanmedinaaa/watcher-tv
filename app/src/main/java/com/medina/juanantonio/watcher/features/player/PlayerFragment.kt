@@ -37,6 +37,8 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.features.home.cleanUpRows
+import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
@@ -159,6 +161,12 @@ class PlayerFragment : VideoSupportFragment() {
         listenVM()
     }
 
+    override fun onResume() {
+        super.onResume()
+        cleanUpRows()
+        hideNavigationBar()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.removePlaybackStateListener(uiPlaybackStateListener)
@@ -260,7 +268,9 @@ class PlayerFragment : VideoSupportFragment() {
             setOnActionListener { action ->
                 when (action) {
                     skipNextAction -> {
-                        if (viewModel.isPlayingMovie) playerAdapter.pause()
+                        if (viewModel.isPlayingMovie || viewModel.isLastEpisode) {
+                            playerAdapter.pause()
+                        }
                         endVideo()
                     }
                     skipPreviousAction -> {

@@ -5,30 +5,38 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.res.ResourcesCompat
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.Group
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.leanback.app.BrowseSupportFragment
+import androidx.leanback.app.RowsSupportFragment
 import androidx.leanback.widget.ListRow
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
+import com.medina.juanantonio.watcher.data.adapters.NavigationAdapter
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.ItemCategory
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
+import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 
-// TODO: Refactor to more generic screen name
 @AndroidEntryPoint
-class HomeFragment : BrowseSupportFragment() {
+class HomeFragment : RowsSupportFragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
@@ -39,14 +47,14 @@ class HomeFragment : BrowseSupportFragment() {
 
     private var selectedVideoGroup: VideoGroup? = null
 
+    private val navigationAdapter = NavigationAdapter()
+
     companion object {
-        private const val CONTINUE_WATCHING_POSITION = 1
+        private const val CONTINUE_WATCHING_POSITION = 0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        headersState = HEADERS_DISABLED
 
         selectedVideoGroup = HomeFragmentArgs.fromBundle(requireArguments()).selectedVideoGroup
         glide = Glide.with(requireContext())
@@ -67,7 +75,6 @@ class HomeFragment : BrowseSupportFragment() {
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
             when (item.categoryType) {
-                ItemCategory.NAVIGATION -> viewModel.handleNavigationItem(item)
                 ItemCategory.ALBUM -> viewModel.getAlbumDetails(item)
                 ItemCategory.MOVIE -> viewModel.getVideoMedia(item)
                 ItemCategory.SERIES -> viewModel.handleSeries(item)
@@ -80,24 +87,27 @@ class HomeFragment : BrowseSupportFragment() {
             val isSelectedVideos = selectedVideoGroup != null
 
             if (isLastItem && !isSelectedVideos) viewModel.addNewContent()
-            if (!item.isAlbum) activityViewModel.setBackgroundImage(item.imageUrl)
+            if (!item.isAlbum) viewModel.getVideoDetails(item)
         }
-
-        setOnSearchClickedListener {
-            findNavController().safeNavigate(
-                HomeFragmentDirections.actionHomeFragmentToVideoSearchFragment()
-            )
-        }
-
-        searchAffordanceColor =
-            ResourcesCompat.getColor(resources, android.R.color.transparent, null)
-
-        badgeDrawable = ResourcesCompat.getDrawable(resources, R.mipmap.ic_launcher, null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = contentAdapter
+
+        view.findViewById<AppCompatImageView>(R.id.image_view_search)?.setOnClickListener {
+            findNavController().safeNavigate(
+                HomeFragmentDirections.actionHomeFragmentToVideoSearchFragment()
+            )
+        }
+
+        view.findViewById<RecyclerView>(R.id.recycler_view_navigation)?.apply {
+            adapter = navigationAdapter
+            isVisible = selectedVideoGroup == null
+            navigationAdapter.setNavigationItems(viewModel.navigationItems) {
+                viewModel.handleNavigationItem(it.id)
+            }
+        }
 
         listenVM()
     }
@@ -167,6 +177,10 @@ class HomeFragment : BrowseSupportFragment() {
             else
                 contentAdapter.removeItems(1, itemCount)
         }
+
+        viewModel.videoDetails.observe(viewLifecycleOwner) { data ->
+            setupVideoDetailsPreview(data)
+        }
     }
 
     override fun onDestroy() {
@@ -179,5 +193,53 @@ class HomeFragment : BrowseSupportFragment() {
         if (contentAdapter.size() <= 1) return false
         val continueWatchingRow = contentAdapter.get(CONTINUE_WATCHING_POSITION) as? ListRow
         return continueWatchingRow?.headerItem?.name == ContinueWatchingTitle
+    }
+
+    private fun setupVideoDetailsPreview(details: GetVideoDetailsResponse.Data) {
+        val groupDetailsPreview =
+            view?.findViewById<Group>(R.id.group_details_preview)
+        val textViewPreviewTitle =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_preview_title)
+        val textViewPreviewDescription =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_preview_description)
+        val textViewPreviewScore =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_preview_score)
+        val textViewPreviewYear =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_preview_year)
+        val textViewPreviewTags =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_preview_tags)
+
+        groupDetailsPreview?.isVisible = true
+
+        textViewPreviewTitle?.text = details.name.trim()
+        textViewPreviewDescription?.text = details.introduction
+        textViewPreviewYear?.text = details.year.toString()
+        textViewPreviewScore?.text = details.score.toString()
+        textViewPreviewTags?.text = details.tagNameList.joinToString()
+
+        textViewPreviewDescription?.maxLines =
+            if ((textViewPreviewTitle?.lineCount ?: 1) > 1) 3 else 5
+
+        activityViewModel.setBackgroundImage(details.coverHorizontalUrl)
+    }
+}
+
+fun Fragment.cleanUpRows() {
+    val groupDetailsPreview =
+        view?.findViewById<Group>(R.id.group_details_preview)
+    groupDetailsPreview?.isVisible = false
+
+    val containerRoot =
+        view?.findViewById<ConstraintLayout>(R.id.container_root)
+
+    val constraintSet2 = ConstraintSet()
+    constraintSet2.clone(containerRoot)
+    constraintSet2.constrainHeight(R.id.container_list, 0)
+    constraintSet2.applyTo(containerRoot)
+}
+
+fun Fragment.hideNavigationBar() {
+    view?.findViewById<RecyclerView>(R.id.recycler_view_navigation)?.apply {
+        isVisible = false
     }
 }

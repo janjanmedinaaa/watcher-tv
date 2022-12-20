@@ -3,23 +3,21 @@ package com.medina.juanantonio.watcher.data.presenters
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
+import com.medina.juanantonio.watcher.databinding.ViewLeaderboardCardBinding
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
-class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
+class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() {
 
     var viewHolder: ViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
-        val binding = ViewVideoCardBinding.inflate(
+        val binding = ViewLeaderboardCardBinding.inflate(
             LayoutInflater.from(context),
             parent, false
         )
@@ -30,26 +28,12 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
         checkNotNull(item)
         val video = item as Video
-        val binding = ViewVideoCardBinding.bind(viewHolder.view)
+        val binding = ViewLeaderboardCardBinding.bind(viewHolder.view)
         this.viewHolder = viewHolder
 
         val (title, _) = video.getSeriesTitleDescription()
         binding.textviewTitle.text = title
         binding.textviewDescription.text = getContentText(binding.root.resources, video)
-        binding.groupVideoDetails.isVisible = !video.isHomeDisplay
-        binding.textviewScore.apply {
-            isVisible = video.showScore && !video.isHomeDisplay
-
-            video.score.let { score ->
-                text = "$score"
-                val color = when (score) {
-                    in 8.0..10.0 -> R.color.high_score
-                    in 4.0..7.9 -> R.color.average_score
-                    else -> R.color.low_score
-                }
-                setTextColor(ContextCompat.getColor(context, color))
-            }
-        }
 
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -59,7 +43,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
     }
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
-        val binding = ViewVideoCardBinding.bind(viewHolder.view)
+        val binding = ViewLeaderboardCardBinding.bind(viewHolder.view)
         this.viewHolder = null
         binding.imageviewPoster.setImageBitmap(null)
     }

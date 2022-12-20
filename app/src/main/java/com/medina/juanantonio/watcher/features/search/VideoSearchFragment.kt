@@ -14,7 +14,10 @@ import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.presenters.LeaderboardCardPresenter
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.features.home.cleanUpRows
+import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,6 +64,12 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         listenVM()
     }
 
+    override fun onResume() {
+        super.onResume()
+        cleanUpRows()
+        hideNavigationBar()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         activityViewModel.cancelBackgroundImage()
@@ -84,7 +93,11 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     private fun listenVM() {
         viewModel.searchResults.observeEvent(viewLifecycleOwner) {
-            val listRowAdapter = ArrayObjectAdapter(VideoCardPresenter(glide))
+            val presenter = when (currentQuery.isBlank()) {
+                true -> LeaderboardCardPresenter(glide)
+                else ->VideoCardPresenter(glide)
+            }
+            val listRowAdapter = ArrayObjectAdapter(presenter)
             listRowAdapter.addAll(0, it)
             val headerTitle =
                 if (currentQuery.isBlank()) getString(R.string.search_leaderboard)

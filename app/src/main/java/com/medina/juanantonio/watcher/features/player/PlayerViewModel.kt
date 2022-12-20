@@ -40,7 +40,7 @@ class PlayerViewModel @Inject constructor(
             currentEpisodeIndex == 0
         } ?: false
 
-    private val isLastEpisode: Boolean
+    val isLastEpisode: Boolean
         get() = video?.let { v ->
             val currentEpisodeIndex = episodeNumbers.indexOf(v.episodeNumber)
             currentEpisodeIndex == episodeNumbers.lastIndex
