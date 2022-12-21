@@ -70,7 +70,9 @@ class ContentRepository(
 
         return if (result is Result.Success) {
             val validVideoGroups = result.data?.data?.recommendItems?.filter {
-                getVideoGroupContentType(it) != null
+                !it.recommendContentVOList.any { content ->
+                    content.contentType == HomePageBean.ContentType.UNKNOWN
+                } && getVideoGroupContentType(it) != null
             }
 
             val uniqueVideoGroups = validVideoGroups?.filter { bean ->

@@ -1,7 +1,11 @@
 package com.medina.juanantonio.watcher.network.models.home
 
 import android.net.Uri
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
+import com.medina.juanantonio.watcher.network.deserializer.ContentTypeDeserializer
+import com.medina.juanantonio.watcher.network.deserializer.ResourceStatusDeserializer
+import com.medina.juanantonio.watcher.network.deserializer.SectionTypeDeserializer
 
 data class HomePageBean(
     val bannerProportion: Double,
@@ -34,25 +38,34 @@ data class HomePageBean(
         }
     }
 
+    @JsonAdapter(SectionTypeDeserializer::class)
     enum class SectionType {
         BANNER,
         SINGLE_ALBUM,
         BLOCK_GROUP,
-        MOVIE_RESERVE
+        MOVIE_RESERVE,
+
+        UNKNOWN
     }
 
+    @JsonAdapter(ContentTypeDeserializer::class)
     enum class ContentType(val category: Int?) {
         MOVIE(0),
         DRAMA(1),
         ALBUM(null),
-        APP_URL(null)
+        APP_URL(null),
+
+        UNKNOWN(null)
     }
 
+    @JsonAdapter(ResourceStatusDeserializer::class)
     enum class ResourceStatus {
         @SerializedName("1")
         UPDATED,
 
         @SerializedName("2")
-        TOTAL
+        TOTAL,
+
+        UNKNOWN
     }
 }
