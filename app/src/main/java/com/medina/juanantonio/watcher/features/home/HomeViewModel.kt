@@ -174,11 +174,28 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getVideoDetails(video: Video) {
+        if (video.isAlbum) getVideoDetailsFromAlbum(video)
+        else getVideoDetailsFromContent(video)
+    }
+
+    private fun getVideoDetailsFromContent(video: Video) {
         if (videoDetailsJob?.isActive == true)
             videoDetailsJob?.cancel()
 
         videoDetailsJob = viewModelScope.launch {
             val videoDetails = mediaRepository.getVideoDetails(video) ?: return@launch
+            this@HomeViewModel.videoDetails.value = videoDetails
+        }
+    }
+
+    private fun getVideoDetailsFromAlbum(video: Video) {
+        if (videoDetailsJob?.isActive == true)
+            videoDetailsJob?.cancel()
+
+        videoDetailsJob = viewModelScope.launch {
+            val albumDetails = contentRepository.getAlbumDetails(video.contentId) ?: return@launch
+            val firstVideo = albumDetails.videoList.firstOrNull() ?: return@launch
+            val videoDetails = mediaRepository.getVideoDetails(firstVideo) ?: return@launch
             this@HomeViewModel.videoDetails.value = videoDetails
         }
     }

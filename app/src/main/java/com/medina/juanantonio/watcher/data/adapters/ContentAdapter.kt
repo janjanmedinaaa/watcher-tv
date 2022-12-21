@@ -7,8 +7,7 @@ import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.data.models.VideoGroup
-import com.medina.juanantonio.watcher.data.presenters.PersonCardPresenter
-import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.data.presenters.*
 
 class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
     ListRowPresenter().apply {
@@ -19,7 +18,10 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
 
     fun addContent(videoGroup: List<VideoGroup>) {
         val videoCardPresenter = VideoCardPresenter(glide)
-        val personCardPresenter = PersonCardPresenter(glide)
+        val artistCardPresenter = ArtistCardPresenter(glide)
+        val topContentCardPresenter = TopContentCardPresenter(glide)
+        val collectionCardPresenter = CollectionCardPresenter(glide)
+        val movieListCardPresenter = MovieListCardPresenter(glide)
 
         videoGroup.forEach {
             when (it.contentType) {
@@ -27,7 +29,16 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
                     add(getListRow(it, videoCardPresenter))
                 }
                 VideoGroup.ContentType.ARTISTS -> {
-                    add(getListRow(it, personCardPresenter))
+                    add(getListRow(it, artistCardPresenter))
+                }
+                VideoGroup.ContentType.TOP_CONTENT -> {
+                    add(getListRow(it, topContentCardPresenter))
+                }
+                VideoGroup.ContentType.COLLECTION -> {
+                    add(getListRow(it, collectionCardPresenter))
+                }
+                VideoGroup.ContentType.MOVIE_LIST -> {
+                    add(getListRow(it, movieListCardPresenter))
                 }
             }
         }
@@ -36,7 +47,10 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
     fun addVideoGroup(videoGroup: VideoGroup, replace: Boolean, position: Int = 0) {
         val cardPresenter = when (videoGroup.contentType) {
             VideoGroup.ContentType.VIDEOS -> VideoCardPresenter(glide)
-            VideoGroup.ContentType.ARTISTS -> PersonCardPresenter(glide)
+            VideoGroup.ContentType.ARTISTS -> ArtistCardPresenter(glide)
+            VideoGroup.ContentType.TOP_CONTENT -> TopContentCardPresenter(glide)
+            VideoGroup.ContentType.COLLECTION -> CollectionCardPresenter(glide)
+            VideoGroup.ContentType.MOVIE_LIST -> MovieListCardPresenter(glide)
         }
 
         val listRow = getListRow(videoGroup, cardPresenter)

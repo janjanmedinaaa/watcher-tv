@@ -7,13 +7,13 @@ import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.databinding.ViewPersonCardBinding
+import com.medina.juanantonio.watcher.databinding.ViewArtistCardBinding
 
-class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
+class ArtistCardPresenter(private val glide: RequestManager) : Presenter() {
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
-        val binding = ViewPersonCardBinding.inflate(
+        val binding = ViewArtistCardBinding.inflate(
             LayoutInflater.from(context),
             parent, false
         )
@@ -24,7 +24,7 @@ class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
         checkNotNull(item)
         val video = item as Video
-        val binding = ViewPersonCardBinding.bind(viewHolder.view)
+        val binding = ViewArtistCardBinding.bind(viewHolder.view)
 
         binding.textviewTitle.text = video.title
 
@@ -36,7 +36,7 @@ class PersonCardPresenter(private val glide: RequestManager) : Presenter() {
     }
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
-        val binding = ViewPersonCardBinding.bind(viewHolder.view)
+        val binding = ViewArtistCardBinding.bind(viewHolder.view)
         binding.imageviewPoster.setImageBitmap(null)
     }
 }

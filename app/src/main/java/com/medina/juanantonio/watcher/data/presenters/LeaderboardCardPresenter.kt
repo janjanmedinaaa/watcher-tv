@@ -37,7 +37,7 @@ class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() 
 
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .override(152 * 2, 203 * 2)
+            .override(256 * 2, 144 * 2)
             .error(R.mipmap.ic_launcher)
             .into(binding.imageviewPoster)
     }

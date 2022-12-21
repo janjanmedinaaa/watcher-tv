@@ -87,7 +87,7 @@ class HomeFragment : RowsSupportFragment() {
             val isSelectedVideos = selectedVideoGroup != null
 
             if (isLastItem && !isSelectedVideos) viewModel.addNewContent()
-            if (!item.isAlbum) viewModel.getVideoDetails(item)
+            viewModel.getVideoDetails(item)
         }
     }
 
@@ -175,7 +175,7 @@ class HomeFragment : RowsSupportFragment() {
             if (isContinueWatchingDisplayed())
                 contentAdapter.removeItems(CONTINUE_WATCHING_POSITION + 1, itemCount)
             else
-                contentAdapter.removeItems(1, itemCount)
+                contentAdapter.removeItems(CONTINUE_WATCHING_POSITION, itemCount)
         }
 
         viewModel.videoDetails.observe(viewLifecycleOwner) { data ->

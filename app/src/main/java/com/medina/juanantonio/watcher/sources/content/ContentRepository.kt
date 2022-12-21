@@ -5,6 +5,8 @@ import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
+import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.CollectionProportion
+import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.MovieListProportion
 
 class ContentRepository(
     private val remoteSource: IContentRemoteSource
@@ -43,8 +45,8 @@ class ContentRepository(
             return
         }
 
-        val result = getHomePage(navigationId, startingPage)
-        if (!result.isNullOrEmpty()) {
+        val pageHasContent = getHomePage(navigationId, startingPage)
+        if (pageHasContent) {
             currentNavigationPage = navigationId ?: -1
             setupHomePage(navigationId, startingPage + 1)
         }
@@ -63,54 +65,65 @@ class ContentRepository(
         homeContentMap.clear()
     }
 
-    private suspend fun getHomePage(navigationId: Int?, page: Int): List<VideoGroup>? {
+    private suspend fun getHomePage(navigationId: Int?, page: Int): Boolean {
         val result = remoteSource.getHomePage(page, navigationId)
 
         return if (result is Result.Success) {
-            val filteredVideos = result.data?.data?.recommendItems?.filter {
-                val areContentsValid =
-                    it.recommendContentVOList.all { content -> content.title.isNotBlank() }
-
-                it.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM ||
-                        (it.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP &&
-                                areContentsValid && it.bannerProportion == 1.0)
+            val validVideoGroups = result.data?.data?.recommendItems?.filter {
+                getVideoGroupContentType(it) != null
             }
 
-            val listVideoGroup = filteredVideos?.map {
+            val uniqueVideoGroups = validVideoGroups?.filter { bean ->
+                val mapId = navigationId ?: -1
+                homeContentMap[mapId]?.any { savedVideoGroups ->
+                    savedVideoGroups.any {
+                        it.category == bean.homeSectionName
+                    }
+                }?.not() ?: true
+            }
+
+            val listVideoGroup = uniqueVideoGroups?.map {
                 VideoGroup(
                     category = it.homeSectionName,
                     videoList = it.recommendContentVOList.map { videoItem ->
                         Video(videoItem)
                     },
-                    contentType = getVideoGroupContentType(it)
+                    contentType = getVideoGroupContentType(it) ?: VideoGroup.ContentType.VIDEOS
                 )
             }
 
             val mapId = navigationId ?: -1
-            val mapItem = listVideoGroup ?: emptyList()
-            if (homeContentMap[mapId] == null) {
-                homeContentMap[mapId] = arrayListOf(mapItem)
-            } else {
-                homeContentMap[mapId]?.add(mapItem)
+            if (!listVideoGroup.isNullOrEmpty()) {
+                if (homeContentMap[mapId] == null) {
+                    homeContentMap[mapId] = arrayListOf(listVideoGroup)
+                } else {
+                    homeContentMap[mapId]?.add(listVideoGroup)
+                }
             }
 
-            listVideoGroup
-        } else null
+            !validVideoGroups.isNullOrEmpty()
+        } else false
     }
 
-    private fun getVideoGroupContentType(bean: HomePageBean): VideoGroup.ContentType {
-        val areContentsValid =
+    private fun getVideoGroupContentType(bean: HomePageBean): VideoGroup.ContentType? {
+        val hasTitle =
             bean.recommendContentVOList.all { content -> content.title.isNotBlank() }
 
-        return when {
-            bean.homeSectionType == HomePageBean.SectionType.SINGLE_ALBUM -> {
+        return when (bean.homeSectionType) {
+            HomePageBean.SectionType.SINGLE_ALBUM -> {
                 VideoGroup.ContentType.VIDEOS
             }
-            bean.homeSectionType == HomePageBean.SectionType.BLOCK_GROUP
-                    && areContentsValid && bean.bannerProportion == 1.0 -> {
-                VideoGroup.ContentType.ARTISTS
+            HomePageBean.SectionType.BLOCK_GROUP -> {
+                if (hasTitle && bean.bannerProportion == 1.0) {
+                    VideoGroup.ContentType.ARTISTS
+                } else when (bean.bannerProportion) {
+                    CollectionProportion -> VideoGroup.ContentType.COLLECTION
+                    MovieListProportion -> VideoGroup.ContentType.MOVIE_LIST
+                    1.0 -> VideoGroup.ContentType.TOP_CONTENT
+                    else -> null
+                }
             }
-            else -> VideoGroup.ContentType.VIDEOS
+            else -> null
         }
     }
 

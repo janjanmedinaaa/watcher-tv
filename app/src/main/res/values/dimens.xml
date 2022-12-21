@@ -11,6 +11,12 @@
     <dimen name="leaderboard_card_width">256dp</dimen>
     <dimen name="leaderboard_card_height">144dp</dimen>
 
+    <dimen name="collection_card_width">135.34dp</dimen>
+    <dimen name="collection_card_height">189.47dp</dimen>
+
+    <dimen name="movie_list_card_width">256dp</dimen>
+    <dimen name="movie_list_card_height">144dp</dimen>
+
     <dimen name="navigation_image_card_height">44dp</dimen>
 
     <!-- Text sizes. -->
