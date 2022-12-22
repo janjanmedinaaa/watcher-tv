@@ -37,6 +37,8 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.features.home.cleanUpRows
+import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
@@ -86,8 +88,6 @@ class PlayerFragment : VideoSupportFragment() {
                 }
                 is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
-                    viewModel.saveVideo(controlGlue.currentPosition)
-
                     findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
                             state.videoMedia,
@@ -157,6 +157,12 @@ class PlayerFragment : VideoSupportFragment() {
 
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)
         listenVM()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cleanUpRows()
+        hideNavigationBar()
     }
 
     override fun onDestroyView() {
@@ -259,10 +265,7 @@ class PlayerFragment : VideoSupportFragment() {
 
             setOnActionListener { action ->
                 when (action) {
-                    skipNextAction -> {
-                        if (viewModel.isPlayingMovie) playerAdapter.pause()
-                        endVideo()
-                    }
+                    skipNextAction -> endVideo()
                     skipPreviousAction -> {
                         if (viewModel.isFirstEpisode || !justStarted) {
                             exoPlayer!!.seekTo(0L)

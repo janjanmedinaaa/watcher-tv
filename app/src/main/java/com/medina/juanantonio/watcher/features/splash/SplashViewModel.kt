@@ -136,7 +136,7 @@ class SplashViewModel @Inject constructor(
     fun navigateToHomeScreen(showLoading: Boolean = false) {
         viewModelScope.launch {
             if (showLoading) loaderUseCase.show()
-            val homePageId = contentRepository.navigationItems.firstOrNull()?.contentId
+            val homePageId = contentRepository.navigationItems.firstOrNull()?.id
             contentRepository.setupHomePage(homePageId)
 
             assetToDownload = null

@@ -54,7 +54,7 @@ class VideoSearchViewModel @Inject constructor(
         job = viewModelScope.launch {
             val results = contentRepository.searchByKeyword(keyword)
             if (!results.isNullOrEmpty()) {
-                searchResults.value = Event(results.sortedBy { it.title.trim() })
+                searchResults.value = Event(results)
             }
         }
     }
@@ -64,7 +64,7 @@ class VideoSearchViewModel @Inject constructor(
         job = viewModelScope.launch {
             val results = contentRepository.getSearchLeaderboard()
             if (!results.isNullOrEmpty()) {
-                searchResults.value = Event(results.sortedBy { it.title.trim() })
+                searchResults.value = Event(results)
             }
         }
     }

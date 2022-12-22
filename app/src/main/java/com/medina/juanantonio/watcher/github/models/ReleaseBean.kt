@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.github.models
 
 import com.medina.juanantonio.watcher.BuildConfig
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 
 data class ReleaseBean(
     val name: String,
@@ -27,7 +28,11 @@ data class ReleaseBean(
     fun isForDownload(): Boolean =
         !draft && !prerelease
 
-    fun isNewerVersion(): Boolean =
-        tag_name != BuildConfig.VERSION_NAME &&
-            tag_name.toFloat() > BuildConfig.VERSION_NAME.toFloat()
+    fun isNewerVersion(): Boolean {
+        val differentVersion = tag_name != BuildConfig.VERSION_NAME
+        val tagNameVersion = DefaultArtifactVersion(tag_name)
+        val versionName = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
+
+        return differentVersion && (tagNameVersion > versionName)
+    }
 }

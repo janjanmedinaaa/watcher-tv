@@ -25,9 +25,6 @@ class PlayerViewModel @Inject constructor(
     private var video: Video? = null
     private var job: Job? = null
 
-    val isPlayingMovie: Boolean
-        get() = video?.isMovie == true
-
     lateinit var videoMedia: VideoMedia
 
     val savedProgress = MutableLiveData<Event<Long>>()

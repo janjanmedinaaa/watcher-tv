@@ -2,8 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/image_card_width"
-    android:layout_height="@dimen/image_card_height"
+    android:layout_width="@dimen/leaderboard_card_width"
+    android:layout_height="@dimen/leaderboard_card_height"
     android:background="@drawable/gradient">
 
     <ImageView
@@ -11,15 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         tools:src="@mipmap/ic_app_banner" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/group_video_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="linear_layout_text_display" />
 
     <View
         android:layout_width="match_parent"
@@ -30,29 +23,6 @@
         app:layout_constraintEnd_toEndOf="@id/linear_layout_text_display"
         app:layout_constraintStart_toStartOf="@id/linear_layout_text_display"
         app:layout_constraintTop_toTopOf="@id/linear_layout_text_display" />
-
-    <View
-        android:layout_width="@dimen/dp_0"
-        android:layout_height="@dimen/dp_0"
-        android:alpha="0.7"
-        android:background="@drawable/rounded_corner_background"
-        app:layout_constraintBottom_toBottomOf="@id/textview_score"
-        app:layout_constraintEnd_toEndOf="@id/textview_score"
-        app:layout_constraintStart_toStartOf="@id/textview_score"
-        app:layout_constraintTop_toTopOf="@id/textview_score" />
-
-    <TextView
-        android:id="@+id/textview_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/dp_6"
-        android:fontFamily="sans-serif-condensed"
-        android:padding="@dimen/dp_4"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_12"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="8.0" />
 
     <LinearLayout
         android:id="@+id/linear_layout_text_display"

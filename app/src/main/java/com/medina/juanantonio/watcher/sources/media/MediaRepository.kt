@@ -4,6 +4,7 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
+import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 
 class MediaRepository(
     private val remoteSource: IMediaRemoteSource
@@ -43,6 +44,14 @@ class MediaRepository(
         } else null
     }
 
+    override suspend fun getVideoDetails(video: Video): GetVideoDetailsResponse.Data? {
+        val result = remoteSource.getVideoDetails(video.contentId, video.category ?: -1)
+
+        return if (result is Result.Success) {
+            result.data?.data
+        } else null
+    }
+
     override suspend fun getSeriesEpisodes(video: Video): VideoGroup? {
         val result = remoteSource.getVideoDetails(video.contentId, video.category ?: -1)
 
@@ -64,5 +73,6 @@ interface IMediaRepository {
     var currentlyPlayingVideo: Video?
 
     suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
+    suspend fun getVideoDetails(video: Video): GetVideoDetailsResponse.Data?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
 }

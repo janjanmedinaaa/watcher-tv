@@ -7,7 +7,8 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
-import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.CategoriesTitle
+import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
+import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
@@ -33,15 +34,22 @@ class HomeViewModel @Inject constructor(
     val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
     val episodeToAutoPlay = MutableLiveData<Event<Video>>()
     val removeNavigationContent = MutableLiveData<Event<Unit>>()
+    val videoDetails = MutableLiveData<GetVideoDetailsResponse.Data>()
+
+    val navigationItems: List<NavigationItemBean>
+        get() = contentRepository.navigationItems
 
     private var isDisplayingEpisodes = false
     var contentLoaded = false
 
     private var job: Job? = null
+    private var videoDetailsJob: Job? = null
 
     fun setupVideoList(videoGroup: VideoGroup?) {
         if (contentLoaded) {
-            if (videoGroup == null) getOnGoingVideoGroup()
+            if (videoGroup == null) viewModelScope.launch {
+                getOnGoingVideoGroup()
+            }
             return
         }
         contentLoaded = true
@@ -71,17 +79,8 @@ class HomeViewModel @Inject constructor(
                     contentList.value = Event(listOf(videoGroup))
                 }
             } else {
-                val navigationVideoGroupList = listOf(
-                    VideoGroup(
-                        category = CategoriesTitle,
-                        videoList = contentRepository.navigationItems,
-                        contentType = VideoGroup.ContentType.NAVIGATION
-                    )
-                )
-
-                contentList.value =
-                    Event(navigationVideoGroupList + contentRepository.getHomePage())
                 getOnGoingVideoGroup()
+                contentList.value = Event(contentRepository.getHomePage())
             }
         }
     }
@@ -107,23 +106,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getOnGoingVideoGroup() {
-        viewModelScope.launch {
-            val onGoingVideos = watchHistoryUseCase.getOnGoingVideos()
-            val latestOnGoingVideos = onGoingVideos.map {
-                it.episodeNumber = 0
-                it
-            }.sortedByDescending { it.lastWatchTime }.take(10)
+    private suspend fun getOnGoingVideoGroup() {
+        val onGoingVideos = watchHistoryUseCase.getOnGoingVideos()
+        val latestOnGoingVideos = onGoingVideos.map {
+            it.episodeNumber = 0
+            it.isHomeDisplay = true
+            it
+        }.sortedByDescending { it.lastWatchTime }.take(10)
 
-            val onGoingVideoGroup =
-                VideoGroup(
-                    category = ContinueWatchingTitle,
-                    videoList = latestOnGoingVideos,
-                    contentType = VideoGroup.ContentType.VIDEOS
-                )
+        val onGoingVideoGroup =
+            VideoGroup(
+                category = ContinueWatchingTitle,
+                videoList = latestOnGoingVideos,
+                contentType = VideoGroup.ContentType.VIDEOS
+            )
 
-            onGoingVideosList.value = Event(onGoingVideoGroup)
-        }
+        onGoingVideosList.value = Event(onGoingVideoGroup)
     }
 
     fun getAlbumDetails(video: Video) {
@@ -143,11 +141,11 @@ class HomeViewModel @Inject constructor(
         else getEpisodeList(video)
     }
 
-    fun handleNavigationItem(video: Video) {
-        if (job?.isActive == true) return
+    fun handleNavigationItem(id: Int) {
+        if (job?.isActive == true) job?.cancel()
         job = viewModelScope.launch {
             loaderUseCase.show()
-            contentRepository.setupHomePage(video.contentId)
+            contentRepository.setupHomePage(id)
             contentRepository.resetPage()
             removeNavigationContent()
             addNewContent()
@@ -172,6 +170,33 @@ class HomeViewModel @Inject constructor(
                 this@HomeViewModel.selectedVideoGroup.value = Event(it)
             }
             loaderUseCase.hide()
+        }
+    }
+
+    fun getVideoDetails(video: Video) {
+        if (video.isAlbum) getVideoDetailsFromAlbum(video)
+        else getVideoDetailsFromContent(video)
+    }
+
+    private fun getVideoDetailsFromContent(video: Video) {
+        if (videoDetailsJob?.isActive == true)
+            videoDetailsJob?.cancel()
+
+        videoDetailsJob = viewModelScope.launch {
+            val videoDetails = mediaRepository.getVideoDetails(video) ?: return@launch
+            this@HomeViewModel.videoDetails.value = videoDetails
+        }
+    }
+
+    private fun getVideoDetailsFromAlbum(video: Video) {
+        if (videoDetailsJob?.isActive == true)
+            videoDetailsJob?.cancel()
+
+        videoDetailsJob = viewModelScope.launch {
+            val albumDetails = contentRepository.getAlbumDetails(video.contentId) ?: return@launch
+            val firstVideo = albumDetails.videoList.firstOrNull() ?: return@launch
+            val videoDetails = mediaRepository.getVideoDetails(firstVideo) ?: return@launch
+            this@HomeViewModel.videoDetails.value = videoDetails
         }
     }
 }

@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="image_card_width">144dp</dimen>
+    <dimen name="image_card_width">135.34dp</dimen>
     <dimen name="image_card_height">203dp</dimen>
 
     <dimen name="person_image_card_length">174dp</dimen>
     <dimen name="person_image_card_radius">60dp</dimen>
     <dimen name="person_image_card_size">120dp</dimen>
+
+    <dimen name="leaderboard_card_width">256dp</dimen>
+    <dimen name="leaderboard_card_height">144dp</dimen>
+
+    <dimen name="collection_card_width">135.34dp</dimen>
+    <dimen name="collection_card_height">189.47dp</dimen>
+
+    <dimen name="movie_list_card_width">256dp</dimen>
+    <dimen name="movie_list_card_height">144dp</dimen>
 
     <dimen name="navigation_image_card_height">44dp</dimen>
 
@@ -35,8 +44,13 @@
     <dimen name="dp_8">8dp</dimen>
     <dimen name="dp_12">12dp</dimen>
     <dimen name="dp_14">14dp</dimen>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="dp_32">32dp</dimen>
 
     <dimen name="sp_12">12sp</dimen>
     <dimen name="sp_16">16sp</dimen>
     <dimen name="sp_18">18sp</dimen>
+    <dimen name="sp_32">32sp</dimen>
+
+    <dimen name="rows_fragment_custom_list_height">290dp</dimen>
 </resources>

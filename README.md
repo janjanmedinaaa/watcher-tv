@@ -2,18 +2,29 @@
 Watcher TV is an Android TV app that utilizes the Loklok API and Android Leanback Library.
 
 ## Features
+- Optional Login for Watch Progress
 - Browse Content
+  - Now with more categories and collections!
 - Search Content
 - Top Search Display
 - Video Playback
-    - Skip and Back Episodes
-    - Closed Captioning
-    - Play and Pause
-- Display connected Movies (for Series' Seasons/Sequels)
+  - Skip and Back Episodes
+  - Closed Captioning
+  - Play and Pause
+  - Bedtime Mode (Pause every 5 episodes)
+  - Playback Speed Control
+- Display related Movies (for Series' Seasons/Sequels)
 - Display Movie Suggestions
-- Continue Watching
+- API based and local storage Watch History
 
 ## Screenshots
+
+### Login Screen
+<p align="center">
+  <img alt="Login Screen" src="./screenshots/Login%20Screen.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Login Screen w/ code" src="./screenshots/Login%20Screen%20Code.png" width="45%">
+</p>
 
 ### Home Screen
 <p align="center">
@@ -33,5 +44,5 @@ Watcher TV is an Android TV app that utilizes the Loklok API and Android Leanbac
 <p align="center">
   <img alt="Video Playback" src="./screenshots/Video%20Playback.png" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Video Recommendations" src="./screenshots/Video%20Recommedations.png" width="45%">
+  <img alt="Video Recommendations" src="./screenshots/Video%20Recommendations.png" width="45%">
 </p>

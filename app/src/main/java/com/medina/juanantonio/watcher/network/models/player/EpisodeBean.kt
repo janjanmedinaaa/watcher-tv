@@ -1,5 +1,8 @@
 package com.medina.juanantonio.watcher.network.models.player
 
+import com.google.gson.annotations.JsonAdapter
+import com.medina.juanantonio.watcher.network.deserializer.DefinitionCodeDeserializer
+
 data class EpisodeBean(
     val id: Int,
     val definitionList: List<Definition>,
@@ -13,11 +16,14 @@ data class EpisodeBean(
         val fullDescription: String
     )
 
+    @JsonAdapter(DefinitionCodeDeserializer::class)
     enum class DefinitionCode {
         GROOT_HD,
         GROOT_SD,
         GROOT_LD,
-        GROOT_FD
+        GROOT_FD,
+
+        UNKNOWN
     }
 
     fun getDefinition(): DefinitionCode {

@@ -2,18 +2,22 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/image_card_width"
-    android:layout_height="@dimen/navigation_image_card_height">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/dp_16">
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.7"
-        android:background="@android:color/black"
+        android:id="@+id/view_focus_background"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="@dimen/dp_0"
+        android:alpha="0.3"
+        android:background="@drawable/rounded_corner_background"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/textview_title"
         app:layout_constraintEnd_toEndOf="@id/textview_title"
         app:layout_constraintStart_toStartOf="@id/textview_title"
-        app:layout_constraintTop_toTopOf="@id/textview_title" />
+        app:layout_constraintTop_toTopOf="@id/textview_title"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/textview_title"
@@ -22,7 +26,8 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-condensed"
         android:maxLines="1"
-        android:padding="@dimen/dp_8"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingVertical="@dimen/dp_8"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="@dimen/sp_18"

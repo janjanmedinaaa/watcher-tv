@@ -127,7 +127,7 @@ class MainActivity : FragmentActivity() {
     }
 
     /**
-     * Updates the main fragment background after a delay
+     * Updates the activity background after a delay
      *
      * This delay allows the user to quickly scroll through content without flashing a changing
      * background with every item that is passed.
