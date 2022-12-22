@@ -88,8 +88,6 @@ class PlayerFragment : VideoSupportFragment() {
                 }
                 is VideoPlaybackState.End -> viewModel.handleVideoEnd()
                 is VideoPlaybackState.Error -> {
-                    viewModel.saveVideo(controlGlue.currentPosition)
-
                     findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
                             state.videoMedia,
@@ -267,12 +265,7 @@ class PlayerFragment : VideoSupportFragment() {
 
             setOnActionListener { action ->
                 when (action) {
-                    skipNextAction -> {
-                        if (viewModel.isPlayingMovie || viewModel.isLastEpisode) {
-                            playerAdapter.pause()
-                        }
-                        endVideo()
-                    }
+                    skipNextAction -> endVideo()
                     skipPreviousAction -> {
                         if (viewModel.isFirstEpisode || !justStarted) {
                             exoPlayer!!.seekTo(0L)
