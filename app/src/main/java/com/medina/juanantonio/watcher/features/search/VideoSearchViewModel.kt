@@ -44,10 +44,7 @@ class VideoSearchViewModel @Inject constructor(
         }
 
         if (keyword.equals(DEVELOPER_KEYWORD, ignoreCase = true)) {
-            viewModelScope.launch {
-                if (!updateRepository.isDeveloperMode())
-                    getEnableDeveloperMode()
-            }
+            getEnableDeveloperMode()
             return
         }
 

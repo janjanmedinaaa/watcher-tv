@@ -49,7 +49,7 @@ class MockUpdateRepository : IUpdateRepository {
     }
 
     override suspend fun enableDeveloperMode() {
-        developerModeEnabled = true
+        developerModeEnabled = !developerModeEnabled
     }
 
     override suspend fun isDeveloperMode(): Boolean {
