@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Card sizes -->
     <dimen name="image_card_width">135.34dp</dimen>
     <dimen name="image_card_height">203dp</dimen>
 
@@ -37,6 +38,10 @@
     <dimen name="action_button_base_elevation">0dp</dimen>
     <dimen name="action_button_focused_elevation">4dp</dimen>
     <dimen name="action_button_padding_horizontal">20dp</dimen>
+
+    <dimen name="icon_background_size">56dp</dimen>
+    <dimen name="logo_size">48dp</dimen>
+    <dimen name="logo_background_size">64dp</dimen>
 
     <dimen name="dp_0">0dp</dimen>
     <dimen name="dp_4">4dp</dimen>

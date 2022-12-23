@@ -7,6 +7,7 @@ import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.data.models.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
+import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
@@ -14,6 +15,7 @@ import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
+import com.medina.juanantonio.watcher.sources.user.IUserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,7 +27,8 @@ class HomeViewModel @Inject constructor(
     private val contentRepository: IContentRepository,
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
-    private val watchHistoryUseCase: WatchHistoryUseCase
+    private val watchHistoryUseCase: WatchHistoryUseCase,
+    private val userRepository: IUserRepository
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -35,6 +38,7 @@ class HomeViewModel @Inject constructor(
     val episodeToAutoPlay = MutableLiveData<Event<Video>>()
     val removeNavigationContent = MutableLiveData<Event<Unit>>()
     val videoDetails = MutableLiveData<GetVideoDetailsResponse.Data>()
+    val userDetails = MutableLiveData<GetUserInfoResponse.Data>()
 
     val navigationItems: List<NavigationItemBean>
         get() = contentRepository.navigationItems
@@ -141,6 +145,18 @@ class HomeViewModel @Inject constructor(
         else getEpisodeList(video)
     }
 
+    private fun getEpisodeList(video: Video) {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            loaderUseCase.show()
+            val videoMedia = mediaRepository.getSeriesEpisodes(video)
+            videoMedia?.let {
+                this@HomeViewModel.selectedVideoGroup.value = Event(it)
+            }
+            loaderUseCase.hide()
+        }
+    }
+
     fun handleNavigationItem(id: Int) {
         if (job?.isActive == true) job?.cancel()
         job = viewModelScope.launch {
@@ -159,18 +175,6 @@ class HomeViewModel @Inject constructor(
 
     fun addNewContent() {
         contentList.value = Event(contentRepository.getHomePage())
-    }
-
-    private fun getEpisodeList(video: Video) {
-        if (job?.isActive == true) return
-        job = viewModelScope.launch {
-            loaderUseCase.show()
-            val videoMedia = mediaRepository.getSeriesEpisodes(video)
-            videoMedia?.let {
-                this@HomeViewModel.selectedVideoGroup.value = Event(it)
-            }
-            loaderUseCase.hide()
-        }
     }
 
     fun getVideoDetails(video: Video) {
@@ -197,6 +201,12 @@ class HomeViewModel @Inject constructor(
             val firstVideo = albumDetails.videoList.firstOrNull() ?: return@launch
             val videoDetails = mediaRepository.getVideoDetails(firstVideo) ?: return@launch
             this@HomeViewModel.videoDetails.value = videoDetails
+        }
+    }
+
+    fun getUserInfo() {
+        viewModelScope.launch {
+            userDetails.value = userRepository.getUserInfo() ?: return@launch
         }
     }
 }

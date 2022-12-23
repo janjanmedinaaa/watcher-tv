@@ -7,9 +7,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Group
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -20,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
@@ -29,6 +32,7 @@ import com.medina.juanantonio.watcher.data.models.ItemCategory
 import com.medina.juanantonio.watcher.data.models.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
+import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
@@ -95,20 +99,7 @@ class HomeFragment : RowsSupportFragment() {
         super.onViewCreated(view, savedInstanceState)
         adapter = contentAdapter
 
-        view.findViewById<AppCompatImageView>(R.id.image_view_search)?.setOnClickListener {
-            findNavController().safeNavigate(
-                HomeFragmentDirections.actionHomeFragmentToVideoSearchFragment()
-            )
-        }
-
-        view.findViewById<RecyclerView>(R.id.recycler_view_navigation)?.apply {
-            adapter = navigationAdapter
-            isVisible = selectedVideoGroup == null
-            navigationAdapter.setNavigationItems(viewModel.navigationItems) {
-                viewModel.handleNavigationItem(it.id)
-            }
-        }
-
+        setupViews()
         listenVM()
     }
 
@@ -116,7 +107,44 @@ class HomeFragment : RowsSupportFragment() {
         super.onResume()
 
         viewModel.setupVideoList(selectedVideoGroup)
+        viewModel.getUserInfo()
         activityViewModel.resetBackgroundImage()
+    }
+
+    private fun setupViews() {
+        view?.findViewById<AppCompatImageView>(R.id.image_view_logo)?.apply {
+            setOnClickListener {
+
+            }
+
+            setOnFocusChangeListener { _, onFocus ->
+                val logoBackground =
+                    view?.findViewById<View>(R.id.view_logo_focus_background)
+                logoBackground?.isVisible = onFocus
+            }
+        }
+
+        view?.findViewById<AppCompatImageView>(R.id.image_view_search)?.apply {
+            setOnClickListener {
+                findNavController().safeNavigate(
+                    HomeFragmentDirections.actionHomeFragmentToVideoSearchFragment()
+                )
+            }
+
+            setOnFocusChangeListener { _, onFocus ->
+                val searchBackground =
+                    view?.findViewById<CardView>(R.id.card_view_search_focus_background)
+                searchBackground?.isInvisible = !onFocus
+            }
+        }
+
+        view?.findViewById<RecyclerView>(R.id.recycler_view_navigation)?.apply {
+            adapter = navigationAdapter
+            isVisible = selectedVideoGroup == null
+            navigationAdapter.setNavigationItems(viewModel.navigationItems) {
+                viewModel.handleNavigationItem(it.id)
+            }
+        }
     }
 
     private fun listenVM() {
@@ -181,6 +209,10 @@ class HomeFragment : RowsSupportFragment() {
         viewModel.videoDetails.observe(viewLifecycleOwner) { data ->
             setupVideoDetailsPreview(data)
         }
+
+        viewModel.userDetails.observe(viewLifecycleOwner) { data ->
+            setupUserDetailsPreview(data)
+        }
     }
 
     override fun onDestroy() {
@@ -221,6 +253,21 @@ class HomeFragment : RowsSupportFragment() {
             if ((textViewPreviewTitle?.lineCount ?: 1) > 1) 3 else 5
 
         activityViewModel.setBackgroundImage(details.coverHorizontalUrl)
+    }
+
+    private fun setupUserDetailsPreview(details: GetUserInfoResponse.Data) {
+        val imageViewIcon =
+            view?.findViewById<AppCompatImageView>(R.id.image_view_logo) ?: return
+        val textViewUserName =
+            view?.findViewById<AppCompatTextView>(R.id.text_view_user_name)
+
+        textViewUserName?.text = details.nickName.trim()
+
+        glide.load(details.headImgUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .override(56 * 2, 56 * 2)
+            .error(R.mipmap.ic_launcher)
+            .into(imageViewIcon)
     }
 }
 
