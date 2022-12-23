@@ -1,10 +1,13 @@
 package com.medina.juanantonio.watcher.sources.auth
 
+import android.content.Context
+import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 
 class AuthRepository(
+    private val context: Context,
     private val remoteSource: IAuthRemoteSource,
     private val dataStoreManager: IDataStoreManager
 ) : IAuthRepository {
@@ -25,10 +28,21 @@ class AuthRepository(
             val data = result.data?.data
             if (data?.token == null) false
             else {
-                dataStoreManager.putString(AUTH_TOKEN, data.token)
+                saveToken(data.token)
                 true
             }
         } else false
+    }
+
+    override suspend fun logout(): Boolean {
+        val registrationToken = context.getString(R.string.registration_token)
+        val result = remoteSource.logout(registrationToken)
+        val isSuccessful =
+            result is Result.Success && result.data?.code == "00000"
+
+        if (isSuccessful) clearToken()
+
+        return isSuccessful
     }
 
     override suspend fun refreshToken(): Boolean {
@@ -38,7 +52,7 @@ class AuthRepository(
             val data = result.data?.data
             if (data == null) false
             else {
-                dataStoreManager.putString(AUTH_TOKEN, data)
+                saveToken(data)
                 true
             }
         } else false
@@ -51,11 +65,16 @@ class AuthRepository(
     override suspend fun isUserAuthenticated(): Boolean {
         return dataStoreManager.getString(AUTH_TOKEN).isNotBlank()
     }
+
+    private suspend fun saveToken(token: String) {
+        dataStoreManager.putString(AUTH_TOKEN, token)
+    }
 }
 
 interface IAuthRepository {
     suspend fun getOTPForLogin(phoneNumber: String): Boolean
     suspend fun login(phoneNumber: String, captcha: String): Boolean
+    suspend fun logout(): Boolean
     suspend fun refreshToken(): Boolean
     suspend fun clearToken()
     suspend fun isUserAuthenticated(): Boolean

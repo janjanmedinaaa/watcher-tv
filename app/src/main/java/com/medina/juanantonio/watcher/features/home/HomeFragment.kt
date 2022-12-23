@@ -48,6 +48,7 @@ class HomeFragment : RowsSupportFragment() {
     private lateinit var glide: RequestManager
 
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
+    private lateinit var startForResultLogout: ActivityResultLauncher<Intent>
 
     private var selectedVideoGroup: VideoGroup? = null
 
@@ -73,6 +74,14 @@ class HomeFragment : RowsSupportFragment() {
                         viewModel.getVideoMedia(video)
                     }
                 }
+            }
+        }
+
+        startForResultLogout = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            when ("${it?.data?.data}".toLongOrNull()) {
+                ACTION_ID_POSITIVE -> viewModel.logout()
             }
         }
 
@@ -114,7 +123,7 @@ class HomeFragment : RowsSupportFragment() {
     private fun setupViews() {
         view?.findViewById<AppCompatImageView>(R.id.image_view_logo)?.apply {
             setOnClickListener {
-
+                viewModel.handleLogoActions()
             }
 
             setOnFocusChangeListener { _, onFocus ->
@@ -213,11 +222,26 @@ class HomeFragment : RowsSupportFragment() {
         viewModel.userDetails.observe(viewLifecycleOwner) { data ->
             setupUserDetailsPreview(data)
         }
+
+        viewModel.navigateToHomeScreen.observeEvent(viewLifecycleOwner) {
+            findNavController().safeNavigate(
+                HomeFragmentDirections.actionHomeFragmentToSplashFragment()
+            )
+        }
+
+        viewModel.showLogoutDialog.observeEvent(viewLifecycleOwner) {
+            startForResultLogout.launch(
+                DialogActivity.getIntent(
+                    context = requireContext(),
+                    title = getString(R.string.logout_title)
+                )
+            )
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.contentLoaded = false
+        viewModel.isContentLoaded = false
         activityViewModel.cancelBackgroundImage()
     }
 

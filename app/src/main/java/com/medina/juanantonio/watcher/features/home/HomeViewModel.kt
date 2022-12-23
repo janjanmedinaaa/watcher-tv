@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.features.home
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,7 @@ import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
@@ -28,7 +30,8 @@ class HomeViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
-    private val userRepository: IUserRepository
+    private val userRepository: IUserRepository,
+    private val authRepository: IAuthRepository
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -43,20 +46,28 @@ class HomeViewModel @Inject constructor(
     val navigationItems: List<NavigationItemBean>
         get() = contentRepository.navigationItems
 
+    private val _showLogoutDialog = MutableLiveData<Event<Unit>>()
+    val showLogoutDialog: LiveData<Event<Unit>>
+        get() = _showLogoutDialog
+
+    private val _navigateToHomeScreen = MutableLiveData<Event<Unit>>()
+    val navigateToHomeScreen: LiveData<Event<Unit>>
+        get() = _navigateToHomeScreen
+
     private var isDisplayingEpisodes = false
-    var contentLoaded = false
+    var isContentLoaded = false
 
     private var job: Job? = null
     private var videoDetailsJob: Job? = null
 
     fun setupVideoList(videoGroup: VideoGroup?) {
-        if (contentLoaded) {
+        if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
                 getOnGoingVideoGroup()
             }
             return
         }
-        contentLoaded = true
+        isContentLoaded = true
 
         viewModelScope.launch {
             if (videoGroup != null) {
@@ -207,6 +218,26 @@ class HomeViewModel @Inject constructor(
     fun getUserInfo() {
         viewModelScope.launch {
             userDetails.value = userRepository.getUserInfo() ?: return@launch
+        }
+    }
+
+    fun handleLogoActions() {
+        viewModelScope.launch {
+            val isLoggedIn = authRepository.isUserAuthenticated()
+            if (isLoggedIn) {
+                _showLogoutDialog.value = Event(Unit)
+            } else {
+                _navigateToHomeScreen.value = Event(Unit)
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            val isSuccessful = authRepository.logout()
+            if (isSuccessful) {
+                _navigateToHomeScreen.value = Event(Unit)
+            }
         }
     }
 }

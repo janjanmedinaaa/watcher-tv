@@ -68,6 +68,20 @@ class AuthRemoteSource(
         }
     }
 
+    override suspend fun logout(registrationToken: String): Result<BasicResponse> {
+        return try {
+            val request = LogoutRequest(registrationToken)
+            val response = withContext(Dispatchers.IO) {
+                apiService.logout(request)
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
+
     override suspend fun refreshToken(): Result<RefreshTokenResponse> {
         return try {
             val response = withContext(Dispatchers.IO) {
@@ -97,6 +111,8 @@ interface IAuthRemoteSource {
         phoneSystem: String = Build.HARDWARE,
         adjustId: String = Build.ID
     ): Result<LoginResponse>
+
+    suspend fun logout(registrationToken: String): Result<BasicResponse>
 
     suspend fun refreshToken(): Result<RefreshTokenResponse>
 }
