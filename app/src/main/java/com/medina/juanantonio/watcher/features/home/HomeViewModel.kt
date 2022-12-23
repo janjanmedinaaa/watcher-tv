@@ -227,6 +227,7 @@ class HomeViewModel @Inject constructor(
             if (isLoggedIn) {
                 _showLogoutDialog.value = Event(Unit)
             } else {
+                authRepository.continueWithoutAuth(false)
                 _navigateToHomeScreen.value = Event(Unit)
             }
         }

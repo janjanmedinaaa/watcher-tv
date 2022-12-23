@@ -122,14 +122,16 @@ class SplashViewModel @Inject constructor(
     fun checkAuthentication() {
         viewModelScope.launch {
             val isUserAuthenticated = authRepository.isUserAuthenticated()
+            val shouldContinueWithoutAuth = authRepository.shouldContinueWithoutAuth()
             if (isUserAuthenticated) {
                 val isRefreshSuccessful = authRepository.refreshToken()
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch
-                } else {
-                    authRepository.clearToken()
                 }
+            } else if (shouldContinueWithoutAuth) {
+                navigateToHomeScreen()
+                return@launch
             }
 
             delay(1000L)
@@ -139,7 +141,10 @@ class SplashViewModel @Inject constructor(
 
     fun navigateToHomeScreen(showLoading: Boolean = false) {
         viewModelScope.launch {
-            if (showLoading) loaderUseCase.show()
+            if (showLoading) {
+                loaderUseCase.show()
+                authRepository.continueWithoutAuth()
+            }
             val homePageId = contentRepository.navigationItems.firstOrNull()?.id
             contentRepository.setupHomePage(homePageId)
 
