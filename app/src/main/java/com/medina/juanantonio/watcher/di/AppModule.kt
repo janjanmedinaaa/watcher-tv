@@ -221,10 +221,11 @@ class AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
+        @ApplicationContext context: Context,
         remoteSource: IAuthRemoteSource,
         dataStoreManager: IDataStoreManager
     ): IAuthRepository {
-        return AuthRepository(remoteSource, dataStoreManager)
+        return AuthRepository(context, remoteSource, dataStoreManager)
     }
 
     @Provides

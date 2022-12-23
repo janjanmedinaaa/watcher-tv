@@ -32,7 +32,7 @@ class DownloadController(
 
     fun enqueueDownload(asset: ReleaseBean.Asset) {
         var destination =
-            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
+            "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_DOWNLOADS}/"
         destination += FILE_NAME
 
         val uri = Uri.parse("$FILE_BASE_PATH$destination")

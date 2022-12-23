@@ -13,26 +13,49 @@
         android:layout_marginStart="@dimen/dp_32"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="@id/image_view_logo"
+        app:layout_constraintBottom_toBottomOf="@id/card_view_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/image_view_logo"
+        app:layout_constraintTop_toTopOf="@id/card_view_logo"
         tools:itemCount="4"
         tools:listitem="@layout/item_navigation" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_search_focus_background"
+        android:layout_width="@dimen/icon_background_size"
+        android:layout_height="@dimen/icon_background_size"
+        android:layout_margin="@dimen/dp_16"
+        android:backgroundTint="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="invisible"
+        app:cardCornerRadius="@dimen/icon_background_size"
+        app:cardElevation="@dimen/dp_0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <View
+            android:id="@+id/view_focus_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:background="@drawable/rounded_corner_background" />
+    </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/dp_16"
         android:background="@null"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
-        android:padding="@dimen/dp_16"
         android:src="@drawable/ic_search"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/card_view_search_focus_background"
+        app:layout_constraintEnd_toEndOf="@id/card_view_search_focus_background"
+        app:layout_constraintStart_toStartOf="@id/card_view_search_focus_background"
+        app:layout_constraintTop_toTopOf="@id/card_view_search_focus_background"
         tools:ignore="UnusedAttribute" />
 
     <androidx.constraintlayout.widget.Group
@@ -40,21 +63,62 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:constraint_referenced_ids="image_view_logo, text_view_preview_title,
+        app:constraint_referenced_ids="card_view_logo, text_view_preview_title,
         text_view_preview_description, text_view_preview_year, text_view_preview_tags,
-        image_view_search, text_view_preview_score"
+        image_view_search, text_view_preview_score, text_view_user_name"
         tools:visibility="visible" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/dp_16"
+    <View
+        android:id="@+id/view_logo_focus_background"
+        android:layout_width="@dimen/logo_background_size"
+        android:layout_height="@dimen/logo_background_size"
+        android:layout_margin="@dimen/dp_8"
+        android:alpha="0.5"
+        android:background="@drawable/rounded_corner_background"
         android:clickable="false"
         android:focusable="false"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/ic_launcher" />
+        tools:visibility="visible" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_logo"
+        android:layout_width="@dimen/logo_size"
+        android:layout_height="@dimen/logo_size"
+        android:layout_margin="@dimen/dp_16"
+        android:backgroundTint="@android:color/transparent"
+        app:cardCornerRadius="@dimen/dp_8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_logo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@mipmap/ic_launcher" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_user_name"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_16"
+        android:layout_marginEnd="@dimen/dp_16"
+        android:clickable="false"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:fontFamily="sans-serif-condensed"
+        android:maxLines="1"
+        android:textSize="@dimen/sp_18"
+        app:layout_constraintBottom_toBottomOf="@id/card_view_logo"
+        app:layout_constraintEnd_toStartOf="@id/recycler_view_navigation"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/card_view_logo"
+        app:layout_constraintTop_toTopOf="@id/card_view_logo"
+        tools:text="janjanmedinaaaaaaaaaaaaaaaaaaaa" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_line_center"
@@ -79,7 +143,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/guide_line_center"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/image_view_logo"
+        app:layout_constraintTop_toBottomOf="@id/card_view_logo"
         tools:text="The Flash" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -104,10 +168,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_corner_background"
+        android:backgroundTint="@color/screen_white"
         android:clickable="false"
         android:ellipsize="end"
         android:focusable="false"
-        android:backgroundTint="@color/screen_white"
         android:fontFamily="sans-serif-condensed"
         android:maxLines="1"
         android:paddingHorizontal="@dimen/dp_8"

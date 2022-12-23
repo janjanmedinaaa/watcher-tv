@@ -63,6 +63,11 @@ interface ApiService {
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
+    @POST("auth/logoutWithFcmToken")
+    suspend fun logout(
+        @Body request: LogoutRequest
+    ): Response<BasicResponse>
+
     @POST("auth/refresh")
     suspend fun refreshToken(): Response<RefreshTokenResponse>
 

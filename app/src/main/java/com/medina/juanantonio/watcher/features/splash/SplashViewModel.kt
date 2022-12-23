@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.features.splash
 
 import android.os.Build
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,7 +32,10 @@ class SplashViewModel @Inject constructor(
     private val watchHistoryUseCase: WatchHistoryUseCase
 ) : ViewModel() {
 
-    val navigateToHomeScreen = MutableLiveData<Event<Unit>>()
+    private val _navigateToHomeScreen = MutableLiveData<Event<Unit>>()
+    val navigateToHomeScreen: LiveData<Event<Unit>>
+        get() = _navigateToHomeScreen
+
     val newerRelease = MutableLiveData<Event<ReleaseBean>>()
     val splashState = MutableLiveData<Event<SplashState>>()
     var assetToDownload: ReleaseBean.Asset? = null
@@ -118,14 +122,16 @@ class SplashViewModel @Inject constructor(
     fun checkAuthentication() {
         viewModelScope.launch {
             val isUserAuthenticated = authRepository.isUserAuthenticated()
+            val shouldContinueWithoutAuth = authRepository.shouldContinueWithoutAuth()
             if (isUserAuthenticated) {
                 val isRefreshSuccessful = authRepository.refreshToken()
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch
-                } else {
-                    authRepository.clearToken()
                 }
+            } else if (shouldContinueWithoutAuth) {
+                navigateToHomeScreen()
+                return@launch
             }
 
             delay(1000L)
@@ -135,13 +141,16 @@ class SplashViewModel @Inject constructor(
 
     fun navigateToHomeScreen(showLoading: Boolean = false) {
         viewModelScope.launch {
-            if (showLoading) loaderUseCase.show()
+            if (showLoading) {
+                loaderUseCase.show()
+                authRepository.continueWithoutAuth()
+            }
             val homePageId = contentRepository.navigationItems.firstOrNull()?.id
             contentRepository.setupHomePage(homePageId)
 
             assetToDownload = null
             preventKeyboardPopup = true
-            navigateToHomeScreen.value = Event(Unit)
+            _navigateToHomeScreen.value = Event(Unit)
             if (showLoading) loaderUseCase.hide()
         }
     }

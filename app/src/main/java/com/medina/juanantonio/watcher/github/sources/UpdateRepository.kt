@@ -83,7 +83,8 @@ class UpdateRepository(
     }
 
     override suspend fun enableDeveloperMode() {
-        dataStoreManager.putBoolean(DEVELOPER_MODE_KEY, true)
+        val isDeveloperMode = isDeveloperMode()
+        dataStoreManager.putBoolean(DEVELOPER_MODE_KEY, !isDeveloperMode)
     }
 
     override suspend fun isDeveloperMode(): Boolean {

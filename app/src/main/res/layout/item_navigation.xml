@@ -10,7 +10,7 @@
         android:id="@+id/view_focus_background"
         android:layout_width="@dimen/dp_0"
         android:layout_height="@dimen/dp_0"
-        android:alpha="0.3"
+        android:alpha="0.5"
         android:background="@drawable/rounded_corner_background"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/textview_title"
