@@ -89,6 +89,7 @@
         android:layout_margin="@dimen/dp_16"
         android:backgroundTint="@android:color/transparent"
         app:cardCornerRadius="@dimen/dp_8"
+        app:cardElevation="@dimen/dp_0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 

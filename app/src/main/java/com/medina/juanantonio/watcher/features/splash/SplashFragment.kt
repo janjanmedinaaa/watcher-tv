@@ -87,7 +87,7 @@ class SplashFragment : Fragment() {
     private fun listenVM() {
         viewModel.otpCode.observe(viewLifecycleOwner) {
             if (!it.isNullOrBlank() && it.length == 6) {
-                binding.editTextCode.clearFocus()
+                binding.root.hideKeyboard()
                 viewModel.login()
             } else if (it.isNullOrBlank()) {
                 binding.editTextCode.requestFocus()

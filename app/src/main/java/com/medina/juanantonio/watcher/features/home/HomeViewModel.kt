@@ -63,6 +63,7 @@ class HomeViewModel @Inject constructor(
     fun setupVideoList(videoGroup: VideoGroup?) {
         if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
+                delay(500)
                 getOnGoingVideoGroup()
             }
             return
