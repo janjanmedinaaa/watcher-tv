@@ -193,9 +193,9 @@ class PlayerFragment : VideoSupportFragment() {
         }
 
         viewModel.handleVideoEndNavigation.observeEvent(viewLifecycleOwner) {
-            if (videoMedia.connectedVideos.isNullOrEmpty()) {
-                findNavController().popBackStack()
-            } else {
+            if (!videoMedia.connectedVideos.isNullOrEmpty() ||
+                !videoMedia.videoSuggestions.isNullOrEmpty()
+            ) {
                 showConnectedVideos()
             }
         }

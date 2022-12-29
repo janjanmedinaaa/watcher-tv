@@ -47,6 +47,12 @@ class PlayerViewModel @Inject constructor(
 
     private val playbackStateListeners = arrayListOf<PlaybackStateListener>()
 
+    init {
+        viewModelScope.launch {
+            watchHistoryUseCase.getOnGoingVideos()
+        }
+    }
+
     /**
      * Adds a [PlaybackStateListener] to be notified of [VideoPlaybackState] changes.
      */
