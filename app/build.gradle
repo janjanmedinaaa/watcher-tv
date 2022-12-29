@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 13
-        versionName "2.1"
+        versionCode 14
+        versionName "2.2"
     }
 
     buildFeatures {
@@ -141,9 +141,12 @@ dependencies {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
 
+    // AndroidX Data Store
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
+    // SpinKit Loading Spinner
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
 
+    // Used for version checking
     implementation 'org.apache.maven:maven-artifact:3.0.3'
 }
