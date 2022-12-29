@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
     fun setupVideoList(videoGroup: VideoGroup?) {
         if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
-                delay(500)
+                delay(1000)
                 getOnGoingVideoGroup()
             }
             return
@@ -77,6 +77,7 @@ class HomeViewModel @Inject constructor(
                 if (!areAlbumItems) {
                     isDisplayingEpisodes = true
                     contentList.value = Event(listOf(videoGroup))
+                    watchHistoryUseCase.getOnGoingVideos()
 
                     // 1. Gets a Content id of the Series
                     videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
