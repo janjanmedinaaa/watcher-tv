@@ -12,6 +12,7 @@ import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.auth.AuthRemoteSource
 import com.medina.juanantonio.watcher.sources.auth.AuthRepository
 import com.medina.juanantonio.watcher.sources.auth.IAuthRemoteSource
@@ -153,9 +154,10 @@ class AppModule {
     @Singleton
     fun provideContentRemoteSource(
         @ApplicationContext context: Context,
-        apiService: ApiService
+        apiService: ApiService,
+        dispatchers: CoroutineDispatchers
     ): IContentRemoteSource {
-        return ContentRemoteSource(context, apiService)
+        return ContentRemoteSource(context, apiService, dispatchers)
     }
 
     @Provides
@@ -170,9 +172,10 @@ class AppModule {
     @Singleton
     fun provideMediaRemoteSource(
         @ApplicationContext context: Context,
-        apiService: ApiService
+        apiService: ApiService,
+        dispatchers: CoroutineDispatchers
     ): IMediaRemoteSource {
-        return MediaRemoteSource(context, apiService)
+        return MediaRemoteSource(context, apiService, dispatchers)
     }
 
     @Provides
@@ -185,9 +188,10 @@ class AppModule {
     @Singleton
     fun provideGithubRemoteSource(
         @ApplicationContext context: Context,
-        apiService: GithubApiService
+        apiService: GithubApiService,
+        dispatchers: CoroutineDispatchers
     ): IGithubRemoteSource {
-        return GithubRemoteSource(context, apiService)
+        return GithubRemoteSource(context, apiService, dispatchers)
     }
 
     @Provides
@@ -213,9 +217,10 @@ class AppModule {
     @Singleton
     fun provideAuthRemoteSource(
         @ApplicationContext context: Context,
-        apiService: ApiService
+        apiService: ApiService,
+        dispatchers: CoroutineDispatchers
     ): IAuthRemoteSource {
-        return AuthRemoteSource(context, apiService)
+        return AuthRemoteSource(context, apiService, dispatchers)
     }
 
     @Provides
@@ -232,9 +237,10 @@ class AppModule {
     @Singleton
     fun provideUserRemoteSource(
         @ApplicationContext context: Context,
-        apiService: ApiService
+        apiService: ApiService,
+        dispatchers: CoroutineDispatchers
     ): IUserRemoteSource {
-        return UserRemoteSource(context, apiService)
+        return UserRemoteSource(context, apiService, dispatchers)
     }
 
     @Provides

@@ -11,6 +11,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.BackgroundManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
@@ -25,6 +28,8 @@ import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.medina.juanantonio.watcher.databinding.ActivityMainBinding
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
+import com.medina.juanantonio.watcher.shared.utils.DownloadController
+import com.medina.juanantonio.watcher.shared.utils.PollState
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -48,6 +53,9 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var loaderUseCase: LoaderUseCase
+
+    @Inject
+    lateinit var downloadController: DownloadController
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -85,6 +93,16 @@ class MainActivity : FragmentActivity() {
                 attach(window)
             }
             setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
+        }
+
+        lifecycleScope.launch {
+            downloadController.progressStateFlow
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    binding.downloadProgressBar.isVisible = it != PollState.Stopped
+                    if (it is PollState.Ongoing)
+                        binding.downloadProgressBar.progress = it.progress
+                }
         }
 
         listenVM()

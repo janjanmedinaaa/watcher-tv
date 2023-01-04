@@ -10,7 +10,6 @@ class MockUpdateRepository : IUpdateRepository {
 
     companion object {
         private var lastUpdateReminder = ""
-        private var developerModeEnabled = false
     }
 
     override val reminderInterval: Long
@@ -49,10 +48,10 @@ class MockUpdateRepository : IUpdateRepository {
     }
 
     override suspend fun enableDeveloperMode() {
-        developerModeEnabled = !developerModeEnabled
+        IUpdateRepository.isDeveloperMode = !IUpdateRepository.isDeveloperMode
     }
 
     override suspend fun isDeveloperMode(): Boolean {
-        return developerModeEnabled
+        return IUpdateRepository.isDeveloperMode
     }
 }

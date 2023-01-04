@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,6 +26,7 @@ import com.medina.juanantonio.watcher.shared.utils.DownloadController
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashFragment : Fragment() {
@@ -34,6 +36,9 @@ class SplashFragment : Fragment() {
     private var binding: FragmentSplashBinding by autoCleared()
 
     private lateinit var startForResultUpdate: ActivityResultLauncher<Intent>
+
+    @Inject
+    lateinit var downloadController: DownloadController
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -118,6 +123,9 @@ class SplashFragment : Fragment() {
 
         viewModel.splashState.observeEvent(viewLifecycleOwner) {
             when (it) {
+                SplashState.LOADING -> {
+                    binding.spinKit.isVisible = true
+                }
                 SplashState.INPUT_PHONE_NUMBER -> {
                     binding.motionLayout.run {
                         setTransition(R.id.transition_show_phone_number)
@@ -151,8 +159,6 @@ class SplashFragment : Fragment() {
         if (BuildConfig.DEBUG) return
 
         val asset = viewModel.assetToDownload ?: return
-        val downloadController = DownloadController(requireContext())
-
         downloadController.enqueueDownload(asset)
     }
 }

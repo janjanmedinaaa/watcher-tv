@@ -25,6 +25,37 @@
             tools:src="@mipmap/ic_app_banner" />
     </androidx.cardview.widget.CardView>
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_dev_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="textview_id"
+        tools:visibility="visible" />
+
+    <View
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="@dimen/dp_0"
+        android:alpha="0.7"
+        android:background="@drawable/rounded_corner_background"
+        app:layout_constraintBottom_toBottomOf="@id/textview_id"
+        app:layout_constraintEnd_toEndOf="@id/textview_id"
+        app:layout_constraintStart_toStartOf="@id/textview_id"
+        app:layout_constraintTop_toTopOf="@id/textview_id" />
+
+    <TextView
+        android:id="@+id/textview_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_6"
+        android:fontFamily="sans-serif-condensed"
+        android:padding="@dimen/dp_4"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/sp_8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="ID: 202222" />
+
     <TextView
         android:id="@+id/textview_title"
         android:layout_width="wrap_content"

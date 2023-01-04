@@ -95,7 +95,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         viewModel.searchResults.observeEvent(viewLifecycleOwner) {
             val presenter = when (currentQuery.isBlank()) {
                 true -> LeaderboardCardPresenter(glide)
-                else ->VideoCardPresenter(glide)
+                else -> VideoCardPresenter(glide)
             }
             val listRowAdapter = ArrayObjectAdapter(presenter)
             listRowAdapter.addAll(0, it)

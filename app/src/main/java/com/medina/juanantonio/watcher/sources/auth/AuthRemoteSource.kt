@@ -7,13 +7,14 @@ import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.auth.*
 import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AuthRemoteSource(
     context: Context,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IAuthRemoteSource {
 
     override suspend fun getOTPForLogin(
@@ -28,7 +29,7 @@ class AuthRemoteSource(
                 sendType = sendType
             )
 
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getOTPForLogin(request)
             }
             response.wrapWithResult()
@@ -57,7 +58,7 @@ class AuthRemoteSource(
                 adjustId = adjustId
             )
 
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.login(request)
             }
             response.wrapWithResult()
@@ -71,7 +72,7 @@ class AuthRemoteSource(
     override suspend fun logout(registrationToken: String): Result<BasicResponse> {
         return try {
             val request = LogoutRequest(registrationToken)
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.logout(request)
             }
             response.wrapWithResult()
@@ -84,7 +85,7 @@ class AuthRemoteSource(
 
     override suspend fun refreshToken(): Result<RefreshTokenResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.refreshToken()
             }
             response.wrapWithResult()

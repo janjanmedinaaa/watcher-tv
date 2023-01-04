@@ -84,11 +84,16 @@ class UpdateRepository(
 
     override suspend fun enableDeveloperMode() {
         val isDeveloperMode = isDeveloperMode()
-        dataStoreManager.putBoolean(DEVELOPER_MODE_KEY, !isDeveloperMode)
+        val updatedValue = !isDeveloperMode
+
+        IUpdateRepository.isDeveloperMode = updatedValue
+        dataStoreManager.putBoolean(DEVELOPER_MODE_KEY, updatedValue)
     }
 
     override suspend fun isDeveloperMode(): Boolean {
-        return dataStoreManager.getBoolean(DEVELOPER_MODE_KEY)
+        val isDeveloperMode = dataStoreManager.getBoolean(DEVELOPER_MODE_KEY)
+        IUpdateRepository.isDeveloperMode = isDeveloperMode
+        return isDeveloperMode
     }
 }
 
@@ -106,5 +111,6 @@ interface IUpdateRepository {
         const val LAST_UPDATE_REMINDER_KEY = "LAST_UPDATE_REMINDER_KEY"
         const val DEVELOPER_MODE_KEY = "DEVELOPER_MODE_KEY"
         const val DEVELOPER_KEYWORD = "Make me a Developer"
+        var isDeveloperMode = false
     }
 }

@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 14
-        versionName "2.2"
+        versionCode 15
+        versionName "2.3"
     }
 
     buildFeatures {

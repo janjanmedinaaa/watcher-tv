@@ -65,6 +65,9 @@ data class Video(
     @Ignore
     var enableDeveloperMode = false
 
+    @Ignore
+    var videoResourceId = -1
+
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.contentType.category,
@@ -92,6 +95,7 @@ data class Video(
     ) {
         showScore = false
         episodeNumber = bean.seriesNo
+        videoResourceId = bean.id
         this.episodeCount = episodeCount
         this.score = score
     }
