@@ -32,7 +32,7 @@ class CollectionCardPresenter(private val glide: RequestManager) : Presenter() {
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override((135.34 * 2).toInt(), (189.47 * 2).toInt())
-            .error(R.mipmap.ic_launcher)
+            .error(R.drawable.drawable_image_error)
             .into(binding.imageviewPoster)
     }
 

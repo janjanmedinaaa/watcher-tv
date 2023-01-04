@@ -33,7 +33,7 @@ class MovieListCardPresenter(private val glide: RequestManager) : Presenter() {
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(256 * 2, 144 * 2)
-            .error(R.mipmap.ic_launcher)
+            .error(R.drawable.drawable_image_error)
             .into(binding.imageviewPoster)
     }
 
