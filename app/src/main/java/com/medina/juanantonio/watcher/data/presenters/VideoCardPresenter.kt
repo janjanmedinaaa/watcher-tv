@@ -11,6 +11,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.databinding.ViewVideoCardBinding
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
@@ -33,6 +34,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         val binding = ViewVideoCardBinding.bind(viewHolder.view)
         this.viewHolder = viewHolder
 
+        setupDevModeUI(viewHolder, video, IUpdateRepository.isDeveloperMode)
         val (title, _) = video.getSeriesTitleDescription()
         binding.textviewTitle.text = title
         binding.textviewDescription.text = getContentText(binding.root.resources, video)
@@ -101,6 +103,19 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
                 R.string.episode_number,
                 video.episodeNumber
             )
+        }
+    }
+
+    private fun setupDevModeUI(viewHolder: ViewHolder, video: Video, isDevMode: Boolean) {
+        val binding = ViewVideoCardBinding.bind(viewHolder.view)
+        val context = binding.root.context
+
+        binding.groupDevMode.isVisible = isDevMode
+        binding.textviewId.text =
+            context.getString(R.string.dev_mode_id_label, video.contentId)
+        binding.textviewContentId.run {
+            isVisible = video.videoResourceId != -1
+            text = context.getString(R.string.dev_mode_cid_label, video.videoResourceId)
         }
     }
 }

@@ -3,17 +3,17 @@ package com.medina.juanantonio.watcher.data.presenters
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.Video
 import com.medina.juanantonio.watcher.databinding.ViewLeaderboardCardBinding
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() {
-
-    var viewHolder: ViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val context = parent.context
@@ -29,8 +29,8 @@ class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() 
         checkNotNull(item)
         val video = item as Video
         val binding = ViewLeaderboardCardBinding.bind(viewHolder.view)
-        this.viewHolder = viewHolder
 
+        setupDevModeUI(viewHolder, video, IUpdateRepository.isDeveloperMode)
         val (title, _) = video.getSeriesTitleDescription()
         binding.textviewTitle.text = title
         binding.textviewDescription.text = getContentText(binding.root.resources, video)
@@ -44,7 +44,6 @@ class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() 
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
         val binding = ViewLeaderboardCardBinding.bind(viewHolder.view)
-        this.viewHolder = null
         binding.imageviewPoster.setImageBitmap(null)
     }
 
@@ -86,5 +85,14 @@ class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() 
                 video.episodeNumber
             )
         }
+    }
+
+    private fun setupDevModeUI(viewHolder: ViewHolder, video: Video, isDevMode: Boolean) {
+        val binding = ViewLeaderboardCardBinding.bind(viewHolder.view)
+        val context = binding.root.context
+
+        binding.groupDevMode.isVisible = isDevMode
+        binding.textviewId.text =
+            context.getString(R.string.dev_mode_id_label, video.contentId)
     }
 }

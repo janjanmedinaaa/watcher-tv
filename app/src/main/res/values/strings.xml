@@ -15,6 +15,8 @@
     <string name="episode_count_without_season">%d Episodes</string>
     <string name="episode_count_without_season_updated">Updated to Episode %d</string>
     <string name="episode_number">Episode %d</string>
+    <string name="dev_mode_id_label">ID: %d</string>
+    <string name="dev_mode_cid_label">CID: %d</string>
 
     <!-- Playback error actions -->
     <string name="retry">Retry</string>
@@ -50,4 +52,7 @@
     <string name="label_send_otp">Send OTP</string>
     <string name="input_hint_code">Code</string>
     <string name="label_continue_without_logging_in">Continue without logging in</string>
+
+    <!-- Player Screen -->
+    <string name="dev_mode_player_title">%s; %d:%d</string>
 </resources>
