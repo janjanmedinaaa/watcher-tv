@@ -114,7 +114,7 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
         binding.textviewId.text =
             context.getString(R.string.dev_mode_id_label, video.contentId)
         binding.textviewContentId.run {
-            isVisible = video.videoResourceId != -1
+            isVisible = video.videoResourceId != -1 && isDevMode
             text = context.getString(R.string.dev_mode_cid_label, video.videoResourceId)
         }
     }

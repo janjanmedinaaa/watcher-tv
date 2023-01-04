@@ -144,6 +144,8 @@ class SplashViewModel @Inject constructor(
             if (showLoading) {
                 loaderUseCase.show()
                 authRepository.continueWithoutAuth()
+            } else {
+                setSplashState(SplashState.LOADING)
             }
             val homePageId = contentRepository.navigationItems.firstOrNull()?.id
             contentRepository.setupHomePage(homePageId)
@@ -173,6 +175,7 @@ class SplashViewModel @Inject constructor(
 }
 
 enum class SplashState {
+    LOADING,
     INPUT_PHONE_NUMBER,
     INPUT_CODE,
 }

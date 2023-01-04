@@ -44,6 +44,18 @@
             app:layout_constraintStart_toStartOf="@id/image_view_logo"
             app:layout_constraintTop_toBottomOf="@id/image_view_logo" />
 
+        <com.github.ybq.android.spinkit.SpinKitView
+            android:id="@+id/spin_kit"
+            style="@style/SpinKitView.FadingCircle"
+            android:layout_width="@dimen/dp_32"
+            android:layout_height="@dimen/dp_32"
+            android:layout_marginTop="@dimen/dp_24"
+            android:visibility="invisible"
+            app:SpinKit_Color="@color/screen_white"
+            app:layout_constraintEnd_toEndOf="@id/image_view_logo"
+            app:layout_constraintStart_toStartOf="@id/image_view_logo"
+            app:layout_constraintTop_toBottomOf="@id/text_view_version" />
+
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_text_phone_number"
             android:layout_width="@dimen/dp_0"

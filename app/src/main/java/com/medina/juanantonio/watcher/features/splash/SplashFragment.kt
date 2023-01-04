@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -118,6 +119,9 @@ class SplashFragment : Fragment() {
 
         viewModel.splashState.observeEvent(viewLifecycleOwner) {
             when (it) {
+                SplashState.LOADING -> {
+                    binding.spinKit.isVisible = true
+                }
                 SplashState.INPUT_PHONE_NUMBER -> {
                     binding.motionLayout.run {
                         setTransition(R.id.transition_show_phone_number)
