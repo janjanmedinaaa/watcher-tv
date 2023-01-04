@@ -81,4 +81,9 @@ interface ApiService {
     suspend fun saveWatchHistory(
         @Body request: List<SaveWatchHistoryRequest>
     ): Response<BasicResponse>
+
+    @POST("user/behavior/app/delBatchWatchHistory")
+    suspend fun deleteWatchHistory(
+        @Body request: List<DeleteWatchHistoryRequest>
+    ): Response<BasicResponse>
 }

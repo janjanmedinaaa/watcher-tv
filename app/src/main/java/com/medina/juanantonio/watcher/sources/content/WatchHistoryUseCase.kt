@@ -46,12 +46,12 @@ class WatchHistoryUseCase @Inject constructor(
         return database.getVideo(id)
     }
 
-    suspend fun removeOnGoingVideo(id: Int) {
+    suspend fun removeOnGoingVideo(video: Video) {
         if (authRepository.isUserAuthenticated()) {
-            userRepository.removeWatchHistory(id)
+            userRepository.removeWatchHistory(video.contentId, video.category ?: 0)
         }
 
-        database.removeVideo(id)
+        database.removeVideo(video.contentId)
     }
 
     suspend fun clearLocalCacheVideos() {

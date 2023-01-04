@@ -48,16 +48,10 @@ class UserRepository(
         )
     }
 
-    override suspend fun removeWatchHistory(id: Int) {
-        remoteSource.saveWatchHistory(
-            category = 0,
+    override suspend fun removeWatchHistory(id: Int, category: Int) {
+        remoteSource.deleteWatchHistory(
             contentId = id,
-            contentEpisodeId = 0,
-            progress = 0,
-            totalDuration = 0,
-            timestamp = 0L,
-            seriesNo = 0,
-            episodeNo = 0
+            category = category,
         )
     }
 }
@@ -72,5 +66,5 @@ interface IUserRepository {
         videoMedia: VideoMedia
     )
 
-    suspend fun removeWatchHistory(id: Int)
+    suspend fun removeWatchHistory(id: Int, category: Int)
 }

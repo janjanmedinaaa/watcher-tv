@@ -103,7 +103,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             video?.let {
                 if ((isLastEpisode && !it.isMovie) || it.isMovie) {
-                    watchHistoryUseCase.removeOnGoingVideo(it.contentId)
+                    watchHistoryUseCase.removeOnGoingVideo(it)
                     handleVideoEndNavigation.value = Event(Unit)
                 } else {
                     getNewVideoMedia(playNext = true)

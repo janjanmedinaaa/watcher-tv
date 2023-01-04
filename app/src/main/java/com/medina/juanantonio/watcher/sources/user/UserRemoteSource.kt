@@ -5,6 +5,7 @@ import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.auth.BasicResponse
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
+import com.medina.juanantonio.watcher.network.models.home.DeleteWatchHistoryRequest
 import com.medina.juanantonio.watcher.network.models.home.GetWatchHistoryResponse
 import com.medina.juanantonio.watcher.network.models.home.SaveWatchHistoryRequest
 import com.medina.juanantonio.watcher.network.wrapWithResult
@@ -79,6 +80,27 @@ class UserRemoteSource(
             getDefaultErrorResponse()
         }
     }
+
+    override suspend fun deleteWatchHistory(
+        contentId: Int,
+        category: Int
+    ): Result<BasicResponse> {
+        val request = DeleteWatchHistoryRequest(
+            contentId,
+            category
+        )
+
+        return try {
+            val response = withContext(dispatchers.io) {
+                apiService.deleteWatchHistory(listOf(request))
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
 }
 
 interface IUserRemoteSource {
@@ -94,5 +116,10 @@ interface IUserRemoteSource {
         seriesNo: Int?,
         episodeNo: Int,
         playTime: Int = 1
+    ): Result<BasicResponse>
+
+    suspend fun deleteWatchHistory(
+        contentId: Int,
+        category: Int
     ): Result<BasicResponse>
 }
