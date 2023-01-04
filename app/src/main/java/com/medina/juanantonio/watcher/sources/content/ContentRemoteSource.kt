@@ -11,18 +11,19 @@ import com.medina.juanantonio.watcher.network.models.home.GetNavigationBarRespon
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ContentRemoteSource(
     context: Context,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IContentRemoteSource {
 
     override suspend fun getNavigationBar(): Result<GetNavigationBarResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getNavigationBar()
             }
             response.wrapWithResult()
@@ -35,7 +36,7 @@ class ContentRemoteSource(
 
     override suspend fun getHomePage(page: Int, navigationId: Int?): Result<GetHomePageResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getHomePage(page, navigationId)
             }
             response.wrapWithResult()
@@ -52,7 +53,7 @@ class ContentRemoteSource(
         id: Int
     ): Result<GetAlbumDetailsResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getAlbumDetails(page, size, id)
             }
             response.wrapWithResult()
@@ -70,7 +71,7 @@ class ContentRemoteSource(
         searchType: String
     ): Result<SearchByKeywordResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.searchByKeyword(
                     SearchByKeywordRequest(
                         searchKeyword,
@@ -90,7 +91,7 @@ class ContentRemoteSource(
 
     override suspend fun getSearchLeaderboard(): Result<GetSearchLeaderboardResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getSearchLeaderboard()
             }
             response.wrapWithResult()

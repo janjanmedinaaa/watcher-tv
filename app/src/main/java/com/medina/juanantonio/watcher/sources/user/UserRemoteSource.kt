@@ -8,19 +8,20 @@ import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.GetWatchHistoryResponse
 import com.medina.juanantonio.watcher.network.models.home.SaveWatchHistoryRequest
 import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class UserRemoteSource(
     context: Context,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IUserRemoteSource {
 
     override suspend fun getUserInfo(): Result<GetUserInfoResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getUserInfo()
             }
             response.wrapWithResult()
@@ -33,7 +34,7 @@ class UserRemoteSource(
 
     override suspend fun getWatchHistory(): Result<GetWatchHistoryResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getWatchHistory()
             }
             response.wrapWithResult()
@@ -68,7 +69,7 @@ class UserRemoteSource(
         )
 
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.saveWatchHistory(listOf(request))
             }
             response.wrapWithResult()

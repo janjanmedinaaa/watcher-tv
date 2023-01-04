@@ -11,15 +11,27 @@ import android.os.Environment
 import androidx.core.content.FileProvider
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.UpdateRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.roundToInt
 
 /**
  * https://androidwave.com/download-and-install-apk-programmatically/
  */
-class DownloadController(
-    private val context: Context
+@Singleton
+class DownloadController @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @ApplicationScope private val coroutineScope: CoroutineScope
 ) {
 
     companion object {
@@ -29,6 +41,13 @@ class DownloadController(
         private const val PROVIDER_PATH = ".provider"
         private const val APP_INSTALL_PATH = "\"application/vnd.android.package-archive\""
     }
+
+    private var _progressStateFlow = MutableStateFlow<PollState>(PollState.Stopped)
+    val progressStateFlow: StateFlow<PollState> = _progressStateFlow
+
+    private var job: Job? = null
+
+    private lateinit var downloadManager: DownloadManager
 
     fun enqueueDownload(asset: ReleaseBean.Asset) {
         var destination =
@@ -40,7 +59,7 @@ class DownloadController(
         val file = File(destination)
         if (file.exists()) file.delete()
 
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadUri = Uri.parse(asset.downloadUrl)
         val request = DownloadManager.Request(downloadUri).apply {
             setMimeType(MIME_TYPE)
@@ -61,7 +80,8 @@ class DownloadController(
 
         showInstallOption(destination, uri)
         // Enqueue a new download and same the referenceId
-        downloadManager.enqueue(request)
+        val downloadId = downloadManager.enqueue(request)
+        startPoll(downloadId)
     }
 
     private fun showInstallOption(
@@ -83,6 +103,7 @@ class DownloadController(
                     val install = Intent(Intent.ACTION_VIEW)
                     install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
                     install.data = contentUri
                     context.startActivity(install)
@@ -99,8 +120,53 @@ class DownloadController(
                     context.unregisterReceiver(this)
                     // finish()
                 }
+                stopPoll()
             }
         }
         context.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
     }
+
+    private fun startPoll(id: Long, delay: Long = 100L) {
+        job = coroutineScope.launch {
+            initPoll(delay)
+                .onCompletion { _progressStateFlow.emit(PollState.Stopped) }
+                .collect {
+                    val query = DownloadManager.Query()
+                    query.setFilterById(id)
+                    val cursor = downloadManager.query(query)
+                    cursor.moveToFirst()
+                    val bytesDownloadedCursor =
+                        cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    val totalBytesCursor =
+                        cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+
+                    if (bytesDownloadedCursor > 0) {
+                        val bytesDownloaded = cursor.getInt(bytesDownloadedCursor)
+                        val totalBytes = cursor.getInt(totalBytesCursor)
+                        cursor.close()
+
+                        val progress = (bytesDownloaded.toFloat() / totalBytes.toFloat()) * 100F
+                        _progressStateFlow.emit(PollState.Ongoing(progress.roundToInt()))
+                    }
+                }
+        }
+    }
+
+    private fun stopPoll() {
+        job?.cancel()
+        job = null
+    }
+
+    private fun initPoll(delay: Long): Flow<Unit> =
+        flow {
+            while (true) {
+                emit(Unit)
+                delay(delay)
+            }
+        }
+}
+
+sealed class PollState {
+    object Stopped : PollState()
+    data class Ongoing(val progress: Int) : PollState()
 }

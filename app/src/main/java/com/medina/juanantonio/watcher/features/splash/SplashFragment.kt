@@ -26,6 +26,7 @@ import com.medina.juanantonio.watcher.shared.utils.DownloadController
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashFragment : Fragment() {
@@ -35,6 +36,9 @@ class SplashFragment : Fragment() {
     private var binding: FragmentSplashBinding by autoCleared()
 
     private lateinit var startForResultUpdate: ActivityResultLauncher<Intent>
+
+    @Inject
+    lateinit var downloadController: DownloadController
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -155,8 +159,6 @@ class SplashFragment : Fragment() {
         if (BuildConfig.DEBUG) return
 
         val asset = viewModel.assetToDownload ?: return
-        val downloadController = DownloadController(requireContext())
-
         downloadController.enqueueDownload(asset)
     }
 }

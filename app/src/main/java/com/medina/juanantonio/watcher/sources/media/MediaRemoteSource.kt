@@ -7,18 +7,19 @@ import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MediaRemoteSource(
     context: Context,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IMediaRemoteSource {
 
     override suspend fun getVideoDetails(id: Int, category: Int): Result<GetVideoDetailsResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getVideoDetails(id, category)
             }
             response.wrapWithResult()
@@ -36,7 +37,7 @@ class MediaRemoteSource(
         definition: String
     ): Result<GetVideoResourceResponse> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getVideoResource(
                     category,
                     contentId,

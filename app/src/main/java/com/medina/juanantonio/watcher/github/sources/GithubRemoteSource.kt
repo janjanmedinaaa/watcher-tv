@@ -8,19 +8,20 @@ import com.medina.juanantonio.watcher.github.models.InstallationBean
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class GithubRemoteSource(
     context: Context,
-    private val apiService: GithubApiService
+    private val apiService: GithubApiService,
+    private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IGithubRemoteSource {
 
     override suspend fun getInstallations(): Result<List<InstallationBean>> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getInstallations()
             }
             response.wrapWithResult()
@@ -36,7 +37,7 @@ class GithubRemoteSource(
         request: GetAccessTokenRequest
     ): Result<AccessTokenBean> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getAccessToken(installationId, request)
             }
             response.wrapWithResult()
@@ -49,7 +50,7 @@ class GithubRemoteSource(
 
     override suspend fun getReleases(repositoryUrl: String): Result<List<ReleaseBean>> {
         return try {
-            val response = withContext(Dispatchers.IO) {
+            val response = withContext(dispatchers.io) {
                 apiService.getReleases(repositoryUrl)
             }
             response.wrapWithResult()
