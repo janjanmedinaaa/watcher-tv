@@ -17,6 +17,9 @@ import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
@@ -34,17 +37,20 @@ import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.cleanUpRows
 import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.network.models.player.VideoSuggestion
+import com.medina.juanantonio.watcher.shared.extensions.initPoll
 import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class PlayerFragment : VideoSupportFragment() {
@@ -154,6 +160,15 @@ class PlayerFragment : VideoSupportFragment() {
             subtitleView.isVisible =
                 if (item is Video) false
                 else controlGlue.closedCaptioningAction.index == INDEX_ON
+        }
+
+        lifecycleScope.launch {
+            5000.milliseconds.initPoll()
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (controlGlue.isPlaying)
+                        viewModel.saveVideo(controlGlue.currentPosition)
+                }
         }
 
         viewModel.addPlaybackStateListener(uiPlaybackStateListener)

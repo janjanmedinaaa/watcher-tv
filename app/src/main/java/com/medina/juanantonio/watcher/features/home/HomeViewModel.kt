@@ -4,15 +4,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.data.models.VideoGroup
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
@@ -31,7 +32,8 @@ class HomeViewModel @Inject constructor(
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val userRepository: IUserRepository,
-    private val authRepository: IAuthRepository
+    private val authRepository: IAuthRepository,
+    private val authUseCase: AuthUseCase
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -237,7 +239,8 @@ class HomeViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            val isSuccessful = authRepository.logout()
+            val userId = userDetails.value?.userId ?: ""
+            val isSuccessful = authUseCase.logout(userId)
             if (isSuccessful) {
                 _navigateToHomeScreen.value = Event(Unit)
             }

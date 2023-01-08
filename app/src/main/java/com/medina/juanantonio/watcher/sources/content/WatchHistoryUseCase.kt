@@ -1,7 +1,7 @@
 package com.medina.juanantonio.watcher.sources.content
 
-import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.media.IVideoDatabase
 import com.medina.juanantonio.watcher.sources.user.IUserRepository

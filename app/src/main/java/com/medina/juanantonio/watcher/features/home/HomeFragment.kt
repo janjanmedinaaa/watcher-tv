@@ -27,9 +27,9 @@ import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
 import com.medina.juanantonio.watcher.data.adapters.NavigationAdapter
-import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.data.models.ItemCategory
-import com.medina.juanantonio.watcher.data.models.VideoGroup
+import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.ItemCategory
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
@@ -290,6 +290,7 @@ class HomeFragment : RowsSupportFragment() {
         glide.load(details.headImgUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(56 * 2, 56 * 2)
+            .circleCrop()
             .error(R.mipmap.ic_launcher)
             .into(imageViewIcon)
     }

@@ -25,7 +25,7 @@
         <argument
             android:name="selectedVideoGroup"
             android:defaultValue="@null"
-            app:argType="com.medina.juanantonio.watcher.data.models.VideoGroup"
+            app:argType="com.medina.juanantonio.watcher.data.models.video.VideoGroup"
             app:nullable="true" />
         <action
             android:id="@+id/action_homeFragment_to_playerFragment"
@@ -65,7 +65,7 @@
         android:label="PlayerFragment">
         <argument
             android:name="videoMedia"
-            app:argType="com.medina.juanantonio.watcher.data.models.VideoMedia" />
+            app:argType="com.medina.juanantonio.watcher.data.models.video.VideoMedia" />
         <action
             android:id="@+id/action_playerFragment_to_playerErrorFragment"
             app:destination="@id/playerErrorFragment"
@@ -101,7 +101,7 @@
         android:label="PlayerErrorFragment">
         <argument
             android:name="videoMedia"
-            app:argType="com.medina.juanantonio.watcher.data.models.VideoMedia" />
+            app:argType="com.medina.juanantonio.watcher.data.models.video.VideoMedia" />
         <argument
             android:name="error"
             app:argType="java.lang.Exception" />

@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.databinding.FragmentPlayerErrorBinding
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.autoCleared

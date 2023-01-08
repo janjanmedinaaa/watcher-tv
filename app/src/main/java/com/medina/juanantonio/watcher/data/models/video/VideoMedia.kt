@@ -1,4 +1,4 @@
-package com.medina.juanantonio.watcher.data.models
+package com.medina.juanantonio.watcher.data.models.video
 
 import android.os.Parcelable
 import com.medina.juanantonio.watcher.network.models.player.*

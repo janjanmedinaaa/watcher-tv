@@ -15,7 +15,7 @@
  */
 package com.medina.juanantonio.watcher.features.player
 
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 
 /**
  * Notifies listeners when the state of playback changes. The new state is supplied but if a
