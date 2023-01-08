@@ -1,8 +1,8 @@
 package com.medina.juanantonio.watcher.sources.media
 
-import com.medina.juanantonio.watcher.data.models.Video
-import com.medina.juanantonio.watcher.data.models.VideoGroup
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 

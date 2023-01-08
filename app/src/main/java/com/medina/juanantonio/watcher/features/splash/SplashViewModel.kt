@@ -11,6 +11,7 @@ import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
@@ -29,7 +30,8 @@ class SplashViewModel @Inject constructor(
     private val updateRepository: IUpdateRepository,
     private val authRepository: IAuthRepository,
     private val loaderUseCase: LoaderUseCase,
-    private val watchHistoryUseCase: WatchHistoryUseCase
+    private val watchHistoryUseCase: WatchHistoryUseCase,
+    private val authUseCase: AuthUseCase
 ) : ViewModel() {
 
     private val _navigateToHomeScreen = MutableLiveData<Event<Unit>>()
@@ -107,7 +109,7 @@ class SplashViewModel @Inject constructor(
             loaderUseCase.show()
             val phoneNumber = phoneNumber.value ?: ""
             val otpCode = otpCode.value ?: ""
-            val isLoginSuccessful = authRepository.login(phoneNumber, otpCode)
+            val isLoginSuccessful = authUseCase.login(phoneNumber, otpCode)
 
             if (isLoginSuccessful) {
                 watchHistoryUseCase.clearLocalCacheVideos()
@@ -124,7 +126,7 @@ class SplashViewModel @Inject constructor(
             val isUserAuthenticated = authRepository.isUserAuthenticated()
             val shouldContinueWithoutAuth = authRepository.shouldContinueWithoutAuth()
             if (isUserAuthenticated) {
-                val isRefreshSuccessful = authRepository.refreshToken()
+                val isRefreshSuccessful = authUseCase.refreshToken()
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch

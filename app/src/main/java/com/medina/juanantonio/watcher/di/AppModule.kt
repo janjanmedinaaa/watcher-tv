@@ -13,10 +13,7 @@ import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
-import com.medina.juanantonio.watcher.sources.auth.AuthRemoteSource
-import com.medina.juanantonio.watcher.sources.auth.AuthRepository
-import com.medina.juanantonio.watcher.sources.auth.IAuthRemoteSource
-import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
+import com.medina.juanantonio.watcher.sources.auth.*
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
@@ -247,5 +244,11 @@ class AppModule {
     @Singleton
     fun provideUserRepository(remoteSource: IUserRemoteSource): IUserRepository {
         return UserRepository(remoteSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserDatabase(watcherDb: WatcherDb): IUserDatabase {
+        return UserDatabase(watcherDb)
     }
 }

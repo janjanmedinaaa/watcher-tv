@@ -1,6 +1,6 @@
 package com.medina.juanantonio.watcher.sources.media
 
-import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.database.WatcherDb
 
 class VideoDatabase(watcherDb: WatcherDb) : IVideoDatabase {

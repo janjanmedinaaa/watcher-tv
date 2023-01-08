@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.presenters.LeaderboardCardPresenter
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.cleanUpRows

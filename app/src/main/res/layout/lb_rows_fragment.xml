@@ -99,7 +99,7 @@
             android:layout_height="match_parent"
             android:clickable="true"
             android:focusable="true"
-            app:srcCompat="@mipmap/ic_launcher" />
+            app:srcCompat="@drawable/ic_guest" />
     </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -113,6 +113,7 @@
         android:focusable="false"
         android:fontFamily="sans-serif-condensed"
         android:maxLines="1"
+        android:text="@string/label_guest"
         android:textSize="@dimen/sp_18"
         app:layout_constraintBottom_toBottomOf="@id/card_view_logo"
         app:layout_constraintEnd_toStartOf="@id/recycler_view_navigation"

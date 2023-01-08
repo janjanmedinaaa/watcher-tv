@@ -19,7 +19,7 @@ class AuthRepository(
         return result is Result.Success && result.data?.code == "00000"
     }
 
-    override suspend fun login(phoneNumber: String, captcha: String): Boolean {
+    override suspend fun login(phoneNumber: String, captcha: String): String? {
         val result = remoteSource.login(
             phoneNumber = phoneNumber,
             captcha = captcha
@@ -27,12 +27,9 @@ class AuthRepository(
 
         return if (result is Result.Success) {
             val data = result.data?.data
-            if (data?.token == null) false
-            else {
-                saveToken(data.token)
-                true
-            }
-        } else false
+            data?.token?.let { saveToken(it) }
+            data?.token
+        } else null
     }
 
     override suspend fun logout(): Boolean {
@@ -67,11 +64,15 @@ class AuthRepository(
         dataStoreManager.putString(AUTH_TOKEN, "")
     }
 
+    override suspend fun getUserToken(): String {
+        return dataStoreManager.getString(AUTH_TOKEN)
+    }
+
     override suspend fun isUserAuthenticated(): Boolean {
         return dataStoreManager.getString(AUTH_TOKEN).isNotBlank()
     }
 
-    private suspend fun saveToken(token: String) {
+    override suspend fun saveToken(token: String) {
         dataStoreManager.putString(AUTH_TOKEN, token)
     }
 
@@ -86,10 +87,12 @@ class AuthRepository(
 
 interface IAuthRepository {
     suspend fun getOTPForLogin(phoneNumber: String): Boolean
-    suspend fun login(phoneNumber: String, captcha: String): Boolean
+    suspend fun login(phoneNumber: String, captcha: String): String?
     suspend fun logout(): Boolean
     suspend fun refreshToken(): Boolean
+    suspend fun getUserToken(): String
     suspend fun isUserAuthenticated(): Boolean
+    suspend fun saveToken(token: String)
     suspend fun continueWithoutAuth(value: Boolean = true)
     suspend fun shouldContinueWithoutAuth(): Boolean
 

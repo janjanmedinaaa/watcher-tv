@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.video.Video
 
 @Dao
 interface VideoDao {

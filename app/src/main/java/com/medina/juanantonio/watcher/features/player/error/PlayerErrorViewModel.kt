@@ -3,7 +3,7 @@ package com.medina.juanantonio.watcher.features.player.error
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.medina.juanantonio.watcher.data.models.VideoMedia
+import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

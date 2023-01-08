@@ -24,8 +24,14 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 15
-        versionName "2.3"
+        versionCode 16
+        versionName "2.4"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildFeatures {

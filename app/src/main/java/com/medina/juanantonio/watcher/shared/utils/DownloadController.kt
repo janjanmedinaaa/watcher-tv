@@ -14,16 +14,17 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.UpdateRepository
+import com.medina.juanantonio.watcher.shared.extensions.initPoll
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * https://androidwave.com/download-and-install-apk-programmatically/
@@ -128,7 +129,7 @@ class DownloadController @Inject constructor(
 
     private fun startPoll(id: Long, delay: Long = 100L) {
         job = coroutineScope.launch {
-            initPoll(delay)
+            delay.milliseconds.initPoll()
                 .onCompletion { _progressStateFlow.emit(PollState.Stopped) }
                 .collect {
                     val query = DownloadManager.Query()
@@ -156,14 +157,6 @@ class DownloadController @Inject constructor(
         job?.cancel()
         job = null
     }
-
-    private fun initPoll(delay: Long): Flow<Unit> =
-        flow {
-            while (true) {
-                emit(Unit)
-                delay(delay)
-            }
-        }
 }
 
 sealed class PollState {

@@ -9,6 +9,7 @@ data class GetUserInfoResponse(
     inner class Data(
         val userId: String,
         val headImgUrl: String,
-        val nickName: String
+        val nickName: String,
+        val countryCode: String
     )
 }

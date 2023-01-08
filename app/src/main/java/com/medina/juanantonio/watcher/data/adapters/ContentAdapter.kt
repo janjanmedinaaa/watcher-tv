@@ -6,7 +6,7 @@ import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
-import com.medina.juanantonio.watcher.data.models.VideoGroup
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.presenters.*
 
 class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(

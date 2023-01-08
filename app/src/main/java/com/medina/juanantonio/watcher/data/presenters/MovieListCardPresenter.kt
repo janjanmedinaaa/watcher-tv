@@ -8,7 +8,7 @@ import androidx.leanback.widget.Presenter
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.data.models.Video
+import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.databinding.ViewMovieListCardBinding
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 

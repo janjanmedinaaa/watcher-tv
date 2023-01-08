@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
@@ -78,6 +79,14 @@ class SplashFragment : Fragment() {
     }
 
     private fun listenViews() {
+        binding.editTextPhoneNumber.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                viewModel.requestOTP()
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
+        }
+
         binding.editTextPhoneNumber.setOnFocusChangeListener { view, onFocus ->
             if (onFocus && !viewModel.preventKeyboardPopup) view.showKeyboard()
             else view.hideKeyboard()
