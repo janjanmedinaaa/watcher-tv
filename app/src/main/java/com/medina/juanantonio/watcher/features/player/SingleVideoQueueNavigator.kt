@@ -17,6 +17,7 @@ package com.medina.juanantonio.watcher.features.player
 
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
@@ -28,8 +29,16 @@ import com.medina.juanantonio.watcher.data.models.video.VideoMedia
  * a single video only, it can build the description once it is first requested and then reuse
  * that description for all future requests.
  */
-class SingleVideoQueueNavigator(video: VideoMedia, mediaSession: MediaSessionCompat) :
-    TimelineQueueNavigator(mediaSession) {
+class SingleVideoQueueNavigator(
+    video: VideoMedia,
+    mediaSession: MediaSessionCompat,
+
+    /**
+     * Needed to handle the Google Assistant's Skip and Next actions
+     * from the Queue Navigator since MediaSessionCompat.Callback is not working
+     */
+    private val onSkipCallback: (Long) -> Unit
+) : TimelineQueueNavigator(mediaSession) {
     private val mediaDescriptionCompat by lazy { getMediaDescription(video) }
 
     override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
@@ -42,5 +51,17 @@ class SingleVideoQueueNavigator(video: VideoMedia, mediaSession: MediaSessionCom
             .setDescription((video.introduction))
             .setMediaId("${video.id}")
             .build()
+    }
+
+    override fun getSupportedQueueNavigatorActions(player: Player): Long {
+        return PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+    }
+
+    override fun onSkipToNext(player: Player) {
+        onSkipCallback(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
+    }
+
+    override fun onSkipToPrevious(player: Player) {
+        onSkipCallback(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
     }
 }

@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import androidx.annotation.Dimension
 import androidx.core.view.isVisible
@@ -227,7 +228,18 @@ class PlayerFragment : VideoSupportFragment() {
         mediaSession = MediaSessionCompat(requireContext(), MEDIA_SESSION_TAG)
 
         mediaSessionConnector = MediaSessionConnector(mediaSession).apply {
-            setQueueNavigator(SingleVideoQueueNavigator(videoMedia, mediaSession))
+            val queueNavigator = SingleVideoQueueNavigator(videoMedia, mediaSession) {
+                when (it) {
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT -> {
+                        controlGlue.onActionClicked(controlGlue.skipNextAction)
+                    }
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS -> {
+                        viewModel.handleSkipPrevious()
+                    }
+                }
+            }
+
+            setQueueNavigator(queueNavigator)
         }
     }
 
