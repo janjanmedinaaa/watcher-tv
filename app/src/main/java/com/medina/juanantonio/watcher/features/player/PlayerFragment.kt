@@ -81,9 +81,13 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var rowsAdapter: ArrayObjectAdapter
     private lateinit var glide: RequestManager
 
+    private var continueSaveVideoPoll = false
+
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
-            view?.keepScreenOn = state is VideoPlaybackState.Play
+            val isPlaying = state is VideoPlaybackState.Play
+            view?.keepScreenOn = isPlaying
+            continueSaveVideoPoll = isPlaying
 
             when (state) {
                 is VideoPlaybackState.Load -> {
@@ -167,7 +171,7 @@ class PlayerFragment : VideoSupportFragment() {
             5000.milliseconds.initPoll()
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect {
-                    if (controlGlue.isPlaying)
+                    if (continueSaveVideoPoll)
                         viewModel.saveVideo(controlGlue.currentPosition)
                 }
         }

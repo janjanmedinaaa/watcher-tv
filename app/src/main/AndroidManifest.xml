@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.medina.juanantonio.watcher">
 
     <!-- Access internet-based media -->
@@ -38,6 +39,19 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
+
+            <!-- Used as an entry point from global search and Google Assistant -->
+            <intent-filter>
+                <!-- Used to launch our content directly from home screen launcher or Assistant -->
+                <action android:name="android.intent.action.VIEW" />
+                <!-- Used to query our content from other applications, such as Google Assistant -->
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <!-- Additional settings for searchable content -->
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
 
         <activity
@@ -53,6 +67,18 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
+        </provider>
+
+        <!-- Content provider used to expose our metadata database to other apps like Assistant -->
+        <provider
+            tools:ignore="ExportedContentProvider"
+            android:name=".data.providers.SearchResultsProvider"
+            android:permission="${applicationId}.MEDIA"
+            android:authorities="@string/authority"
+            android:exported="true">
+            <path-permission
+                android:pathPrefix="/search"
+                android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
     </application>
 

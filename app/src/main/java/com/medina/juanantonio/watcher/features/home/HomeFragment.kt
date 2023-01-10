@@ -110,6 +110,7 @@ class HomeFragment : RowsSupportFragment() {
 
         setupViews()
         listenVM()
+        listenActivityVM()
     }
 
     override fun onResume() {
@@ -236,6 +237,12 @@ class HomeFragment : RowsSupportFragment() {
                     title = getString(R.string.logout_title)
                 )
             )
+        }
+    }
+
+    private fun listenActivityVM() {
+        activityViewModel.searchResultToWatch.observeEvent(viewLifecycleOwner) {
+            viewModel.getVideoMediaFromId(it)
         }
     }
 

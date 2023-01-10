@@ -15,6 +15,10 @@ class WatchHistoryUseCase @Inject constructor(
     private val database: IVideoDatabase
 ) {
 
+    companion object {
+        private const val VIDEO_ENDED_DIFFERENCE_SECONDS = 5
+    }
+
     suspend fun getOnGoingVideos(): List<Video> {
         if (authRepository.isUserAuthenticated()) {
             val watchHistoryFromAPI = userRepository.getWatchHistory()
@@ -26,6 +30,14 @@ class WatchHistoryUseCase @Inject constructor(
     }
 
     suspend fun addOnGoingVideo(video: Video, videoMedia: VideoMedia) {
+        val progress = (video.videoProgress / 1000L).toInt()
+        val totalDuration = videoMedia.totalDuration
+
+        if (video.isMovie && totalDuration - progress < VIDEO_ENDED_DIFFERENCE_SECONDS) {
+            removeOnGoingVideo(video)
+            return
+        }
+
         if (authRepository.isUserAuthenticated()) {
             userRepository.saveWatchHistory(video, videoMedia)
         }

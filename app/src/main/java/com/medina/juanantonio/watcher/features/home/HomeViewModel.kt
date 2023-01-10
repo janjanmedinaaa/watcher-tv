@@ -104,6 +104,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun getVideoMediaFromId(id: Int) {
+        getVideoMedia(Video(id))
+    }
+
     fun getVideoMedia(video: Video) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {

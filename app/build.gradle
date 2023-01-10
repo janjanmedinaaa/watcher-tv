@@ -32,6 +32,13 @@ android {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        // Dynamically created resources
+        def host = 'watcher.medina.juanantonio.com'
+        resValue 'string', 'host_name', host
+        resValue 'string', 'authority', applicationId
+        resValue 'string', 'permission', "${applicationId}.MEDIA"
+        resValue 'string', 'view_intent', "https://$host/program"
     }
 
     buildFeatures {
