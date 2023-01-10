@@ -4,7 +4,6 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
-import android.util.Log
 import com.medina.juanantonio.watcher.sources.content.SearchProviderUseCase
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -43,7 +42,6 @@ class SearchResultsProvider : ContentProvider() {
 
             runBlocking {
                 val limit = uri.getQueryParameter("limit")?.toIntOrNull() ?: 5
-                Log.d("DEVELOP", "$query $limit")
                 useCase.getSearchResults(query, limit)
             }
         }
