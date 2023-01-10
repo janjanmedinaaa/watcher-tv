@@ -58,4 +58,7 @@
 
     <!-- Player Screen -->
     <string name="dev_mode_player_title">%s; %d:%d</string>
+
+    <!-- The hint text that appears in the search box -->
+    <string name="search_hint">Search for movies</string>
 </resources>

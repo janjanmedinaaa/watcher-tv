@@ -68,6 +68,9 @@ data class Video(
     @Ignore
     var videoResourceId = -1
 
+    @Ignore
+    var year: String = ""
+
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.contentType.category,
@@ -106,7 +109,9 @@ data class Video(
         contentId = bean.id,
         imageUrl = bean.coverVerticalUrl,
         title = bean.name
-    )
+    ) {
+        year = bean.releaseTime
+    }
 
     // Video Suggestion item
     constructor(videoSuggestion: VideoSuggestion) : this(
@@ -148,6 +153,14 @@ data class Video(
         videoProgress = bean.progress * 1000L
         isHomeDisplay = true
     }
+
+    // Search Provider result Intent (only supports Movies for now)
+    constructor(id: Int) : this(
+        category = 0,
+        contentId = id,
+        imageUrl = "",
+        title = ""
+    )
 
     /**
      * Deep copy Video object

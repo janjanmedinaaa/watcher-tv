@@ -76,6 +76,7 @@ class SplashFragment : Fragment() {
         listenViews()
         listenVM()
         listenActivityVM()
+        checkForSearchResult()
     }
 
     private fun listenViews() {
@@ -169,5 +170,10 @@ class SplashFragment : Fragment() {
 
         val asset = viewModel.assetToDownload ?: return
         downloadController.enqueueDownload(asset)
+    }
+
+    private fun checkForSearchResult() {
+        viewModel.hasPendingSearchResultToWatch =
+            mainViewModel.searchResultToWatch.value?.peekConsumedContent() != null
     }
 }

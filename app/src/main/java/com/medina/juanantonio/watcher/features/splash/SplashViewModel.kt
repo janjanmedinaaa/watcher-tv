@@ -58,6 +58,8 @@ class SplashViewModel @Inject constructor(
     private val isEmulator: Boolean
         get() = Build.FINGERPRINT.contains("generic")
 
+    var hasPendingSearchResultToWatch = false
+
     init {
         viewModelScope.launch {
             contentRepository.clearHomePage()
@@ -66,7 +68,7 @@ class SplashViewModel @Inject constructor(
                 async { contentRepository.setupNavigationBar() }
             )
 
-            if (updateRepository.shouldGetUpdate()) {
+            if (updateRepository.shouldGetUpdate() && !hasPendingSearchResultToWatch) {
                 requestList.add(
                     async { updateRepository.getLatestRelease() }
                 )
@@ -131,7 +133,7 @@ class SplashViewModel @Inject constructor(
                     navigateToHomeScreen()
                     return@launch
                 }
-            } else if (shouldContinueWithoutAuth) {
+            } else if (shouldContinueWithoutAuth || hasPendingSearchResultToWatch) {
                 navigateToHomeScreen()
                 return@launch
             }

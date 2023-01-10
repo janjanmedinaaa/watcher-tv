@@ -1,9 +1,11 @@
 package com.medina.juanantonio.watcher
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.viewModels
@@ -105,6 +107,7 @@ class MainActivity : FragmentActivity() {
                 }
         }
 
+        handleIntent()
         listenVM()
         setupLoading()
     }
@@ -201,6 +204,18 @@ class MainActivity : FragmentActivity() {
     private fun setupLoading() {
         loaderUseCase.loadingStatus.observe(this) {
             binding.spinKit.isVisible = it
+        }
+    }
+
+    private fun handleIntent() {
+        if (intent.action == Intent.ACTION_VIEW || intent.action == Intent.ACTION_SEARCH) {
+            val uri = intent.data ?: Uri.EMPTY
+            when (uri.pathSegments.firstOrNull()) {
+                "program" -> {
+                    val contentId = uri.pathSegments.lastOrNull()?.toIntOrNull() ?: return
+                    viewModel.readySearchResultToWatch(contentId)
+                }
+            }
         }
     }
 }

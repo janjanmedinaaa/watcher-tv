@@ -7,5 +7,6 @@ data class SearchResultBean(
     val coverVerticalUrl: String,
 
     // It looks like domainType also means "Category ID"
-    val domainType: Int
+    val domainType: Int,
+    val releaseTime: String
 )

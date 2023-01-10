@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import androidx.annotation.Dimension
 import androidx.core.view.isVisible
@@ -80,9 +81,13 @@ class PlayerFragment : VideoSupportFragment() {
     private lateinit var rowsAdapter: ArrayObjectAdapter
     private lateinit var glide: RequestManager
 
+    private var continueSaveVideoPoll = false
+
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
-            view?.keepScreenOn = state is VideoPlaybackState.Play
+            val isPlaying = state is VideoPlaybackState.Play
+            view?.keepScreenOn = isPlaying
+            continueSaveVideoPoll = isPlaying
 
             when (state) {
                 is VideoPlaybackState.Load -> {
@@ -166,7 +171,7 @@ class PlayerFragment : VideoSupportFragment() {
             5000.milliseconds.initPoll()
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect {
-                    if (controlGlue.isPlaying)
+                    if (continueSaveVideoPoll)
                         viewModel.saveVideo(controlGlue.currentPosition)
                 }
         }
@@ -227,7 +232,18 @@ class PlayerFragment : VideoSupportFragment() {
         mediaSession = MediaSessionCompat(requireContext(), MEDIA_SESSION_TAG)
 
         mediaSessionConnector = MediaSessionConnector(mediaSession).apply {
-            setQueueNavigator(SingleVideoQueueNavigator(videoMedia, mediaSession))
+            val queueNavigator = SingleVideoQueueNavigator(videoMedia, mediaSession) {
+                when (it) {
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT -> {
+                        controlGlue.onActionClicked(controlGlue.skipNextAction)
+                    }
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS -> {
+                        viewModel.handleSkipPrevious()
+                    }
+                }
+            }
+
+            setQueueNavigator(queueNavigator)
         }
     }
 

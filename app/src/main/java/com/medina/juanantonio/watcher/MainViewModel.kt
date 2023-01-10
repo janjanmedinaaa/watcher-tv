@@ -22,6 +22,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
     val backgroundImageUrl: LiveData<String?>
         get() = _backgroundImageUrl
 
+    private val _searchResultToWatch = MutableLiveData<Event<Int>>()
+    val searchResultToWatch: LiveData<Event<Int>>
+        get() = _searchResultToWatch
+
     private var currentBackgroundUrl = ""
 
     fun setBackgroundImage(url: String) {
@@ -56,5 +60,9 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun setKeyDown(keyCode: Int) {
         _onKeyDown.value = Event(keyCode)
+    }
+
+    fun readySearchResultToWatch(id: Int) {
+        _searchResultToWatch.value = Event(id)
     }
 }

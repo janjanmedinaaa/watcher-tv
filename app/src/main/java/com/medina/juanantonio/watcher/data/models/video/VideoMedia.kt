@@ -17,7 +17,8 @@ data class VideoMedia(
     val videoSuggestions: List<VideoSuggestion>?,
     val episodeNumbers: List<Int>,
     val totalDuration: Int,
-    val seriesNo: Int?
+    val seriesNo: Int?,
+    val coverHorizontalUrl: String
 ) : Parcelable {
 
     // Storing the score in the videoMedia so that
@@ -48,7 +49,8 @@ data class VideoMedia(
         videoSuggestions = detailsResponse.likeList,
         episodeNumbers = detailsResponse.episodeVo.map { it.seriesNo },
         totalDuration = mediaResponse.totalDuration,
-        seriesNo = detailsResponse.seriesNo
+        seriesNo = detailsResponse.seriesNo,
+        coverHorizontalUrl = detailsResponse.coverHorizontalUrl
     ) {
         this.score = score
     }

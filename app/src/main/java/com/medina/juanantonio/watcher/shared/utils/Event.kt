@@ -31,6 +31,11 @@ open class Event<out T>(private val content: T) {
      * @return The content whether it's been handled or not.
      */
     fun peek(): T = content
+
+    fun peekConsumedContent(): T? {
+        return if (consumed) null
+        else content
+    }
     
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

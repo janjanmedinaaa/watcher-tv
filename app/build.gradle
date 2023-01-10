@@ -24,14 +24,21 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 16
-        versionName "2.4"
+        versionCode 17
+        versionName "2.5"
 
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        // Dynamically created resources
+        def host = 'watcher.medina.juanantonio.com'
+        resValue 'string', 'host_name', host
+        resValue 'string', 'authority', applicationId
+        resValue 'string', 'permission', "${applicationId}.MEDIA"
+        resValue 'string', 'view_intent', "https://$host/program"
     }
 
     buildFeatures {
