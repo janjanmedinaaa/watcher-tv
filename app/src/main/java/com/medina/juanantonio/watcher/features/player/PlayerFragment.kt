@@ -158,7 +158,7 @@ class PlayerFragment : VideoSupportFragment() {
             if (item !is Video) return@setOnItemViewClickedListener
             viewModel.saveVideo(controlGlue.currentPosition)
             if (item.isMovie) viewModel.getVideoMedia(item)
-            else viewModel.getEpisodeList(item)
+            else viewModel.getEpisodeList(item, autoPlay = false)
         }
 
         setOnItemViewSelectedListener { _, item, _, _ ->
@@ -222,9 +222,9 @@ class PlayerFragment : VideoSupportFragment() {
             }
         }
 
-        viewModel.episodeList.observeEvent(viewLifecycleOwner) {
+        viewModel.episodeList.observeEvent(viewLifecycleOwner) { (episodeList, autoPlay) ->
             findNavController().safeNavigate(
-                PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(it)
+                PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(episodeList, autoPlay)
             )
         }
     }

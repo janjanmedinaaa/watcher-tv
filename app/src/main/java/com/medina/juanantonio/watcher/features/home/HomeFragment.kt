@@ -54,6 +54,8 @@ class HomeFragment : RowsSupportFragment() {
 
     private val navigationAdapter = NavigationAdapter()
 
+    private var autoPlayFirstEpisode = false
+
     companion object {
         private const val CONTINUE_WATCHING_POSITION = 0
     }
@@ -116,7 +118,10 @@ class HomeFragment : RowsSupportFragment() {
     override fun onResume() {
         super.onResume()
 
-        viewModel.setupVideoList(selectedVideoGroup)
+        autoPlayFirstEpisode =
+            HomeFragmentArgs.fromBundle(requireArguments()).autoPlayFirstEpisode
+
+        viewModel.setupVideoList(selectedVideoGroup, autoPlayFirstEpisode)
         viewModel.getUserInfo()
         activityViewModel.resetBackgroundImage()
     }
@@ -170,6 +175,11 @@ class HomeFragment : RowsSupportFragment() {
         }
 
         viewModel.episodeToAutoPlay.observeEvent(viewLifecycleOwner) {
+            if (autoPlayFirstEpisode) {
+                viewModel.getVideoMedia(it)
+                return@observeEvent
+            }
+
             startForResultAutoPlay.launch(
                 DialogActivity.getIntent(
                     context = requireContext(),

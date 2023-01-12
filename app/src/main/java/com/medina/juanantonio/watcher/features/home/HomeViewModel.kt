@@ -62,10 +62,9 @@ class HomeViewModel @Inject constructor(
     private var job: Job? = null
     private var videoDetailsJob: Job? = null
 
-    fun setupVideoList(videoGroup: VideoGroup?) {
+    fun setupVideoList(videoGroup: VideoGroup?, autoPlayFirstEpisode: Boolean) {
         if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
-                delay(1000)
                 getOnGoingVideoGroup()
             }
             return
@@ -74,32 +73,48 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (videoGroup != null) {
-                val areAlbumItems = videoGroup.videoList.any { it.isAlbumItem }
+                contentList.value = Event(listOf(videoGroup))
 
+                val areAlbumItems = videoGroup.videoList.any { it.isAlbumItem }
                 if (!areAlbumItems) {
                     isDisplayingEpisodes = true
-                    contentList.value = Event(listOf(videoGroup))
-                    watchHistoryUseCase.getOnGoingVideos()
 
-                    // 1. Gets a Content id of the Series
-                    videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
-                        // 2. Check if there is an on going playing episode
-                        watchHistoryUseCase.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
-                            // 3. If there is, get the specific episode to play
-                            videoGroup.videoList.firstOrNull {
-                                it.episodeNumber == onGoingVideo.episodeNumber
-                            }?.let { episodeToPlay ->
-                                delay(250)
-                                episodeToAutoPlay.value = Event(episodeToPlay)
-                            }
-                        }
+                    if (autoPlayFirstEpisode) {
+                        autoPlayFirstEpisode(videoGroup)
+                    } else {
+                        autoPlayOngoingVideo(videoGroup)
                     }
-                } else {
-                    contentList.value = Event(listOf(videoGroup))
                 }
-            } else {
-                getOnGoingVideoGroup()
-                contentList.value = Event(contentRepository.getHomePage())
+
+                return@launch
+            }
+
+            getOnGoingVideoGroup()
+            contentList.value = Event(contentRepository.getHomePage())
+        }
+    }
+
+    private fun autoPlayFirstEpisode(videoGroup: VideoGroup) {
+        videoGroup.videoList.firstOrNull {
+            it.episodeNumber == 1
+        }?.let { episodeToPlay ->
+            episodeToAutoPlay.value = Event(episodeToPlay)
+        }
+    }
+
+    private suspend fun autoPlayOngoingVideo(videoGroup: VideoGroup) {
+        watchHistoryUseCase.getOnGoingVideos()
+        // 1. Gets a Content id of the Series
+        videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
+            // 2. Check if there is an on going playing episode
+            watchHistoryUseCase.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                // 3. If there is, get the specific episode to play
+                videoGroup.videoList.firstOrNull {
+                    it.episodeNumber == onGoingVideo.episodeNumber
+                }?.let { episodeToPlay ->
+                    delay(250)
+                    episodeToAutoPlay.value = Event(episodeToPlay)
+                }
             }
         }
     }
