@@ -49,6 +49,7 @@
 
     <!-- Login Screen -->
     <string name="input_hint_phone_number">Phone Number</string>
+    <string name="phone_number_prefix">+63</string>
     <string name="label_send_otp">Send OTP</string>
     <string name="input_hint_code">Code</string>
     <string name="label_continue_without_logging_in">Continue as Guest</string>

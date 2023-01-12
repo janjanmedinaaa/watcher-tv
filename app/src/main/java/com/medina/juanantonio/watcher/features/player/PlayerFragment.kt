@@ -156,6 +156,7 @@ class PlayerFragment : VideoSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
+            viewModel.saveVideo(controlGlue.currentPosition)
             if (item.isMovie) viewModel.getVideoMedia(item)
             else viewModel.getEpisodeList(item)
         }
