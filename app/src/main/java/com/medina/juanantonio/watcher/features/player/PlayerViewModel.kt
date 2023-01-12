@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class PlayerViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
-    private val watchHistoryUseCase: WatchHistoryUseCase
+    private val watchHistoryUseCase: WatchHistoryUseCase,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
@@ -100,7 +103,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun handleVideoEnd() {
-        viewModelScope.launch {
+        applicationScope.launch {
             video?.let { video ->
                 if ((isLastEpisode && !video.isMovie) || video.isMovie) {
                     watchHistoryUseCase.removeOnGoingVideo(video)
@@ -123,7 +126,7 @@ class PlayerViewModel @Inject constructor(
                 return
             }
         }
-        handleVideoEndNavigation.value = Event(Unit)
+        handleVideoEndNavigation.postValue(Event(Unit))
     }
 
     fun getVideoDetails(id: Int) {

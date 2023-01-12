@@ -16,7 +16,7 @@ class WatchHistoryUseCase @Inject constructor(
 ) {
 
     companion object {
-        private const val VIDEO_ENDED_DIFFERENCE_SECONDS = 5
+        private const val VIDEO_ENDED_PERCENTAGE = 95
     }
 
     suspend fun getOnGoingVideos(): List<Video> {
@@ -30,10 +30,9 @@ class WatchHistoryUseCase @Inject constructor(
     }
 
     suspend fun addOnGoingVideo(video: Video, videoMedia: VideoMedia) {
-        val progress = (video.videoProgress / 1000L).toInt()
-        val totalDuration = videoMedia.totalDuration
+        val hasVideoEnded = hasVideoEnd(video, videoMedia)
 
-        if (video.isMovie && totalDuration - progress < VIDEO_ENDED_DIFFERENCE_SECONDS) {
+        if (video.isMovie && hasVideoEnded) {
             removeOnGoingVideo(video)
             return
         }
@@ -68,5 +67,13 @@ class WatchHistoryUseCase @Inject constructor(
 
     suspend fun clearLocalCacheVideos() {
         database.clear()
+    }
+
+    private fun hasVideoEnd(video: Video, videoMedia: VideoMedia): Boolean {
+        val progress = (video.videoProgress / 1000L).toInt()
+        val totalDuration = videoMedia.totalDuration
+        val videoWatchedPercentage = ((progress.toFloat() / totalDuration.toFloat()) * 100)
+
+        return videoWatchedPercentage >= VIDEO_ENDED_PERCENTAGE
     }
 }

@@ -229,6 +229,9 @@ class PlayerFragment : VideoSupportFragment() {
                 !videoMedia.videoSuggestions.isNullOrEmpty()
             ) {
                 showConnectedVideos()
+                startTimerForPopBackstack()
+            } else {
+                findNavController().popBackStack()
             }
         }
 
