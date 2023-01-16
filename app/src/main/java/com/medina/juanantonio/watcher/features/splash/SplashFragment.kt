@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.MainViewModel
@@ -27,6 +28,7 @@ import com.medina.juanantonio.watcher.shared.utils.DownloadController
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -104,6 +106,7 @@ class SplashFragment : Fragment() {
             if (!it.isNullOrBlank() && it.length == 6) {
                 binding.root.hideKeyboard()
                 viewModel.login()
+                checkCacheVideos()
             } else if (it.isNullOrBlank()) {
                 binding.editTextCode.requestFocus()
             }
@@ -175,5 +178,12 @@ class SplashFragment : Fragment() {
     private fun checkForSearchResult() {
         viewModel.hasPendingSearchResultToWatch =
             mainViewModel.searchResultToWatch.value?.peekConsumedContent() != null
+    }
+
+    private fun checkCacheVideos() {
+        viewModel.viewModelScope.launch {
+            if (viewModel.hasCacheVideos())
+                mainViewModel.hasGuestModeCacheVideos()
+        }
     }
 }

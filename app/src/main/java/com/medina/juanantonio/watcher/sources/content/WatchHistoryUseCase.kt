@@ -19,6 +19,10 @@ class WatchHistoryUseCase @Inject constructor(
         private const val VIDEO_ENDED_PERCENTAGE = 95
     }
 
+    suspend fun getLocalOnGoingVideos(): List<Video> {
+        return database.getOnGoingVideos()
+    }
+
     suspend fun getOnGoingVideos(): List<Video> {
         if (authRepository.isUserAuthenticated()) {
             val watchHistoryFromAPI = userRepository.getWatchHistory()
@@ -26,7 +30,7 @@ class WatchHistoryUseCase @Inject constructor(
                 return watchHistoryFromAPI
         }
 
-        return database.getOnGoingVideos()
+        return getLocalOnGoingVideos()
     }
 
     suspend fun addOnGoingVideo(video: Video, videoMedia: VideoMedia) {
@@ -39,6 +43,7 @@ class WatchHistoryUseCase @Inject constructor(
 
         if (authRepository.isUserAuthenticated()) {
             userRepository.saveWatchHistory(video, videoMedia)
+            return
         }
 
         database.addVideo(video)
@@ -60,12 +65,13 @@ class WatchHistoryUseCase @Inject constructor(
     suspend fun removeOnGoingVideo(video: Video) {
         if (authRepository.isUserAuthenticated()) {
             userRepository.removeWatchHistory(video.contentId, video.category ?: 0)
+            return
         }
 
         database.removeVideo(video.contentId)
     }
 
-    suspend fun clearLocalCacheVideos() {
+    suspend fun clearLocalOnGoingVideos() {
         database.clear()
     }
 

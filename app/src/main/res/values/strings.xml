@@ -37,6 +37,8 @@
     <string name="update_button">Update</string>
     <string name="no_thanks_button">Remind Me Later</string>
     <string name="logout_title">Are you sure you want to logout?</string>
+    <string name="save_local_video_title">Save On Going Videos</string>
+    <string name="save_local_video_description">It looks like you have on going videos when you were using Guest Mode. Do you want to save them on your account Watch History?</string>
 
     <!-- Downloader -->
     <string name="title_file_download">Downloading Watcher TV Update</string>

@@ -21,10 +21,7 @@ import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -268,8 +265,30 @@ class HomeViewModel @Inject constructor(
             val userId = userDetails.value?.userId ?: ""
             val isSuccessful = authUseCase.logout(userId)
             if (isSuccessful) {
+                watchHistoryUseCase.clearLocalOnGoingVideos()
                 _navigateToHomeScreen.value = Event(Unit)
             }
+        }
+    }
+
+    fun saveCacheVideos() {
+        applicationScope.launch {
+            val cacheVideos = watchHistoryUseCase.getLocalOnGoingVideos()
+            cacheVideos.forEach {
+                val videoMedia = mediaRepository.getVideo(
+                    it.contentId,
+                    it.category ?: 0,
+                    it.episodeNumber
+                ) ?: return@forEach
+
+                watchHistoryUseCase.addOnGoingVideo(it, videoMedia)
+            }
+        }
+    }
+
+    fun clearCacheVideos() {
+        viewModelScope.launch {
+            watchHistoryUseCase.clearLocalOnGoingVideos()
         }
     }
 }

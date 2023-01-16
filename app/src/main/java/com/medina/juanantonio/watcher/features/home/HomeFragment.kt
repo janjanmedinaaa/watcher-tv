@@ -31,6 +31,7 @@ import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.ItemCategory
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.features.dialog.DialogActivity
+import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_NEGATIVE
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment.Companion.ACTION_ID_POSITIVE
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
@@ -49,6 +50,7 @@ class HomeFragment : RowsSupportFragment() {
 
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
     private lateinit var startForResultLogout: ActivityResultLauncher<Intent>
+    private lateinit var startForResultSaveCacheVideos: ActivityResultLauncher<Intent>
 
     private var selectedVideoGroup: VideoGroup? = null
 
@@ -84,6 +86,15 @@ class HomeFragment : RowsSupportFragment() {
         ) {
             when ("${it?.data?.data}".toLongOrNull()) {
                 ACTION_ID_POSITIVE -> viewModel.logout()
+            }
+        }
+
+        startForResultSaveCacheVideos = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            when ("${it?.data?.data}".toLongOrNull()) {
+                ACTION_ID_POSITIVE -> viewModel.saveCacheVideos()
+                ACTION_ID_NEGATIVE -> viewModel.clearCacheVideos()
             }
         }
 
@@ -253,6 +264,16 @@ class HomeFragment : RowsSupportFragment() {
     private fun listenActivityVM() {
         activityViewModel.searchResultToWatch.observeEvent(viewLifecycleOwner) {
             viewModel.getVideoMediaFromId(it)
+        }
+
+        activityViewModel.hasGuestModeCacheVideos.observeEvent(viewLifecycleOwner) {
+            startForResultSaveCacheVideos.launch(
+                DialogActivity.getIntent(
+                    context = requireContext(),
+                    title = getString(R.string.save_local_video_title),
+                    description = getString(R.string.save_local_video_description)
+                )
+            )
         }
     }
 

@@ -111,7 +111,6 @@ class SplashViewModel @Inject constructor(
             val isLoginSuccessful = authUseCase.login(phoneNumber, otpCode)
 
             if (isLoginSuccessful) {
-                watchHistoryUseCase.clearLocalCacheVideos()
                 navigateToHomeScreen(showLoading = true)
             } else {
                 this@SplashViewModel.otpCode.value = ""
@@ -129,6 +128,8 @@ class SplashViewModel @Inject constructor(
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch
+                } else {
+                    watchHistoryUseCase.clearLocalOnGoingVideos()
                 }
             } else if (shouldContinueWithoutAuth || hasPendingSearchResultToWatch) {
                 navigateToHomeScreen()
@@ -159,6 +160,9 @@ class SplashViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun hasCacheVideos(): Boolean =
+        watchHistoryUseCase.getOnGoingVideos().isNotEmpty()
 
     private fun setSplashState(state: SplashState) {
         splashState.postValue(Event(state))
