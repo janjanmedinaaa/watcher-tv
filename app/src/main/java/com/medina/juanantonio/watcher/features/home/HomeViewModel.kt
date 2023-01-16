@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
@@ -20,6 +21,7 @@ import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationScope private val applicationScope: CoroutineScope,
     private val contentRepository: IContentRepository,
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
@@ -192,23 +195,27 @@ class HomeViewModel @Inject constructor(
     }
 
     fun handleNavigationItem(id: Int) {
-        if (job?.isActive == true) job?.cancel()
-        job = viewModelScope.launch {
+        val loadHomePageContent = applicationScope.launch {
             loaderUseCase.show()
-            contentRepository.setupHomePage(id)
-            contentRepository.resetPage()
-            removeNavigationContent()
-            addNewContent()
+            contentRepository.setPageId(id)
+            contentRepository.setupPage(id) {
+                contentRepository.resetPage()
+                removeNavigationContent()
+                addNewContent()
+                loaderUseCase.hide()
+            }
+        }
+        loadHomePageContent.invokeOnCompletion {
             loaderUseCase.hide()
         }
     }
 
     private fun removeNavigationContent() {
-        removeNavigationContent.value = Event(Unit)
+        removeNavigationContent.postValue(Event(Unit))
     }
 
     fun addNewContent() {
-        contentList.value = Event(contentRepository.getHomePage())
+        contentList.postValue(Event(contentRepository.getHomePage()))
     }
 
     fun getVideoDetails(video: Video) {

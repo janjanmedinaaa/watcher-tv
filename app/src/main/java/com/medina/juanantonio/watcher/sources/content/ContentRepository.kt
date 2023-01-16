@@ -39,16 +39,24 @@ class ContentRepository(
         currentPage = 0
     }
 
-    override suspend fun setupHomePage(navigationId: Int?, startingPage: Int) {
+    override fun setPageId(id: Int) {
+        currentNavigationPage = id
+    }
+
+    override suspend fun setupPage(
+        navigationId: Int,
+        startingPage: Int,
+        onFirstPage: () -> Unit
+    ) {
         if (startingPage == 0 && homeContentMap[navigationId] != null) {
-            currentNavigationPage = navigationId ?: -1
+            onFirstPage()
             return
         }
 
         val pageHasContent = getHomePage(navigationId, startingPage)
         if (pageHasContent) {
-            currentNavigationPage = navigationId ?: -1
-            setupHomePage(navigationId, startingPage + 1)
+            if (startingPage == 0) onFirstPage()
+            setupPage(navigationId, startingPage + 1)
         }
     }
 
@@ -171,7 +179,13 @@ interface IContentRepository {
 
     suspend fun setupNavigationBar()
     fun resetPage()
-    suspend fun setupHomePage(navigationId: Int?, startingPage: Int = 0)
+    fun setPageId(id: Int)
+    suspend fun setupPage(
+        navigationId: Int,
+        startingPage: Int = 0,
+        onFirstPage: () -> Unit = {}
+    )
+
     fun getHomePage(): List<VideoGroup>
     fun clearHomePage()
     suspend fun getAlbumDetails(id: Int): VideoGroup?
