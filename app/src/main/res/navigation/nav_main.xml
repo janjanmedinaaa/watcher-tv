@@ -27,6 +27,11 @@
             android:defaultValue="@null"
             app:argType="com.medina.juanantonio.watcher.data.models.video.VideoGroup"
             app:nullable="true" />
+        <argument
+            android:name="autoPlayFirstEpisode"
+            android:defaultValue="false"
+            app:argType="boolean"
+            app:nullable="false" />
         <action
             android:id="@+id/action_homeFragment_to_playerFragment"
             app:destination="@id/playerFragment"

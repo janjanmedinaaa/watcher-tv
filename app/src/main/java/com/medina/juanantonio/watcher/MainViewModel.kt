@@ -26,6 +26,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
     val searchResultToWatch: LiveData<Event<Int>>
         get() = _searchResultToWatch
 
+    private val _hasGuestModeCacheVideos = MutableLiveData<Event<Unit>>()
+    val hasGuestModeCacheVideos: LiveData<Event<Unit>>
+        get() = _hasGuestModeCacheVideos
+
     private var currentBackgroundUrl = ""
 
     fun setBackgroundImage(url: String) {
@@ -64,5 +68,9 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun readySearchResultToWatch(id: Int) {
         _searchResultToWatch.value = Event(id)
+    }
+
+    fun hasGuestModeCacheVideos() {
+        _hasGuestModeCacheVideos.value = Event(Unit)
     }
 }

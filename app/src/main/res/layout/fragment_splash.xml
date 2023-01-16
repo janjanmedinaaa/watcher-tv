@@ -68,7 +68,9 @@
             android:imeOptions="actionGo"
             android:inputType="number"
             android:maxLength="10"
-            android:padding="@dimen/dp_14"
+            android:paddingVertical="@dimen/dp_14"
+            android:paddingStart="@dimen/dp_36"
+            android:paddingEnd="@dimen/dp_14"
             android:text="@={viewModel.phoneNumber}"
             android:textSize="@dimen/sp_12"
             android:visibility="gone"
@@ -78,6 +80,19 @@
             app:layout_constraintTop_toBottomOf="@id/text_view_version"
             app:layout_constraintWidth_percent=".45"
             tools:text="9123456789123456789123456789123456789" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_prefix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:padding="@dimen/dp_14"
+            android:text="@string/phone_number_prefix"
+            android:textSize="@dimen/sp_12"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/edit_text_phone_number"
+            app:layout_constraintStart_toStartOf="@id/edit_text_phone_number"
+            app:layout_constraintTop_toTopOf="@id/edit_text_phone_number" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_send_otp"

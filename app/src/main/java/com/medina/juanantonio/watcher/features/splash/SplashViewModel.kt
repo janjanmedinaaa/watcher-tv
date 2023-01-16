@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.BuildConfig
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
@@ -16,16 +17,12 @@ import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
+    @ApplicationScope private val applicationScope: CoroutineScope,
     private val contentRepository: IContentRepository,
     private val updateRepository: IUpdateRepository,
     private val authRepository: IAuthRepository,
@@ -114,7 +111,6 @@ class SplashViewModel @Inject constructor(
             val isLoginSuccessful = authUseCase.login(phoneNumber, otpCode)
 
             if (isLoginSuccessful) {
-                watchHistoryUseCase.clearLocalCacheVideos()
                 navigateToHomeScreen(showLoading = true)
             } else {
                 this@SplashViewModel.otpCode.value = ""
@@ -132,6 +128,8 @@ class SplashViewModel @Inject constructor(
                 if (isRefreshSuccessful) {
                     navigateToHomeScreen()
                     return@launch
+                } else {
+                    watchHistoryUseCase.clearLocalOnGoingVideos()
                 }
             } else if (shouldContinueWithoutAuth || hasPendingSearchResultToWatch) {
                 navigateToHomeScreen()
@@ -144,25 +142,30 @@ class SplashViewModel @Inject constructor(
     }
 
     fun navigateToHomeScreen(showLoading: Boolean = false) {
-        viewModelScope.launch {
+        applicationScope.launch {
             if (showLoading) {
                 loaderUseCase.show()
                 authRepository.continueWithoutAuth()
             } else {
                 setSplashState(SplashState.LOADING)
             }
-            val homePageId = contentRepository.navigationItems.firstOrNull()?.id
-            contentRepository.setupHomePage(homePageId)
 
-            assetToDownload = null
-            preventKeyboardPopup = true
-            _navigateToHomeScreen.value = Event(Unit)
-            if (showLoading) loaderUseCase.hide()
+            val homePageId = contentRepository.navigationItems.firstOrNull()?.id ?: -1
+            contentRepository.setPageId(homePageId)
+            contentRepository.setupPage(homePageId) {
+                assetToDownload = null
+                preventKeyboardPopup = true
+                _navigateToHomeScreen.postValue(Event(Unit))
+                if (showLoading) loaderUseCase.hide()
+            }
         }
     }
 
+    suspend fun hasCacheVideos(): Boolean =
+        watchHistoryUseCase.getOnGoingVideos().isNotEmpty()
+
     private fun setSplashState(state: SplashState) {
-        splashState.value = Event(state)
+        splashState.postValue(Event(state))
     }
 
     private fun shouldDownloadRelease(

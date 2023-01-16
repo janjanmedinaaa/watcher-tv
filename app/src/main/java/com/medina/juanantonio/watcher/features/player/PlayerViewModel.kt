@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class PlayerViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
-    private val watchHistoryUseCase: WatchHistoryUseCase
+    private val watchHistoryUseCase: WatchHistoryUseCase,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
@@ -29,7 +32,7 @@ class PlayerViewModel @Inject constructor(
 
     val savedProgress = MutableLiveData<Event<Long>>()
     val handleVideoEndNavigation = MutableLiveData<Event<Unit>>()
-    val episodeList = MutableLiveData<Event<VideoGroup>>()
+    val episodeList = MutableLiveData<Event<Pair<VideoGroup, Boolean>>>()
 
     val isFirstEpisode: Boolean
         get() = video?.let { v ->
@@ -100,16 +103,30 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun handleVideoEnd() {
-        viewModelScope.launch {
-            video?.let {
-                if ((isLastEpisode && !it.isMovie) || it.isMovie) {
-                    watchHistoryUseCase.removeOnGoingVideo(it)
-                    handleVideoEndNavigation.value = Event(Unit)
+        applicationScope.launch {
+            video?.let { video ->
+                if ((isLastEpisode && !video.isMovie) || video.isMovie) {
+                    watchHistoryUseCase.removeOnGoingVideo(video)
+                    handleVideoEndNavigation(video)
                 } else {
                     getNewVideoMedia(playNext = true)
                 }
             }
         }
+    }
+
+    private fun handleVideoEndNavigation(video: Video) {
+        if (!video.isMovie) {
+            val nextSeason = videoMedia.connectedVideos?.find {
+                it.seriesNo == (videoMedia.seriesNo ?: 0) + 1
+            }
+
+            if (nextSeason != null) {
+                getEpisodeList(Video(nextSeason), autoPlay = true)
+                return
+            }
+        }
+        handleVideoEndNavigation.postValue(Event(Unit))
     }
 
     fun getVideoDetails(id: Int) {
@@ -152,13 +169,13 @@ class PlayerViewModel @Inject constructor(
     /**
      * Used for handling Series Recommendations
      */
-    fun getEpisodeList(video: Video) {
+    fun getEpisodeList(video: Video, autoPlay: Boolean) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             loaderUseCase.show()
             val videoMedia = mediaRepository.getSeriesEpisodes(video)
             videoMedia?.let {
-                this@PlayerViewModel.episodeList.value = Event(it)
+                this@PlayerViewModel.episodeList.value = Event(Pair(it, autoPlay))
             }
             loaderUseCase.hide()
         }

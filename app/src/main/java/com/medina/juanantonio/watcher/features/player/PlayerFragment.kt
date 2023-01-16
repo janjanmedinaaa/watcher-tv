@@ -21,6 +21,7 @@ import androidx.leanback.widget.PlaybackControlsRow.ClosedCaptioningAction.INDEX
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
@@ -50,7 +51,10 @@ import com.medina.juanantonio.watcher.shared.extensions.playbackSpeed
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
@@ -83,6 +87,8 @@ class PlayerFragment : VideoSupportFragment() {
 
     private var continueSaveVideoPoll = false
 
+    private var timedPopBackstackJob: Job? = null
+
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
             val isPlaying = state is VideoPlaybackState.Play
@@ -110,7 +116,9 @@ class PlayerFragment : VideoSupportFragment() {
                 is VideoPlaybackState.Pause -> {
                     viewModel.saveVideo(controlGlue.currentPosition)
                 }
-                else -> Unit
+                is VideoPlaybackState.Play -> {
+                    stopTimerForPopBackstack()
+                }
             }
         }
     }
@@ -119,6 +127,7 @@ class PlayerFragment : VideoSupportFragment() {
         exoPlayer?.apply {
             seekTo(startPosition)
             playWhenReady = controlGlue.autoPlayVideos
+            if (!controlGlue.autoPlayVideos) startTimerForPopBackstack()
         }
     }
 
@@ -156,8 +165,9 @@ class PlayerFragment : VideoSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
+            viewModel.saveVideo(controlGlue.currentPosition)
             if (item.isMovie) viewModel.getVideoMedia(item)
-            else viewModel.getEpisodeList(item)
+            else viewModel.getEpisodeList(item, autoPlay = false)
         }
 
         setOnItemViewSelectedListener { _, item, _, _ ->
@@ -199,6 +209,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onStop() {
         super.onStop()
         destroyPlayer()
+        stopTimerForPopBackstack()
     }
 
     override fun onDestroy() {
@@ -218,12 +229,15 @@ class PlayerFragment : VideoSupportFragment() {
                 !videoMedia.videoSuggestions.isNullOrEmpty()
             ) {
                 showConnectedVideos()
+                startTimerForPopBackstack()
+            } else {
+                findNavController().popBackStack()
             }
         }
 
-        viewModel.episodeList.observeEvent(viewLifecycleOwner) {
+        viewModel.episodeList.observeEvent(viewLifecycleOwner) { (episodeList, autoPlay) ->
             findNavController().safeNavigate(
-                PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(it)
+                PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(episodeList, autoPlay)
             )
         }
     }
@@ -324,6 +338,8 @@ class PlayerFragment : VideoSupportFragment() {
                         enableBedtimeMode(bedtimeModeAction.index == INDEX_ON)
                     }
                 }
+
+                stopTimerForPopBackstack()
             }
 
             // Set Actions that are On by default
@@ -405,6 +421,18 @@ class PlayerFragment : VideoSupportFragment() {
         val listItem = listItemAdapter?.get(0)
         val listPresenter = listItemAdapter?.getPresenter(listItem) as? VideoCardPresenter
         listPresenter?.viewHolder?.view?.requestFocus()
+    }
+
+    private fun startTimerForPopBackstack() {
+        timedPopBackstackJob = viewModel.viewModelScope.launch {
+            delay(TimeUnit.MINUTES.toMillis(5))
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun stopTimerForPopBackstack() {
+        timedPopBackstackJob?.cancel()
+        timedPopBackstackJob = null
     }
 
     inner class PlayerEventListener : Player.Listener {

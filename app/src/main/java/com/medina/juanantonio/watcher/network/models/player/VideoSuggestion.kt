@@ -10,5 +10,6 @@ data class VideoSuggestion(
     val coverVerticalUrl: String,
     val id: Int,
     val name: String,
-    val score: Double
+    val score: Double,
+    val seriesNo: Int
 ): Parcelable

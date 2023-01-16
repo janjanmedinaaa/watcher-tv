@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
@@ -20,13 +21,12 @@ import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationScope private val applicationScope: CoroutineScope,
     private val contentRepository: IContentRepository,
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
@@ -62,10 +62,9 @@ class HomeViewModel @Inject constructor(
     private var job: Job? = null
     private var videoDetailsJob: Job? = null
 
-    fun setupVideoList(videoGroup: VideoGroup?) {
+    fun setupVideoList(videoGroup: VideoGroup?, autoPlayFirstEpisode: Boolean) {
         if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
-                delay(1000)
                 getOnGoingVideoGroup()
             }
             return
@@ -74,32 +73,48 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (videoGroup != null) {
-                val areAlbumItems = videoGroup.videoList.any { it.isAlbumItem }
+                contentList.value = Event(listOf(videoGroup))
 
+                val areAlbumItems = videoGroup.videoList.any { it.isAlbumItem }
                 if (!areAlbumItems) {
                     isDisplayingEpisodes = true
-                    contentList.value = Event(listOf(videoGroup))
-                    watchHistoryUseCase.getOnGoingVideos()
 
-                    // 1. Gets a Content id of the Series
-                    videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
-                        // 2. Check if there is an on going playing episode
-                        watchHistoryUseCase.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
-                            // 3. If there is, get the specific episode to play
-                            videoGroup.videoList.firstOrNull {
-                                it.episodeNumber == onGoingVideo.episodeNumber
-                            }?.let { episodeToPlay ->
-                                delay(250)
-                                episodeToAutoPlay.value = Event(episodeToPlay)
-                            }
-                        }
+                    if (autoPlayFirstEpisode) {
+                        autoPlayFirstEpisode(videoGroup)
+                    } else {
+                        autoPlayOngoingVideo(videoGroup)
                     }
-                } else {
-                    contentList.value = Event(listOf(videoGroup))
                 }
-            } else {
-                getOnGoingVideoGroup()
-                contentList.value = Event(contentRepository.getHomePage())
+
+                return@launch
+            }
+
+            getOnGoingVideoGroup()
+            contentList.value = Event(contentRepository.getHomePage())
+        }
+    }
+
+    private fun autoPlayFirstEpisode(videoGroup: VideoGroup) {
+        videoGroup.videoList.firstOrNull {
+            it.episodeNumber == 1
+        }?.let { episodeToPlay ->
+            episodeToAutoPlay.value = Event(episodeToPlay)
+        }
+    }
+
+    private suspend fun autoPlayOngoingVideo(videoGroup: VideoGroup) {
+        watchHistoryUseCase.getOnGoingVideos()
+        // 1. Gets a Content id of the Series
+        videoGroup.videoList.firstOrNull()?.contentId?.let { seriesId ->
+            // 2. Check if there is an on going playing episode
+            watchHistoryUseCase.getOnGoingVideo(seriesId)?.let { onGoingVideo ->
+                // 3. If there is, get the specific episode to play
+                videoGroup.videoList.firstOrNull {
+                    it.episodeNumber == onGoingVideo.episodeNumber
+                }?.let { episodeToPlay ->
+                    delay(250)
+                    episodeToAutoPlay.value = Event(episodeToPlay)
+                }
             }
         }
     }
@@ -177,23 +192,27 @@ class HomeViewModel @Inject constructor(
     }
 
     fun handleNavigationItem(id: Int) {
-        if (job?.isActive == true) job?.cancel()
-        job = viewModelScope.launch {
+        val loadHomePageContent = applicationScope.launch {
             loaderUseCase.show()
-            contentRepository.setupHomePage(id)
-            contentRepository.resetPage()
-            removeNavigationContent()
-            addNewContent()
+            contentRepository.setPageId(id)
+            contentRepository.setupPage(id) {
+                contentRepository.resetPage()
+                removeNavigationContent()
+                addNewContent()
+                loaderUseCase.hide()
+            }
+        }
+        loadHomePageContent.invokeOnCompletion {
             loaderUseCase.hide()
         }
     }
 
     private fun removeNavigationContent() {
-        removeNavigationContent.value = Event(Unit)
+        removeNavigationContent.postValue(Event(Unit))
     }
 
     fun addNewContent() {
-        contentList.value = Event(contentRepository.getHomePage())
+        contentList.postValue(Event(contentRepository.getHomePage()))
     }
 
     fun getVideoDetails(video: Video) {
@@ -246,8 +265,30 @@ class HomeViewModel @Inject constructor(
             val userId = userDetails.value?.userId ?: ""
             val isSuccessful = authUseCase.logout(userId)
             if (isSuccessful) {
+                watchHistoryUseCase.clearLocalOnGoingVideos()
                 _navigateToHomeScreen.value = Event(Unit)
             }
+        }
+    }
+
+    fun saveCacheVideos() {
+        applicationScope.launch {
+            val cacheVideos = watchHistoryUseCase.getLocalOnGoingVideos()
+            cacheVideos.forEach {
+                val videoMedia = mediaRepository.getVideo(
+                    it.contentId,
+                    it.category ?: 0,
+                    it.episodeNumber
+                ) ?: return@forEach
+
+                watchHistoryUseCase.addOnGoingVideo(it, videoMedia)
+            }
+        }
+    }
+
+    fun clearCacheVideos() {
+        viewModelScope.launch {
+            watchHistoryUseCase.clearLocalOnGoingVideos()
         }
     }
 }
