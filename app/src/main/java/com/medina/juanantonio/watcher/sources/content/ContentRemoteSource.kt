@@ -1,9 +1,10 @@
 package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
+import android.util.Log
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
-import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
 import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.home.GetAlbumDetailsResponse
@@ -26,10 +27,11 @@ class ContentRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getNavigationBar()
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
+            Log.d("DEVELOP", "${exception.message}")
             getDefaultErrorResponse()
         }
     }
@@ -39,7 +41,7 @@ class ContentRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getHomePage(page, navigationId)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -56,7 +58,7 @@ class ContentRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getAlbumDetails(page, size, id)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -81,7 +83,7 @@ class ContentRemoteSource(
                     )
                 )
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -94,7 +96,7 @@ class ContentRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getSearchLeaderboard()
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {

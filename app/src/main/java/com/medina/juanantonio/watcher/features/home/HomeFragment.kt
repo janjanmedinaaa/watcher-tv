@@ -100,6 +100,11 @@ class HomeFragment : RowsSupportFragment() {
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
+            if (!item.onlineTime.isNullOrBlank()) {
+                viewModel.getVideoMedia(item, isComingSoon = true)
+                return@setOnItemViewClickedListener
+            }
+
             when (item.categoryType) {
                 ItemCategory.ALBUM -> viewModel.getAlbumDetails(item)
                 ItemCategory.MOVIE -> viewModel.getVideoMedia(item)
@@ -306,7 +311,7 @@ class HomeFragment : RowsSupportFragment() {
         groupDetailsPreview?.isVisible = true
 
         textViewPreviewTitle?.text = details.name.trim()
-        textViewPreviewDescription?.text = details.introduction
+        textViewPreviewDescription?.text = details.introduction.trim()
         textViewPreviewYear?.text = details.year.toString()
         textViewPreviewScore?.text = details.score.toString()
         textViewPreviewTags?.text = details.tagNameList.joinToString()

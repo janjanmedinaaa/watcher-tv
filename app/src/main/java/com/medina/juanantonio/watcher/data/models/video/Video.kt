@@ -71,6 +71,9 @@ data class Video(
     @Ignore
     var year: String = ""
 
+    @Ignore
+    var onlineTime: String? = null
+
     // Home Page item
     constructor(bean: HomePageBean.Content) : this(
         category = bean.contentType.category,
@@ -87,6 +90,7 @@ data class Video(
         resourceStatus = bean.resourceStatus
         score = bean.score
         isHomeDisplay = true
+        onlineTime = bean.onlineTime
     }
 
     // Home Page Episode display item

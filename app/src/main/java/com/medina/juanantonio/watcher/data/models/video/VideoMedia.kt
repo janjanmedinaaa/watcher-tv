@@ -18,7 +18,8 @@ data class VideoMedia(
     val episodeNumbers: List<Int>,
     val totalDuration: Int,
     val seriesNo: Int?,
-    val coverHorizontalUrl: String
+    val coverHorizontalUrl: String,
+    val isComingSoon: Boolean
 ) : Parcelable {
 
     // Storing the score in the videoMedia so that
@@ -31,13 +32,17 @@ data class VideoMedia(
         episodeBean: EpisodeBean,
         detailsResponse: GetVideoDetailsResponse.Data,
         mediaResponse: GetVideoResourceResponse.Data,
-        score: Double
+        score: Double,
+        isComingSoon: Boolean
     ) : this(
         id = episodeBean.id,
         contentId = contentId,
         categoryId = categoryId,
-        title = if (categoryId == 0) detailsResponse.name
-        else "${detailsResponse.name} - Episode ${episodeBean.seriesNo}",
+        title = when {
+            isComingSoon -> "${detailsResponse.name} - Trailer"
+            (categoryId == 0) -> detailsResponse.name
+            else -> "${detailsResponse.name} - Episode ${episodeBean.seriesNo}"
+        },
         introduction = detailsResponse.introduction,
         mediaUrl = mediaResponse.mediaUrl,
         subtitles = detailsResponse.episodeVo.firstOrNull {
@@ -50,7 +55,8 @@ data class VideoMedia(
         episodeNumbers = detailsResponse.episodeVo.map { it.seriesNo },
         totalDuration = mediaResponse.totalDuration,
         seriesNo = detailsResponse.seriesNo,
-        coverHorizontalUrl = detailsResponse.coverHorizontalUrl
+        coverHorizontalUrl = detailsResponse.coverHorizontalUrl,
+        isComingSoon = isComingSoon
     ) {
         this.score = score
     }

@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.network
 
+import com.medina.juanantonio.watcher.network.models.ApiResponse
 import retrofit2.Response
 
 // A generic class that contains data and status about loading this data.
@@ -27,4 +28,14 @@ sealed class Result<T>(
 fun <RESPONSE_TYPE> Response<RESPONSE_TYPE>.wrapWithResult(): Result<RESPONSE_TYPE> {
     return if (isSuccessful) Result.Success(body())
     else Result.Error(code(), errorBody()?.string() ?: "")
+}
+
+fun <T, RESPONSE_TYPE : ApiResponse<T>> Response<RESPONSE_TYPE>.wrapWithResultForLoklok(): Result<RESPONSE_TYPE> {
+    return if (isSuccessful) {
+        if (body()?.code == "00000") {
+            Result.Success(body())
+        } else {
+            Result.Error(body()?.code?.toIntOrNull() ?: code(), "${body()?.msg}")
+        }
+    } else Result.Error(code(), errorBody()?.string() ?: "")
 }

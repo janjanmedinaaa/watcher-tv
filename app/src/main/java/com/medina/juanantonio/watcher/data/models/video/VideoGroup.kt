@@ -18,6 +18,7 @@ class VideoGroup(
         ARTISTS,
         TOP_CONTENT,
         COLLECTION,
-        MOVIE_LIST
+        MOVIE_LIST,
+        COMING_SOON
     }
 }

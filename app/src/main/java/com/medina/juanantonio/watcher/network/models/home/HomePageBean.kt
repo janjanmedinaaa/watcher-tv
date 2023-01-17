@@ -24,7 +24,8 @@ data class HomePageBean(
         val score: Double,
         val title: String,
         val resourceNum: Int?,
-        val resourceStatus: ResourceStatus?
+        val resourceStatus: ResourceStatus?,
+        val onlineTime: String?
     ) {
 
         fun getIdFromJumpAddress(): Int {
