@@ -1,5 +1,7 @@
 package com.medina.juanantonio.watcher.sources.content
 
+import android.content.Context
+import android.widget.Toast
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
@@ -9,6 +11,7 @@ import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.Collect
 import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.MovieListProportion
 
 class ContentRepository(
+    private val context: Context,
     private val remoteSource: IContentRemoteSource
 ) : IContentRepository {
 
@@ -32,6 +35,8 @@ class ContentRepository(
                 clear()
                 addAll(filteredItems ?: emptyList())
             }
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -79,7 +84,8 @@ class ContentRepository(
         return if (result is Result.Success) {
             val validVideoGroups = result.data?.data?.recommendItems?.filter {
                 !it.recommendContentVOList.any { content ->
-                    content.contentType == HomePageBean.ContentType.UNKNOWN
+                    content.contentType == HomePageBean.ContentType.UNKNOWN ||
+                        content.needLogin
                 } && getVideoGroupContentType(it) != null
             }
 
@@ -122,6 +128,9 @@ class ContentRepository(
         return when (bean.homeSectionType) {
             HomePageBean.SectionType.SINGLE_ALBUM -> {
                 VideoGroup.ContentType.VIDEOS
+            }
+            HomePageBean.SectionType.MOVIE_RESERVE -> {
+                VideoGroup.ContentType.COMING_SOON
             }
             HomePageBean.SectionType.BLOCK_GROUP -> {
                 if (hasTitle && bean.bannerProportion == 1.0) {

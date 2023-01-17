@@ -14,7 +14,7 @@
         android:id="@+id/motion_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray_dark"
+        android:background="@color/screen_black"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/error_ui_margin_start"

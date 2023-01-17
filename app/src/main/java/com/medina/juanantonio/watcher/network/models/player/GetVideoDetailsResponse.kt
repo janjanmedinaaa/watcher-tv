@@ -1,10 +1,12 @@
 package com.medina.juanantonio.watcher.network.models.player
 
+import com.medina.juanantonio.watcher.network.models.ApiResponse
+
 data class GetVideoDetailsResponse(
-    val code: String,
-    val data: Data,
-    val msg: String
-) {
+    private val _code: String,
+    private val _data: Data,
+    private val _msg: String
+) : ApiResponse<GetVideoDetailsResponse.Data>(_code, _data, _msg) {
 
     inner class Data(
         val coverHorizontalUrl: String,

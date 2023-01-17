@@ -22,6 +22,7 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
         val topContentCardPresenter = TopContentCardPresenter(glide)
         val collectionCardPresenter = CollectionCardPresenter(glide)
         val movieListCardPresenter = MovieListCardPresenter(glide)
+        val comingSoonCardPresenter = ComingSoonCardPresenter(glide)
 
         videoGroup.forEach {
             when (it.contentType) {
@@ -40,6 +41,9 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
                 VideoGroup.ContentType.MOVIE_LIST -> {
                     add(getListRow(it, movieListCardPresenter))
                 }
+                VideoGroup.ContentType.COMING_SOON -> {
+                    add(getListRow(it, comingSoonCardPresenter))
+                }
             }
         }
     }
@@ -51,6 +55,7 @@ class ContentAdapter(private val glide: RequestManager) : ArrayObjectAdapter(
             VideoGroup.ContentType.TOP_CONTENT -> TopContentCardPresenter(glide)
             VideoGroup.ContentType.COLLECTION -> CollectionCardPresenter(glide)
             VideoGroup.ContentType.MOVIE_LIST -> MovieListCardPresenter(glide)
+            VideoGroup.ContentType.COMING_SOON -> ComingSoonCardPresenter(glide)
         }
 
         val listRow = getListRow(videoGroup, cardPresenter)

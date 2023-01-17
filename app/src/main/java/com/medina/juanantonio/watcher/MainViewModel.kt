@@ -41,10 +41,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _backgroundImageUrl.value = null
     }
 
-    fun setDefaultBackgroundImage() {
-        _backgroundImageUrl.value = ""
-    }
-
     fun setMovieBackground() {
         _backgroundImageUrl.value = SHOW_MOVIE_BACKGROUND
     }

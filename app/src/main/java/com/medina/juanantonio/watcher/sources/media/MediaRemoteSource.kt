@@ -2,7 +2,7 @@ package com.medina.juanantonio.watcher.sources.media
 
 import android.content.Context
 import com.medina.juanantonio.watcher.network.ApiService
-import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
 import kotlinx.coroutines.CancellationException
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
@@ -22,7 +22,7 @@ class MediaRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getVideoDetails(id, category)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -45,7 +45,7 @@ class MediaRemoteSource(
                     definition
                 )
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {

@@ -14,6 +14,7 @@ import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -87,6 +88,7 @@ class PlayerViewModel @Inject constructor(
     fun saveVideo(progress: Long) {
         viewModelScope.launch {
             video?.let {
+                if (videoMedia.isComingSoon) return@let
                 watchHistoryUseCase.addOnGoingVideo(
                     it.apply {
                         videoProgress = progress
@@ -115,13 +117,14 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    private fun handleVideoEndNavigation(video: Video) {
+    private suspend fun handleVideoEndNavigation(video: Video) {
         if (!video.isMovie) {
             val nextSeason = videoMedia.connectedVideos?.find {
                 it.seriesNo == (videoMedia.seriesNo ?: 0) + 1
             }
 
             if (nextSeason != null) {
+                delay(500)
                 getEpisodeList(Video(nextSeason), autoPlay = true)
                 return
             }

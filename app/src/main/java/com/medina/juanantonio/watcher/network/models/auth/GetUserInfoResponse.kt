@@ -1,10 +1,12 @@
 package com.medina.juanantonio.watcher.network.models.auth
 
+import com.medina.juanantonio.watcher.network.models.ApiResponse
+
 data class GetUserInfoResponse(
-    val code: String,
-    val data: Data?,
-    val msg: String
-) {
+    private val _code: String,
+    private val _data: Data,
+    private val _msg: String
+) : ApiResponse<GetUserInfoResponse.Data?>(_code, _data, _msg) {
 
     inner class Data(
         val userId: String,

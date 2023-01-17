@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.sources.auth
 
 import android.content.Context
+import android.widget.Toast
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.network.Result
@@ -16,7 +17,7 @@ class AuthRepository(
     override suspend fun getOTPForLogin(phoneNumber: String): Boolean {
         val result = remoteSource.getOTPForLogin(phoneNumber)
 
-        return result is Result.Success && result.data?.code == "00000"
+        return result is Result.Success
     }
 
     override suspend fun login(phoneNumber: String, captcha: String): String? {
@@ -29,18 +30,22 @@ class AuthRepository(
             val data = result.data?.data
             data?.token?.let { saveToken(it) }
             data?.token
-        } else null
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 
     override suspend fun logout(): Boolean {
         val registrationToken = context.getString(R.string.registration_token)
         val result = remoteSource.logout(registrationToken)
-        val isSuccessful =
-            result is Result.Success && result.data?.code == "00000"
+        val isSuccessful = result is Result.Success
 
         if (isSuccessful) {
             clearToken()
             continueWithoutAuth(false)
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
         }
 
         return isSuccessful
@@ -54,8 +59,12 @@ class AuthRepository(
             if (result is Result.Success) data != null
             else false
 
-        if (isSuccessful) saveToken(data ?: "")
-        else clearToken()
+        if (isSuccessful) {
+            saveToken(data ?: "")
+        } else {
+            clearToken()
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+        }
 
         return isSuccessful
     }

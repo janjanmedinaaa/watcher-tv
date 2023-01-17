@@ -160,9 +160,10 @@ class AppModule {
     @Provides
     @Singleton
     fun provideContentRepository(
+        @ApplicationContext context: Context,
         remoteSource: IContentRemoteSource
     ): IContentRepository {
-        return ContentRepository(remoteSource)
+        return ContentRepository(context, remoteSource)
     }
 
     @Provides

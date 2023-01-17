@@ -6,7 +6,7 @@ import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.auth.*
-import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
@@ -32,7 +32,7 @@ class AuthRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getOTPForLogin(request)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -61,7 +61,7 @@ class AuthRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.login(request)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -75,7 +75,7 @@ class AuthRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.logout(request)
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -88,7 +88,7 @@ class AuthRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.refreshToken()
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {

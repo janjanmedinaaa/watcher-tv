@@ -134,7 +134,6 @@ class MainActivity : FragmentActivity() {
         viewModel.backgroundImageUrl.observe(this) {
             when (it) {
                 null -> cancelBackgroundImageLoading()
-                "" -> showDefaultBackground()
                 SHOW_MOVIE_BACKGROUND -> showMovieBackground()
                 else -> updateBackgroundDelayed(it)
             }
@@ -181,15 +180,6 @@ class MainActivity : FragmentActivity() {
         glide.clear(backgroundTarget)
         imageLoadingJob?.cancel()
         imageLoadingJob = null
-    }
-
-    private fun showDefaultBackground() {
-        cancelBackgroundImageLoading()
-        backgroundManager.setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
-
-        val drawable =
-            ResourcesCompat.getDrawable(resources, BACKGROUND_RESOURCE_ID, null)
-        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 
     private fun showMovieBackground() {

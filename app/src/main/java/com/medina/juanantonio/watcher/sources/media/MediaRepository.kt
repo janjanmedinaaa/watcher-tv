@@ -12,7 +12,12 @@ class MediaRepository(
 
     override var currentlyPlayingVideo: Video? = null
 
-    override suspend fun getVideo(id: Int, category: Int, episodeNumber: Int): VideoMedia? {
+    override suspend fun getVideo(
+        id: Int,
+        category: Int,
+        episodeNumber: Int,
+        isComingSoon: Boolean
+    ): VideoMedia? {
         val videoDetailsResult = remoteSource.getVideoDetails(id, category)
 
         return if (videoDetailsResult is Result.Success) {
@@ -38,7 +43,8 @@ class MediaRepository(
                     episodeBean = episode ?: return null,
                     detailsResponse = videoDetailsResult.data?.data ?: return null,
                     mediaResponse = videoMediaResult.data?.data ?: return null,
-                    score = videoDetails?.score ?: return null
+                    score = videoDetails?.score ?: return null,
+                    isComingSoon = isComingSoon
                 )
             } else null
         } else null
@@ -69,10 +75,15 @@ class MediaRepository(
 }
 
 interface IMediaRepository {
-    // TODO: Maybe move this to somewhere cleaner? Also reset value
     var currentlyPlayingVideo: Video?
 
-    suspend fun getVideo(id: Int, category: Int, episodeNumber: Int = 0): VideoMedia?
+    suspend fun getVideo(
+        id: Int,
+        category: Int,
+        episodeNumber: Int = 0,
+        isComingSoon: Boolean = false
+    ): VideoMedia?
+
     suspend fun getVideoDetails(video: Video): GetVideoDetailsResponse.Data?
     suspend fun getSeriesEpisodes(video: Video): VideoGroup?
 }

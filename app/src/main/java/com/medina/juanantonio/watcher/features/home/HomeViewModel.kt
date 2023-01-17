@@ -123,14 +123,15 @@ class HomeViewModel @Inject constructor(
         getVideoMedia(Video(id))
     }
 
-    fun getVideoMedia(video: Video) {
+    fun getVideoMedia(video: Video, isComingSoon: Boolean = false) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             loaderUseCase.show()
             val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
-                episodeNumber = video.episodeNumber
+                episodeNumber = video.episodeNumber,
+                isComingSoon = isComingSoon
             )
             videoMedia?.let {
                 mediaRepository.currentlyPlayingVideo = video.apply {

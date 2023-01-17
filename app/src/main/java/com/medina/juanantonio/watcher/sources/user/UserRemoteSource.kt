@@ -8,7 +8,7 @@ import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.DeleteWatchHistoryRequest
 import com.medina.juanantonio.watcher.network.models.home.GetWatchHistoryResponse
 import com.medina.juanantonio.watcher.network.models.home.SaveWatchHistoryRequest
-import com.medina.juanantonio.watcher.network.wrapWithResult
+import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import kotlinx.coroutines.CancellationException
@@ -25,7 +25,7 @@ class UserRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getUserInfo()
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -38,7 +38,7 @@ class UserRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.getWatchHistory()
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -73,7 +73,7 @@ class UserRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.saveWatchHistory(listOf(request))
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
@@ -94,7 +94,7 @@ class UserRemoteSource(
             val response = withContext(dispatchers.io) {
                 apiService.deleteWatchHistory(listOf(request))
             }
-            response.wrapWithResult()
+            response.wrapWithResultForLoklok()
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
