@@ -2,6 +2,7 @@ package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
 import android.widget.Toast
+import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
@@ -162,23 +163,50 @@ class ContentRepository(
         } else null
     }
 
-    override suspend fun searchByKeyword(keyword: String): List<Video>? {
+    override suspend fun searchByKeyword(keyword: String): List<VideoGroup>? {
         val result = remoteSource.searchByKeyword(keyword)
 
         return if (result is Result.Success) {
             val data = result.data?.data ?: return null
-            val filteredList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank() }
+            val filteredSearchList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank() }
+            val filteredAlbumList = data.albumResults.map { album ->
+                album.contents.filter { it.coverVerticalUrl.isNotBlank() }
+                album
+            }
 
-            filteredList.map { Video(it) }
+            arrayListOf<VideoGroup>().apply {
+                val searchResultsVideoGroup =
+                    VideoGroup(
+                        category = context.getString(R.string.search_results, keyword),
+                        videoList = filteredSearchList.map { Video(it) },
+                        contentType = VideoGroup.ContentType.VIDEOS
+                    )
+                add(searchResultsVideoGroup)
+
+                filteredAlbumList.forEach { album ->
+                    val videoList = album.contents.map { Video(it) }
+                    val videoGroup =
+                        VideoGroup(
+                            category = album.name,
+                            videoList = videoList,
+                            contentType = VideoGroup.ContentType.VIDEOS
+                        )
+                    add(videoGroup)
+                }
+            }
         } else null
     }
 
-    override suspend fun getSearchLeaderboard(): List<Video>? {
+    override suspend fun getSearchLeaderboard(): VideoGroup? {
         val result = remoteSource.getSearchLeaderboard()
 
         return if (result is Result.Success) {
             val data = result.data?.data ?: return null
-            data.list.map { Video(it) }
+            VideoGroup(
+                category = context.getString(R.string.search_leaderboard),
+                videoList = data.list.map { Video(it) },
+                contentType = VideoGroup.ContentType.LEADERBOARD
+            )
         } else null
     }
 }
@@ -199,6 +227,6 @@ interface IContentRepository {
     fun clearHomePage()
     suspend fun getAlbumDetails(id: Int): VideoGroup?
 
-    suspend fun searchByKeyword(keyword: String): List<Video>?
-    suspend fun getSearchLeaderboard(): List<Video>?
+    suspend fun searchByKeyword(keyword: String): List<VideoGroup>?
+    suspend fun getSearchLeaderboard(): VideoGroup?
 }

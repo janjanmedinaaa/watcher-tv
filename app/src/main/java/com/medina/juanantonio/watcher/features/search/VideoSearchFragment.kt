@@ -13,9 +13,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
 import com.medina.juanantonio.watcher.data.models.video.Video
-import com.medina.juanantonio.watcher.data.presenters.LeaderboardCardPresenter
-import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
 import com.medina.juanantonio.watcher.features.home.cleanUpRows
 import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
@@ -27,15 +26,15 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     private val viewModel: VideoSearchViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
-    private lateinit var mRowsAdapter: ArrayObjectAdapter
+    private lateinit var contentAdapter: ContentAdapter
     private lateinit var glide: RequestManager
     private var currentQuery = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mRowsAdapter = ArrayObjectAdapter(ListRowPresenter())
         glide = Glide.with(requireContext())
+        contentAdapter = ContentAdapter(glide)
         setSearchResultProvider(this)
 
         setOnItemViewClickedListener { _, item, _, _ ->
@@ -76,13 +75,13 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     }
 
     override fun getResultsAdapter(): ObjectAdapter {
-        return mRowsAdapter
+        return contentAdapter
     }
 
     override fun onQueryTextChange(newQuery: String?): Boolean {
         if (currentQuery == newQuery?.trim()) return true
         currentQuery = newQuery.orEmpty()
-        mRowsAdapter.clear()
+        contentAdapter.clear()
         viewModel.searchKeyword(newQuery.orEmpty())
         return true
     }
@@ -93,17 +92,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
     private fun listenVM() {
         viewModel.searchResults.observeEvent(viewLifecycleOwner) {
-            val presenter = when (currentQuery.isBlank()) {
-                true -> LeaderboardCardPresenter(glide)
-                else -> VideoCardPresenter(glide)
-            }
-            val listRowAdapter = ArrayObjectAdapter(presenter)
-            listRowAdapter.addAll(0, it)
-            val headerTitle =
-                if (currentQuery.isBlank()) getString(R.string.search_leaderboard)
-                else getString(R.string.search_results, currentQuery)
-            val headerItem = HeaderItem(headerTitle)
-            mRowsAdapter.add(ListRow(headerItem, listRowAdapter))
+            contentAdapter.addContent(it)
         }
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
@@ -121,7 +110,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
 
         activityViewModel.onKeyDown.observeEvent(viewLifecycleOwner) {
             if (it != KEYCODE_DPAD_UP) return@observeEvent
-            focusSearchEditText()
+            if (rowsSupportFragment.selectedPosition == 0) focusSearchEditText()
         }
     }
 

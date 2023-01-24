@@ -9,6 +9,7 @@ data class SearchByKeywordResponse(
 ) : ApiResponse<SearchByKeywordResponse.Data>(_code, _data, _msg) {
 
     inner class Data(
+        val albumResults: List<AlbumResultBean>,
         val searchResults: List<SearchResultBean>,
         val searchType: String
     )

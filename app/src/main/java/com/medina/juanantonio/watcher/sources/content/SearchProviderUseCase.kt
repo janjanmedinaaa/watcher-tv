@@ -16,8 +16,9 @@ class SearchProviderUseCase @Inject constructor(
 ) {
 
     suspend fun getSearchResults(query: String, limit: Int): Cursor {
-        val searchResults = contentRepository.searchByKeyword(query) ?: emptyList()
-        val movieResults = searchResults.filter { it.isMovie }.take(limit)
+        val searchResults = contentRepository.searchByKeyword(query)
+        val resultsFromKeyword = searchResults?.firstOrNull()?.videoList ?: emptyList()
+        val movieResults = resultsFromKeyword.filter { it.isMovie }.take(limit)
         val matrixCursor = MatrixCursor(
             arrayOf(
                 BaseColumns._ID,
