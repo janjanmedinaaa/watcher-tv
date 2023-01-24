@@ -32,6 +32,9 @@ class VideoSearchViewModel @Inject constructor(
 
     private var displaysEpisodes = false
 
+    val searchResultHint: String
+        get() = contentRepository.searchResultsHint
+
     init {
         getLeaderboard()
     }

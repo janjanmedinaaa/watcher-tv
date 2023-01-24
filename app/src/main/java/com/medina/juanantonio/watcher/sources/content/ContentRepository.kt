@@ -17,6 +17,7 @@ class ContentRepository(
 ) : IContentRepository {
 
     override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
+    override var searchResultsHint: String = ""
     private var currentNavigationPage = -1
 
     private val homeContentMap: MutableMap<Int, ArrayList<List<VideoGroup>>> = mutableMapOf()
@@ -118,6 +119,8 @@ class ContentRepository(
                 }
             }
 
+            searchResultsHint = result.data?.data?.searchKeyWord ?: ""
+
             !validVideoGroups.isNullOrEmpty()
         } else false
     }
@@ -213,6 +216,7 @@ class ContentRepository(
 
 interface IContentRepository {
     val navigationItems: List<NavigationItemBean>
+    var searchResultsHint: String
 
     suspend fun setupNavigationBar()
     fun resetPage()

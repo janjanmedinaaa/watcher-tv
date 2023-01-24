@@ -64,4 +64,6 @@
 
     <!-- The hint text that appears in the search box -->
     <string name="search_hint">Search for movies</string>
+
+    <string name="lb_search_bar_hint_with_title">%1$s</string>
 </resources>

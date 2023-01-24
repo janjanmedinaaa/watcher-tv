@@ -60,6 +60,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        title = viewModel.searchResultHint
         listenVM()
     }
 
