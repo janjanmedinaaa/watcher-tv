@@ -44,6 +44,7 @@
     <dimen name="logo_background_size">64dp</dimen>
 
     <dimen name="dp_0">0dp</dimen>
+    <dimen name="dp_2">2dp</dimen>
     <dimen name="dp_4">4dp</dimen>
     <dimen name="dp_6">6dp</dimen>
     <dimen name="dp_8">8dp</dimen>

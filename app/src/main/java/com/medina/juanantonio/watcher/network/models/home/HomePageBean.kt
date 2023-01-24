@@ -2,7 +2,6 @@ package com.medina.juanantonio.watcher.network.models.home
 
 import android.net.Uri
 import com.google.gson.annotations.JsonAdapter
-import com.google.gson.annotations.SerializedName
 import com.medina.juanantonio.watcher.network.deserializer.ContentTypeDeserializer
 import com.medina.juanantonio.watcher.network.deserializer.ResourceStatusDeserializer
 import com.medina.juanantonio.watcher.network.deserializer.SectionTypeDeserializer
@@ -61,12 +60,8 @@ data class HomePageBean(
 
     @JsonAdapter(ResourceStatusDeserializer::class)
     enum class ResourceStatus {
-        @SerializedName("1")
         UPDATED,
-
-        @SerializedName("2")
         TOTAL,
-
         UNKNOWN
     }
 }

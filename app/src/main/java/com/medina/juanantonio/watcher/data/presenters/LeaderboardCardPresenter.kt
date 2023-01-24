@@ -11,7 +11,6 @@ import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.databinding.ViewLeaderboardCardBinding
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
-import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 
 class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() {
 
@@ -48,42 +47,13 @@ class LeaderboardCardPresenter(private val glide: RequestManager) : Presenter() 
     }
 
     private fun getContentText(resources: Resources, video: Video): String {
-        if (video.isMovie) {
-            return resources.getString(R.string.content_type_movie)
-        }
-
-        val (_, description) = video.getSeriesTitleDescription()
-        return if (video.episodeNumber == 0) {
-            description.ifBlank {
-                // Some shows don't have a "Season {number}" in their title
-                // because they're either a limited series or has only 1 season
-                if (video.episodeCount != 0) {
-                    when (video.resourceStatus) {
-                        HomePageBean.ResourceStatus.UPDATED -> {
-                            resources.getString(
-                                R.string.episode_count_without_season_updated,
-                                video.episodeCount
-                            )
-                        }
-                        else -> {
-                            resources.getString(
-                                R.string.episode_count_without_season,
-                                video.episodeCount
-                            )
-                        }
-                    }
-                } else {
-                    // The episodeCount will always be 0 on Search
-                    // results and Player video recommendations
-                    resources.getString(R.string.content_type_series)
-                }
-            }
+        return if (video.isMovie) {
+            resources.getString(R.string.content_type_movie)
         } else {
-            // Video will only have an episodeNumber if it is displaying an Episode
-            resources.getString(
-                R.string.episode_number,
-                video.episodeNumber
-            )
+            val (_, description) = video.getSeriesTitleDescription()
+            description.ifBlank {
+                resources.getString(R.string.content_type_series)
+            }
         }
     }
 
