@@ -158,14 +158,6 @@ data class Video(
         isHomeDisplay = true
     }
 
-    // Search Provider result Intent (only supports Movies for now)
-    constructor(id: Int) : this(
-        category = 0,
-        contentId = id,
-        imageUrl = "",
-        title = ""
-    )
-
     /**
      * Deep copy Video object
      */

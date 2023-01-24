@@ -22,8 +22,8 @@ class MainViewModel @Inject constructor() : ViewModel() {
     val backgroundImageUrl: LiveData<String?>
         get() = _backgroundImageUrl
 
-    private val _searchResultToWatch = MutableLiveData<Event<Int>>()
-    val searchResultToWatch: LiveData<Event<Int>>
+    private val _searchResultToWatch = MutableLiveData<Event<String>>()
+    val searchResultToWatch: LiveData<Event<String>>
         get() = _searchResultToWatch
 
     private val _hasGuestModeCacheVideos = MutableLiveData<Event<Unit>>()
@@ -62,7 +62,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _onKeyDown.value = Event(keyCode)
     }
 
-    fun readySearchResultToWatch(id: Int) {
+    fun readySearchResultToWatch(id: String) {
         _searchResultToWatch.value = Event(id)
     }
 

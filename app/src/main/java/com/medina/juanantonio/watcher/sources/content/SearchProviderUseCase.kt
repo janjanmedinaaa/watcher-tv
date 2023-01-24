@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.provider.BaseColumns
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,6 +37,8 @@ class SearchProviderUseCase @Inject constructor(
                 category = video.category ?: -1,
                 episodeNumber = video.episodeNumber
             ) ?: return@forEach
+            val encodedUrl = URLEncoder.encode(videoMedia.coverVerticalUrl, "utf-8")
+            val searchId = "${video.category};${video.contentId};${encodedUrl};${video.title}"
 
             matrixCursor.newRow()
                 .add(BaseColumns._ID, video.contentId)
@@ -46,7 +49,7 @@ class SearchProviderUseCase @Inject constructor(
                     TimeUnit.MINUTES.toMillis(videoMedia.totalDuration.toLong())
                 )
                 .add(SUGGEST_COLUMN_RESULT_CARD_IMAGE, videoMedia.coverHorizontalUrl)
-                .add(SUGGEST_COLUMN_INTENT_DATA_ID, video.contentId)
+                .add(SUGGEST_COLUMN_INTENT_DATA_ID, searchId)
         }
 
         return matrixCursor

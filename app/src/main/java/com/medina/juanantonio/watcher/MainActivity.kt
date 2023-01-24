@@ -202,7 +202,7 @@ class MainActivity : FragmentActivity() {
             val uri = intent.data ?: Uri.EMPTY
             when (uri.pathSegments.firstOrNull()) {
                 "program" -> {
-                    val contentId = uri.pathSegments.lastOrNull()?.toIntOrNull() ?: return
+                    val contentId = uri.pathSegments.lastOrNull().toString()
                     viewModel.readySearchResultToWatch(contentId)
                 }
             }
