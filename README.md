@@ -1,5 +1,5 @@
 # Watcher TV
-Watcher TV is an Android TV app that utilizes the Loklok API and Android Leanback Library.
+Watcher TV is an Android TV app that uses the Android Leanback Library.
 
 ## Features
 - Optional Login for Watch Progress
