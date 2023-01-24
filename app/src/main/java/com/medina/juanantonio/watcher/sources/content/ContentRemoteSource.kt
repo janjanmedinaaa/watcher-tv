@@ -1,7 +1,6 @@
 package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
-import android.util.Log
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
@@ -31,7 +30,6 @@ class ContentRemoteSource(
         } catch (exception: CancellationException) {
             Result.Cancelled()
         } catch (exception: Exception) {
-            Log.d("DEVELOP", "${exception.message}")
             getDefaultErrorResponse()
         }
     }

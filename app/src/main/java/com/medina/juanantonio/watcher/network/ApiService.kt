@@ -31,7 +31,7 @@ interface ApiService {
         @Query("id") id: Int,
     ): Response<GetAlbumDetailsResponse>
 
-    @POST("cms/app/search/v1/searchWithKeyWord")
+    @POST("cms/app/search/v2/searchWithKeyWord")
     suspend fun searchByKeyword(
         @Body request: SearchByKeywordRequest
     ): Response<SearchByKeywordResponse>

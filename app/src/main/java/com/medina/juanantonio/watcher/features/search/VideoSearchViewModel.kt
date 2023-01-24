@@ -25,12 +25,15 @@ class VideoSearchViewModel @Inject constructor(
     private val loaderUseCase: LoaderUseCase
 ) : ViewModel() {
 
-    val searchResults = MutableLiveData<Event<List<Video>>>()
+    val searchResults = MutableLiveData<Event<List<VideoGroup>>>()
     val videoMedia = MutableLiveData<Event<VideoMedia>>()
     val episodeList = MutableLiveData<Event<VideoGroup>>()
     private var job: Job? = null
 
     private var displaysEpisodes = false
+
+    val searchResultHint: String
+        get() = contentRepository.searchResultsHint
 
     init {
         getLeaderboard()
@@ -60,8 +63,8 @@ class VideoSearchViewModel @Inject constructor(
         if (job?.isActive == true) job?.cancel()
         job = viewModelScope.launch {
             val results = contentRepository.getSearchLeaderboard()
-            if (!results.isNullOrEmpty()) {
-                searchResults.value = Event(results)
+            if (results?.videoList?.isNotEmpty() == true) {
+                searchResults.value = Event(listOf(results))
             }
         }
     }
@@ -117,7 +120,12 @@ class VideoSearchViewModel @Inject constructor(
         ).apply {
             enableDeveloperMode = true
         }
+        val videoGroup = VideoGroup(
+            category = "Enable Developer Mode",
+            videoList = listOf(enableDeveloperModeItem),
+            contentType = VideoGroup.ContentType.VIDEOS
+        )
 
-        searchResults.value = Event(listOf(enableDeveloperModeItem))
+        searchResults.value = Event(listOf(videoGroup))
     }
 }

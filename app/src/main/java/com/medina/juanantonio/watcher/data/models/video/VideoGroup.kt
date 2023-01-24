@@ -19,6 +19,7 @@ class VideoGroup(
         TOP_CONTENT,
         COLLECTION,
         MOVIE_LIST,
-        COMING_SOON
+        COMING_SOON,
+        LEADERBOARD
     }
 }

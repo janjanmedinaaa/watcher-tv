@@ -119,7 +119,7 @@
         android:padding="@dimen/dp_8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/textview_title"
@@ -140,5 +140,48 @@
             android:maxLines="1"
             android:textColor="@android:color/white"
             tools:text="Movie" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_layout_new_episode"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent=".8">
+
+        <TextView
+            android:id="@+id/textview_new_episode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner_background"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-condensed"
+            android:maxLines="1"
+            android:padding="@dimen/dp_2"
+            android:text="@string/new_episode_title"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textview_watch_now"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner_background"
+            android:backgroundTint="@android:color/white"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-condensed"
+            android:maxLines="1"
+            android:padding="@dimen/dp_2"
+            android:text="@string/new_episode_description"
+            android:textAlignment="center"
+            android:textColor="@color/screen_black"
+            android:textStyle="bold" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

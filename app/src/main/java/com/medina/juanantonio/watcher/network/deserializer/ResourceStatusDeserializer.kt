@@ -14,7 +14,11 @@ class ResourceStatusDeserializer : JsonDeserializer<HomePageBean.ResourceStatus>
         context: JsonDeserializationContext
     ): HomePageBean.ResourceStatus {
         return try {
-            HomePageBean.ResourceStatus.valueOf(json.asString)
+            when (json.asString) {
+                "1" -> HomePageBean.ResourceStatus.UPDATED
+                "2" -> HomePageBean.ResourceStatus.TOTAL
+                else -> HomePageBean.ResourceStatus.UNKNOWN
+            }
         } catch (e: Exception) {
             HomePageBean.ResourceStatus.UNKNOWN
         }

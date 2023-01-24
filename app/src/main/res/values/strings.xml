@@ -17,6 +17,8 @@
     <string name="episode_number">Episode %d</string>
     <string name="dev_mode_id_label">ID: %d</string>
     <string name="dev_mode_cid_label">CID: %d</string>
+    <string name="new_episode_title">New Episode</string>
+    <string name="new_episode_description">Watch Now</string>
 
     <!-- Playback error actions -->
     <string name="retry">Retry</string>
@@ -64,4 +66,6 @@
 
     <!-- The hint text that appears in the search box -->
     <string name="search_hint">Search for movies</string>
+
+    <string name="lb_search_bar_hint_with_title">%1$s</string>
 </resources>

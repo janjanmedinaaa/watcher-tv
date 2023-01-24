@@ -86,7 +86,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun saveVideo(progress: Long) {
-        viewModelScope.launch {
+        applicationScope.launch {
             video?.let {
                 if (videoMedia.isComingSoon) return@let
                 watchHistoryUseCase.addOnGoingVideo(

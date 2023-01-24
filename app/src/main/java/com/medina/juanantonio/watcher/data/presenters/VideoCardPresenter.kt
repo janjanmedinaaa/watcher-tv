@@ -36,9 +36,13 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
 
         setupDevModeUI(viewHolder, video, IUpdateRepository.isDeveloperMode)
         val (title, _) = video.getSeriesTitleDescription()
+        val seriesUpdated = video.resourceStatus == HomePageBean.ResourceStatus.UPDATED
+
         binding.textviewTitle.text = title
         binding.textviewDescription.text = getContentText(binding.root.resources, video)
         binding.groupVideoDetails.isVisible = !video.isHomeDisplay
+        binding.linearLayoutNewEpisode.isVisible =
+            !video.isMovie && video.isHomeDisplay && seriesUpdated
         binding.textviewScore.apply {
             isVisible = video.showScore && !video.isHomeDisplay
 
@@ -77,20 +81,10 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
                 // Some shows don't have a "Season {number}" in their title
                 // because they're either a limited series or has only 1 season
                 if (video.episodeCount != 0) {
-                    when (video.resourceStatus) {
-                        HomePageBean.ResourceStatus.UPDATED -> {
-                            resources.getString(
-                                R.string.episode_count_without_season_updated,
-                                video.episodeCount
-                            )
-                        }
-                        else -> {
-                            resources.getString(
-                                R.string.episode_count_without_season,
-                                video.episodeCount
-                            )
-                        }
-                    }
+                    resources.getString(
+                        R.string.episode_count_without_season,
+                        video.episodeCount
+                    )
                 } else {
                     // The episodeCount will always be 0 on Search
                     // results and Player video recommendations

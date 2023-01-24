@@ -18,6 +18,7 @@ data class VideoMedia(
     val episodeNumbers: List<Int>,
     val totalDuration: Int,
     val seriesNo: Int?,
+    val coverVerticalUrl: String,
     val coverHorizontalUrl: String,
     val isComingSoon: Boolean
 ) : Parcelable {
@@ -55,6 +56,7 @@ data class VideoMedia(
         episodeNumbers = detailsResponse.episodeVo.map { it.seriesNo },
         totalDuration = mediaResponse.totalDuration,
         seriesNo = detailsResponse.seriesNo,
+        coverVerticalUrl = detailsResponse.coverVerticalUrl,
         coverHorizontalUrl = detailsResponse.coverHorizontalUrl,
         isComingSoon = isComingSoon
     ) {
