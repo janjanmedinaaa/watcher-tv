@@ -77,7 +77,7 @@ class SplashViewModel @Inject constructor(
             latestRelease?.let { releaseBean ->
                 val developerModeEnabled = updateRepository.isDeveloperMode()
                 if (shouldDownloadRelease(releaseBean, developerModeEnabled)) {
-                    assetToDownload = releaseBean.assets.first { it.isAPK() }
+                    assetToDownload = releaseBean.assets.last { it.isAPK() }
                     newerRelease.value = Event(releaseBean)
                 } else checkAuthentication()
             } ?: checkAuthentication()
