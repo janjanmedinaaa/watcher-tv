@@ -2,8 +2,7 @@ package com.medina.juanantonio.watcher.github.sources
 
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
-import java.math.BigDecimal
-import java.math.RoundingMode
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 import java.util.concurrent.TimeUnit
 
 class MockUpdateRepository : IUpdateRepository {
@@ -16,11 +15,8 @@ class MockUpdateRepository : IUpdateRepository {
         get() = TimeUnit.MINUTES.toMillis(5)
 
     override suspend fun getLatestRelease(): ReleaseBean {
-        val currentVersion =
-            BigDecimal(BuildConfig.VERSION_NAME)
-                .setScale(2, RoundingMode.HALF_EVEN)
-        val newVersion =
-            currentVersion + BigDecimal(0.10).setScale(2, RoundingMode.HALF_EVEN)
+        val version = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
+        val newVersion = "${version.majorVersion}.${version.minorVersion + 1}"
 
         return ReleaseBean(
             name = "Watcher TV v${newVersion}",
@@ -34,7 +30,8 @@ class MockUpdateRepository : IUpdateRepository {
             ),
             draft = false,
             prerelease = false,
-            tag_name = "$newVersion"
+            tag_name = newVersion,
+            body = ""
         )
     }
 
