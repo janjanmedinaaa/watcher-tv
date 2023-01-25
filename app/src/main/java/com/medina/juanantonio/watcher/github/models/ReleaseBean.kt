@@ -8,7 +8,8 @@ data class ReleaseBean(
     val assets: List<Asset>,
     private val draft: Boolean,
     private val prerelease: Boolean,
-    private val tag_name: String
+    private val tag_name: String,
+    private val body: String
 ) {
 
     class Asset(
@@ -29,10 +30,15 @@ data class ReleaseBean(
         !draft && !prerelease
 
     fun isNewerVersion(): Boolean {
-        val differentVersion = tag_name != BuildConfig.VERSION_NAME
         val tagNameVersion = DefaultArtifactVersion(tag_name)
         val versionName = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
+        val versionCode = body.toIntOrNull()
+        val validPreReleaseVersionCode =
+            (versionCode != null && prerelease && versionCode > BuildConfig.VERSION_CODE)
 
-        return differentVersion && (tagNameVersion > versionName)
+        val newBuildSameVersion =
+            (tagNameVersion == versionName) && validPreReleaseVersionCode
+        val newVersion = tagNameVersion > versionName
+        return newBuildSameVersion || newVersion
     }
 }
