@@ -30,15 +30,15 @@ data class ReleaseBean(
         !draft && !prerelease
 
     fun isNewerVersion(): Boolean {
-        val differentVersion = tag_name != BuildConfig.VERSION_NAME
         val tagNameVersion = DefaultArtifactVersion(tag_name)
         val versionName = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
         val versionCode = body.toIntOrNull()
-        val validReleaseVersionCode = (versionCode == null && !prerelease)
         val validPreReleaseVersionCode =
             (versionCode != null && prerelease && versionCode > BuildConfig.VERSION_CODE)
-        val validVersionCode = validReleaseVersionCode || validPreReleaseVersionCode
 
-        return differentVersion && (tagNameVersion > versionName) && validVersionCode
+        val newBuildSameVersion =
+            (tagNameVersion == versionName) && validPreReleaseVersionCode
+        val newVersion = tagNameVersion > versionName
+        return newBuildSameVersion || newVersion
     }
 }
