@@ -44,15 +44,23 @@ jobs:
           ./gradlew --no-daemon --stacktrace assembleRelease
           echo "APK_LOCATION=$(find app -type f -name '*.apk')" >> $GITHUB_ENV
 
+      # Final Filename: Watcher TV v2.8_20 Release.apk
       # It splits the apkLocation by '/' and gets the last item, usually the APK filename.
-      # Then it removes the 'Release.apk' suffix and splits the string using the 'v' as delimeter
+      # Then it removes the 'Release.apk' suffix to create the $initialReleaseName.
+      # To create the RELEASE_NAME, it splits the $initialReleaseName using the "_" delimeter
+      # and gets the first item(-f1).
+      # To create the $initialTagName, it splits the $initialReleaseName using the 'v' as delimeter
+      # and gets the second item(-f2).
+      # For the TAG_NAME and RELEASE_BODY, it splits the $initialTagName using the "_" delimeter
+      # and uses the first and second item accordingly.
       - name: Store Tag Name
         run: |
           apkLocation="${{ env.APK_LOCATION }}"
           filename=${apkLocation##*/}
-          releaseName=${filename%Release.apk*}
-          echo "RELEASE_NAME=$(echo $releaseName)" >> $GITHUB_ENV
-          echo "TAG_NAME=$(cut -d "v" -f2 <<< "$releaseName")" >> $GITHUB_ENV
+          initialReleaseName=${filename%Release.apk*}
+          echo "RELEASE_NAME=$(cut -d "_" -f1 <<< "$initialReleaseName")" >> $GITHUB_ENV
+          initialTagName=$(cut -d "v" -f2 <<< "$initialReleaseName")
+          echo "TAG_NAME=$(cut -d "_" -f1 <<< "$initialTagName")" >> $GITHUB_ENV
 
       - name: Create Release
         if: env.APK_LOCATION != ''
@@ -60,6 +68,8 @@ jobs:
         with:
           name: ${{ env.RELEASE_NAME }}
           artifacts: ${{ env.APK_LOCATION }}
+          body: ${{ github.event.head_commit.message }}
           tag: ${{ env.TAG_NAME }}
           token: ${{ secrets.PAT }}
-          prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true

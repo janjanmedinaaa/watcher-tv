@@ -1,0 +1,77 @@
+name: Deploy to Github Pre-Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - 'Development'
+
+jobs:
+  verifyBranch:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Preparing to Build Beta Release"
+
+  buildAPK:
+    needs: [ verifyBranch ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+
+      - name: set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Create properties files
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > keystore.properties
+          echo "${{ secrets.SECRET }}" | base64 --decode > secret.properties
+
+      - name: Create temporary keystore file
+        run: |
+          echo "${{ secrets.WATCHER_JKS }}" | base64 --decode > ./app/watcher-keystore.jks
+
+      - name: Build Release
+        run: |
+          ./gradlew --no-daemon --stacktrace assembleRelease
+          echo "APK_LOCATION=$(find app -type f -name '*.apk')" >> $GITHUB_ENV
+
+      # Final Filename: Watcher TV v2.8_20 Release.apk
+      # It splits the apkLocation by '/' and gets the last item, usually the APK filename.
+      # Then it removes the 'Release.apk' suffix to create the $initialReleaseName.
+      # To create the RELEASE_NAME, it splits the $initialReleaseName using the "_" delimeter
+      # and gets the first item(-f1).
+      # To create the $initialTagName, it splits the $initialReleaseName using the 'v' as delimeter
+      # and gets the second item(-f2).
+      # For the TAG_NAME and RELEASE_BODY, it splits the $initialTagName using the "_" delimeter
+      # and uses the first and second item accordingly.
+      - name: Store Tag Name
+        run: |
+          apkLocation="${{ env.APK_LOCATION }}"
+          filename=${apkLocation##*/}
+          initialReleaseName=${filename%Release.apk*}
+          echo "RELEASE_NAME=$(cut -d "_" -f1 <<< "$initialReleaseName")" >> $GITHUB_ENV
+          initialTagName=$(cut -d "v" -f2 <<< "$initialReleaseName")
+          echo "TAG_NAME=$(cut -d "_" -f1 <<< "$initialTagName")" >> $GITHUB_ENV
+          echo "RELEASE_BODY=$(cut -d "_" -f2 <<< "$initialTagName")" >> $GITHUB_ENV
+
+      - name: Create Release
+        if: env.APK_LOCATION != ''
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          artifacts: ${{ env.APK_LOCATION }}
+          body: ${{ env.RELEASE_BODY }}
+          tag: ${{ env.TAG_NAME }}
+          token: ${{ secrets.PAT }}
+          prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
