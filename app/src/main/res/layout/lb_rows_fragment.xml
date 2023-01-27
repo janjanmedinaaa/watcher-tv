@@ -21,6 +21,43 @@
         tools:listitem="@layout/item_navigation" />
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_update_focus_background"
+        android:layout_width="@dimen/icon_background_size"
+        android:layout_height="@dimen/icon_background_size"
+        android:layout_margin="@dimen/dp_16"
+        android:backgroundTint="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="invisible"
+        app:cardCornerRadius="@dimen/icon_background_size"
+        app:cardElevation="@dimen/dp_0"
+        app:layout_constraintEnd_toStartOf="@id/card_view_search_focus_background"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:background="@drawable/rounded_corner_background" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_16"
+        android:background="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_update"
+        app:layout_constraintBottom_toBottomOf="@id/card_view_update_focus_background"
+        app:layout_constraintEnd_toEndOf="@id/card_view_update_focus_background"
+        app:layout_constraintStart_toStartOf="@id/card_view_update_focus_background"
+        app:layout_constraintTop_toTopOf="@id/card_view_update_focus_background"
+        tools:ignore="UnusedAttribute" />
+
+    <androidx.cardview.widget.CardView
         android:id="@+id/card_view_search_focus_background"
         android:layout_width="@dimen/icon_background_size"
         android:layout_height="@dimen/icon_background_size"
@@ -36,7 +73,6 @@
         tools:visibility="visible">
 
         <View
-            android:id="@+id/view_focus_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"

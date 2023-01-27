@@ -155,6 +155,18 @@ class HomeFragment : RowsSupportFragment() {
             }
         }
 
+        view?.findViewById<AppCompatImageView>(R.id.image_view_update)?.apply {
+            setOnClickListener {
+                activityViewModel.askToUpdate()
+            }
+
+            setOnFocusChangeListener { _, onFocus ->
+                val focusBackground =
+                    view?.findViewById<CardView>(R.id.card_view_update_focus_background)
+                focusBackground?.isInvisible = !onFocus
+            }
+        }
+
         view?.findViewById<AppCompatImageView>(R.id.image_view_search)?.apply {
             setOnClickListener {
                 findNavController().safeNavigate(
@@ -163,9 +175,9 @@ class HomeFragment : RowsSupportFragment() {
             }
 
             setOnFocusChangeListener { _, onFocus ->
-                val searchBackground =
+                val focusBackground =
                     view?.findViewById<CardView>(R.id.card_view_search_focus_background)
-                searchBackground?.isInvisible = !onFocus
+                focusBackground?.isInvisible = !onFocus
             }
         }
 
@@ -280,6 +292,12 @@ class HomeFragment : RowsSupportFragment() {
                 )
             )
         }
+
+        activityViewModel.hasUpdateRelease.observe(viewLifecycleOwner) {
+            val imageViewUpdate =
+                view?.findViewById<AppCompatImageView>(R.id.image_view_update)
+            imageViewUpdate?.isVisible = it
+        }
     }
 
     override fun onDestroy() {
@@ -343,6 +361,9 @@ fun Fragment.cleanUpRows() {
     val groupDetailsPreview =
         view?.findViewById<Group>(R.id.group_details_preview)
     groupDetailsPreview?.isVisible = false
+    val imageViewUpdate =
+        view?.findViewById<AppCompatImageView>(R.id.image_view_update)
+    imageViewUpdate?.isVisible = false
 
     val containerRoot =
         view?.findViewById<ConstraintLayout>(R.id.container_root)

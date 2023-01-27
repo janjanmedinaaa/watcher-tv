@@ -1,4 +1,4 @@
-package com.medina.juanantonio.watcher.shared.utils
+package com.medina.juanantonio.watcher.data.manager.downloader
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
@@ -11,29 +11,24 @@ import android.os.Environment
 import androidx.core.content.FileProvider
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.UpdateRepository
 import com.medina.juanantonio.watcher.shared.extensions.initPoll
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * https://androidwave.com/download-and-install-apk-programmatically/
  */
-@Singleton
-class DownloadController @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @ApplicationScope private val coroutineScope: CoroutineScope
-) {
+class DownloadManager(
+    private val context: Context,
+    private val coroutineScope: CoroutineScope
+) : IDownloadManager {
 
     companion object {
         private const val FILE_NAME = "latest-watcher-tv-update.apk"
@@ -43,14 +38,15 @@ class DownloadController @Inject constructor(
         private const val APP_INSTALL_PATH = "\"application/vnd.android.package-archive\""
     }
 
-    private var _progressStateFlow = MutableStateFlow<PollState>(PollState.Stopped)
-    val progressStateFlow: StateFlow<PollState> = _progressStateFlow
+    private val _progressStateFlow = MutableStateFlow<PollState>(PollState.Stopped)
+    override val progressStateFlow: StateFlow<PollState>
+        get() = _progressStateFlow
 
     private var job: Job? = null
 
     private lateinit var downloadManager: DownloadManager
 
-    fun enqueueDownload(asset: ReleaseBean.Asset) {
+    override fun enqueueDownload(asset: ReleaseBean.Asset) {
         var destination =
             "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_DOWNLOADS}/"
         destination += FILE_NAME
@@ -130,7 +126,12 @@ class DownloadController @Inject constructor(
     private fun startPoll(id: Long, delay: Long = 100L) {
         job = coroutineScope.launch {
             delay.milliseconds.initPoll()
-                .onCompletion { _progressStateFlow.emit(PollState.Stopped) }
+                .onStart {
+                    _progressStateFlow.emit(PollState.Ongoing(0))
+                }
+                .onCompletion {
+                    _progressStateFlow.emit(PollState.Stopped)
+                }
                 .collect {
                     val query = DownloadManager.Query()
                     query.setFilterById(id)
@@ -157,6 +158,14 @@ class DownloadController @Inject constructor(
         job?.cancel()
         job = null
     }
+}
+
+interface IDownloadManager {
+    val progressStateFlow: StateFlow<PollState>
+    val isDownloading: Boolean
+        get() = progressStateFlow.value is PollState.Ongoing
+
+    fun enqueueDownload(asset: ReleaseBean.Asset)
 }
 
 sealed class PollState {

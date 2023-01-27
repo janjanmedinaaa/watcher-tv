@@ -8,6 +8,9 @@ import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.DataStoreManager
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
+import com.medina.juanantonio.watcher.data.manager.downloader.DownloadManager
+import com.medina.juanantonio.watcher.data.manager.downloader.IDownloadManager
+import com.medina.juanantonio.watcher.data.manager.downloader.MockDownloadManager
 import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
@@ -29,6 +32,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -254,5 +258,15 @@ class AppModule {
     @Singleton
     fun provideUserDatabase(watcherDb: WatcherDb): IUserDatabase {
         return UserDatabase(watcherDb)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDownloadManager(
+        @ApplicationContext context: Context,
+        @ApplicationScope coroutineScope: CoroutineScope
+    ): IDownloadManager {
+        return if (BuildConfig.DEBUG) MockDownloadManager(coroutineScope)
+        else DownloadManager(context, coroutineScope)
     }
 }

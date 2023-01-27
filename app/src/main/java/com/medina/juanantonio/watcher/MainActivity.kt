@@ -8,6 +8,8 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
@@ -29,9 +31,11 @@ import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.medina.juanantonio.watcher.databinding.ActivityMainBinding
+import com.medina.juanantonio.watcher.features.dialog.DialogActivity
+import com.medina.juanantonio.watcher.features.dialog.DialogFragment
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
-import com.medina.juanantonio.watcher.shared.utils.DownloadController
-import com.medina.juanantonio.watcher.shared.utils.PollState
+import com.medina.juanantonio.watcher.data.manager.downloader.IDownloadManager
+import com.medina.juanantonio.watcher.data.manager.downloader.PollState
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -57,7 +61,7 @@ class MainActivity : FragmentActivity() {
     lateinit var loaderUseCase: LoaderUseCase
 
     @Inject
-    lateinit var downloadController: DownloadController
+    lateinit var downloadManager: IDownloadManager
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -84,6 +88,8 @@ class MainActivity : FragmentActivity() {
         override fun onLoadCleared(placeholder: Drawable?) = Unit
     }
 
+    private lateinit var startForResultUpdate: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -97,8 +103,21 @@ class MainActivity : FragmentActivity() {
             setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
         }
 
+        startForResultUpdate = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            when ("${it?.data?.data}".toLongOrNull()) {
+                DialogFragment.ACTION_ID_POSITIVE -> {
+                    viewModel.requestPermission()
+                }
+                DialogFragment.ACTION_ID_NEGATIVE -> {
+                    viewModel.saveLastUpdateReminder()
+                }
+            }
+        }
+
         lifecycleScope.launch {
-            downloadController.progressStateFlow
+            downloadManager.progressStateFlow
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     binding.downloadProgressBar.isVisible = it != PollState.Stopped
@@ -110,6 +129,11 @@ class MainActivity : FragmentActivity() {
         handleIntent()
         listenVM()
         setupLoading()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!downloadManager.isDownloading) viewModel.checkForUpdates()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -139,10 +163,30 @@ class MainActivity : FragmentActivity() {
             }
         }
 
+        viewModel.askToUpdate.observeEvent(this) {
+            val releaseName = viewModel.updateRelease?.name ?: return@observeEvent
+            startForResultUpdate.launch(
+                DialogActivity.getIntent(
+                    context = this,
+                    title = getString(R.string.update_available_title),
+                    description = getString(
+                        R.string.update_available_description,
+                        releaseName
+                    ),
+                    positiveButton = getString(R.string.update_button),
+                    negativeButton = getString(R.string.no_thanks_button)
+                )
+            )
+        }
+
         viewModel.requestPermissions.observeEvent(this) {
             permissionsBuilder(WRITE_EXTERNAL_STORAGE).build().send {
                 viewModel.startDownload(it.allGranted())
             }
+        }
+
+        viewModel.startDownload.observeEvent(this) { permissionGranted ->
+            if (permissionGranted) downloadLatestAPK()
         }
     }
 
@@ -207,5 +251,11 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    private fun downloadLatestAPK() {
+        val asset = viewModel.assetToDownload ?: return
+        downloadManager.enqueueDownload(asset)
+        viewModel.clearUpdateRelease()
     }
 }
