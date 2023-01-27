@@ -1,10 +1,10 @@
 package com.medina.juanantonio.watcher.sources.auth
 
 import android.content.Context
-import android.widget.Toast
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.network.Result
+import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.CONTINUE_WITHOUT_AUTH
 
@@ -31,7 +31,7 @@ class AuthRepository(
             data?.token?.let { saveToken(it) }
             data?.token
         } else {
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
             null
         }
     }
@@ -45,7 +45,7 @@ class AuthRepository(
             clearToken()
             continueWithoutAuth(false)
         } else {
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
         }
 
         return isSuccessful
@@ -63,7 +63,7 @@ class AuthRepository(
             saveToken(data ?: "")
         } else {
             clearToken()
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
         }
 
         return isSuccessful

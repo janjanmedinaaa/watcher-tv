@@ -9,12 +9,16 @@ class MockUpdateRepository : IUpdateRepository {
 
     companion object {
         private var lastUpdateReminder = ""
+        private var alreadyDownloadedUpdate = false
     }
 
     override val reminderInterval: Long
         get() = TimeUnit.MINUTES.toMillis(5)
 
-    override suspend fun getLatestRelease(): ReleaseBean {
+    override suspend fun getLatestRelease(): ReleaseBean? {
+        if (alreadyDownloadedUpdate) return null
+        alreadyDownloadedUpdate = true
+
         val version = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
         val newVersion = "${version.majorVersion}.${version.minorVersion + 1}"
 

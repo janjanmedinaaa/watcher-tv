@@ -1,12 +1,15 @@
 package com.medina.juanantonio.watcher.sources.media
 
+import android.content.Context
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
+import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 
 class MediaRepository(
+    private val context: Context,
     private val remoteSource: IMediaRemoteSource
 ) : IMediaRepository {
 
@@ -46,8 +49,14 @@ class MediaRepository(
                     score = videoDetails?.score ?: return null,
                     isComingSoon = isComingSoon
                 )
-            } else null
-        } else null
+            } else {
+                videoMediaResult.message.toastIfNotBlank(context)
+                null
+            }
+        } else {
+            videoDetailsResult.message.toastIfNotBlank(context)
+            null
+        }
     }
 
     override suspend fun getVideoDetails(video: Video): GetVideoDetailsResponse.Data? {
@@ -55,7 +64,10 @@ class MediaRepository(
 
         return if (result is Result.Success) {
             result.data?.data
-        } else null
+        } else {
+            result.message.toastIfNotBlank(context)
+            null
+        }
     }
 
     override suspend fun getSeriesEpisodes(video: Video): VideoGroup? {
@@ -70,7 +82,10 @@ class MediaRepository(
                 },
                 contentType = VideoGroup.ContentType.VIDEOS
             )
-        } else null
+        } else {
+            result.message.toastIfNotBlank(context)
+            null
+        }
     }
 }
 

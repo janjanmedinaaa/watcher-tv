@@ -1,4 +1,6 @@
-# Watcher v2.8.2
+# Watcher v2.9
 
 ## What's New
-- Updated Update Version checking
+- Added More Error Toasts
+- Removed annoying update notification on start
+- Added double click on item to Remove video from Watch History

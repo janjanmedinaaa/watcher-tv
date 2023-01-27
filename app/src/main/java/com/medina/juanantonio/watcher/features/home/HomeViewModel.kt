@@ -62,6 +62,8 @@ class HomeViewModel @Inject constructor(
     private var job: Job? = null
     private var videoDetailsJob: Job? = null
 
+    var videoToRemove: Video? = null
+
     fun setupVideoList(videoGroup: VideoGroup?, autoPlayFirstEpisode: Boolean) {
         if (isContentLoaded) {
             if (videoGroup == null) viewModelScope.launch {
@@ -158,12 +160,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getOnGoingVideoGroup() {
+    /**
+     * Sometimes there's a delay in removing a video in the Watch History API,
+     * so we need to manually remove it from the result.
+     */
+    private suspend fun getOnGoingVideoGroup(removeVideo: Video? = null) {
         val onGoingVideos = watchHistoryUseCase.getOnGoingVideos()
         val latestOnGoingVideos = onGoingVideos.map {
             it.episodeNumber = 0
             it.isHomeDisplay = true
             it
+        }.filterNot {
+            it.contentId == removeVideo?.contentId
         }.sortedByDescending { it.lastWatchTime }.take(10)
 
         val onGoingVideoGroup =
@@ -303,6 +311,16 @@ class HomeViewModel @Inject constructor(
     fun clearCacheVideos() {
         viewModelScope.launch {
             watchHistoryUseCase.clearLocalOnGoingVideos()
+        }
+    }
+
+    fun removeFromWatchHistory() {
+        viewModelScope.launch {
+            videoToRemove?.let { video ->
+                watchHistoryUseCase.removeOnGoingVideo(video)
+                getOnGoingVideoGroup(removeVideo = video)
+            }
+            videoToRemove = null
         }
     }
 }

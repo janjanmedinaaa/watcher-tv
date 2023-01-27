@@ -18,6 +18,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.RowsSupportFragment
 import androidx.leanback.widget.ListRow
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -39,6 +40,9 @@ import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueW
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : RowsSupportFragment() {
@@ -51,6 +55,7 @@ class HomeFragment : RowsSupportFragment() {
     private lateinit var startForResultAutoPlay: ActivityResultLauncher<Intent>
     private lateinit var startForResultLogout: ActivityResultLauncher<Intent>
     private lateinit var startForResultSaveCacheVideos: ActivityResultLauncher<Intent>
+    private lateinit var startForResultRemoveWatchHistory: ActivityResultLauncher<Intent>
 
     private var selectedVideoGroup: VideoGroup? = null
 
@@ -58,8 +63,11 @@ class HomeFragment : RowsSupportFragment() {
 
     private var autoPlayFirstEpisode = false
 
+    private var singleClickJob: Job? = null
+
     companion object {
         private const val CONTINUE_WATCHING_POSITION = 0
+        private const val DOUBLE_CLICK_DELAY = 250L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,17 +106,32 @@ class HomeFragment : RowsSupportFragment() {
             }
         }
 
+        startForResultRemoveWatchHistory = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            when ("${it?.data?.data}".toLongOrNull()) {
+                ACTION_ID_POSITIVE -> viewModel.removeFromWatchHistory()
+                ACTION_ID_NEGATIVE -> {
+                    viewModel.videoToRemove = null
+                }
+            }
+        }
+
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
-            if (!item.onlineTime.isNullOrBlank()) {
-                viewModel.getVideoMedia(item, isComingSoon = true)
+
+            // Handle Double Click
+            if (singleClickJob?.isActive == true) {
+                singleClickJob?.cancel()
+                singleClickJob = null
+                handleItemDoubleClick(item)
+
                 return@setOnItemViewClickedListener
             }
 
-            when (item.categoryType) {
-                ItemCategory.ALBUM -> viewModel.getAlbumDetails(item)
-                ItemCategory.MOVIE -> viewModel.getVideoMedia(item)
-                ItemCategory.SERIES -> viewModel.handleSeries(item)
+            singleClickJob = lifecycleScope.launch {
+                delay(DOUBLE_CLICK_DELAY)
+                handleItemSingleClick(item)
             }
         }
 
@@ -155,6 +178,18 @@ class HomeFragment : RowsSupportFragment() {
             }
         }
 
+        view?.findViewById<AppCompatImageView>(R.id.image_view_update)?.apply {
+            setOnClickListener {
+                activityViewModel.askToUpdate()
+            }
+
+            setOnFocusChangeListener { _, onFocus ->
+                val focusBackground =
+                    view?.findViewById<CardView>(R.id.card_view_update_focus_background)
+                focusBackground?.isInvisible = !onFocus
+            }
+        }
+
         view?.findViewById<AppCompatImageView>(R.id.image_view_search)?.apply {
             setOnClickListener {
                 findNavController().safeNavigate(
@@ -163,9 +198,9 @@ class HomeFragment : RowsSupportFragment() {
             }
 
             setOnFocusChangeListener { _, onFocus ->
-                val searchBackground =
+                val focusBackground =
                     view?.findViewById<CardView>(R.id.card_view_search_focus_background)
-                searchBackground?.isInvisible = !onFocus
+                focusBackground?.isInvisible = !onFocus
             }
         }
 
@@ -280,12 +315,42 @@ class HomeFragment : RowsSupportFragment() {
                 )
             )
         }
+
+        activityViewModel.hasUpdateRelease.observe(viewLifecycleOwner) {
+            val imageViewUpdate =
+                view?.findViewById<AppCompatImageView>(R.id.image_view_update)
+            imageViewUpdate?.isVisible = it && selectedVideoGroup == null
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         viewModel.isContentLoaded = false
         activityViewModel.cancelBackgroundImage()
+    }
+
+    private fun handleItemSingleClick(video: Video) {
+        if (!video.onlineTime.isNullOrBlank()) {
+            viewModel.getVideoMedia(video, isComingSoon = true)
+            return
+        }
+
+        when (video.categoryType) {
+            ItemCategory.ALBUM -> viewModel.getAlbumDetails(video)
+            ItemCategory.MOVIE -> viewModel.getVideoMedia(video)
+            ItemCategory.SERIES -> viewModel.handleSeries(video)
+        }
+    }
+
+    private fun handleItemDoubleClick(video: Video) {
+        viewModel.videoToRemove = video
+        startForResultRemoveWatchHistory.launch(
+            DialogActivity.getIntent(
+                context = requireContext(),
+                title = getString(R.string.remove_from_watch_history_title),
+                description = getString(R.string.remove_from_watch_history_description, video.title)
+            )
+        )
     }
 
     private fun isContinueWatchingDisplayed(): Boolean {
@@ -343,6 +408,9 @@ fun Fragment.cleanUpRows() {
     val groupDetailsPreview =
         view?.findViewById<Group>(R.id.group_details_preview)
     groupDetailsPreview?.isVisible = false
+    val imageViewUpdate =
+        view?.findViewById<AppCompatImageView>(R.id.image_view_update)
+    imageViewUpdate?.isVisible = false
 
     val containerRoot =
         view?.findViewById<ConstraintLayout>(R.id.container_root)
