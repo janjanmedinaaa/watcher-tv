@@ -68,7 +68,7 @@ jobs:
         with:
           name: ${{ env.RELEASE_NAME }}
           artifacts: ${{ env.APK_LOCATION }}
-          body: ${{ github.event.head_commit.message }}
+          bodyFile: 'RELEASE.md'
           tag: ${{ env.TAG_NAME }}
           token: ${{ secrets.PAT }}
           allowUpdates: true
