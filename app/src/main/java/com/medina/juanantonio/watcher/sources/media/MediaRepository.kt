@@ -1,12 +1,12 @@
 package com.medina.juanantonio.watcher.sources.media
 
 import android.content.Context
-import android.widget.Toast
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
+import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 
 class MediaRepository(
     private val context: Context,
@@ -50,11 +50,11 @@ class MediaRepository(
                     isComingSoon = isComingSoon
                 )
             } else {
-                Toast.makeText(context, videoMediaResult.message, Toast.LENGTH_SHORT).show()
+                videoMediaResult.message.toastIfNotBlank(context)
                 null
             }
         } else {
-            Toast.makeText(context, videoDetailsResult.message, Toast.LENGTH_SHORT).show()
+            videoDetailsResult.message.toastIfNotBlank(context)
             null
         }
     }
@@ -65,7 +65,7 @@ class MediaRepository(
         return if (result is Result.Success) {
             result.data?.data
         } else {
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
             null
         }
     }
@@ -83,7 +83,7 @@ class MediaRepository(
                 contentType = VideoGroup.ContentType.VIDEOS
             )
         } else {
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
             null
         }
     }
