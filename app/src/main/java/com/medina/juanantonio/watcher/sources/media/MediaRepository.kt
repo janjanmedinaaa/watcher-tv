@@ -1,5 +1,7 @@
 package com.medina.juanantonio.watcher.sources.media
 
+import android.content.Context
+import android.widget.Toast
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
@@ -7,6 +9,7 @@ import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 
 class MediaRepository(
+    private val context: Context,
     private val remoteSource: IMediaRemoteSource
 ) : IMediaRepository {
 
@@ -46,8 +49,14 @@ class MediaRepository(
                     score = videoDetails?.score ?: return null,
                     isComingSoon = isComingSoon
                 )
-            } else null
-        } else null
+            } else {
+                Toast.makeText(context, videoMediaResult.message, Toast.LENGTH_SHORT).show()
+                null
+            }
+        } else {
+            Toast.makeText(context, videoDetailsResult.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 
     override suspend fun getVideoDetails(video: Video): GetVideoDetailsResponse.Data? {
@@ -55,7 +64,10 @@ class MediaRepository(
 
         return if (result is Result.Success) {
             result.data?.data
-        } else null
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 
     override suspend fun getSeriesEpisodes(video: Video): VideoGroup? {
@@ -70,7 +82,10 @@ class MediaRepository(
                 },
                 contentType = VideoGroup.ContentType.VIDEOS
             )
-        } else null
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 }
 

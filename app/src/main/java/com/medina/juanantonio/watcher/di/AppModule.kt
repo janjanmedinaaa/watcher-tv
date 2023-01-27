@@ -178,8 +178,11 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideMediaRepository(remoteSource: IMediaRemoteSource): IMediaRepository {
-        return MediaRepository(remoteSource)
+    fun provideMediaRepository(
+        @ApplicationContext context: Context,
+        remoteSource: IMediaRemoteSource
+    ): IMediaRepository {
+        return MediaRepository(context, remoteSource)
     }
 
     @Provides

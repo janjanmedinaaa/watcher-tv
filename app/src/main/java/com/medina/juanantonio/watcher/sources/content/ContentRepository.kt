@@ -163,7 +163,10 @@ class ContentRepository(
                 } ?: emptyList(),
                 contentType = VideoGroup.ContentType.VIDEOS
             )
-        } else null
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 
     override suspend fun searchByKeyword(keyword: String): List<VideoGroup>? {
@@ -197,7 +200,10 @@ class ContentRepository(
                     add(videoGroup)
                 }
             }
-        } else null
+        } else {
+            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            null
+        }
     }
 
     override suspend fun getSearchLeaderboard(): VideoGroup? {
