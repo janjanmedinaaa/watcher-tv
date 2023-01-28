@@ -36,6 +36,7 @@ import com.medina.juanantonio.watcher.features.dialog.DialogFragment
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.data.manager.downloader.IDownloadManager
 import com.medina.juanantonio.watcher.data.manager.downloader.PollState
+import com.medina.juanantonio.watcher.shared.extensions.initPoll
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -44,6 +45,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -126,14 +128,18 @@ class MainActivity : FragmentActivity() {
                 }
         }
 
+        lifecycleScope.launch {
+            60.seconds.initPoll()
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (!downloadManager.isDownloading)
+                        viewModel.checkForUpdates()
+                }
+        }
+
         handleIntent()
         listenVM()
         setupLoading()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (!downloadManager.isDownloading) viewModel.checkForUpdates()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

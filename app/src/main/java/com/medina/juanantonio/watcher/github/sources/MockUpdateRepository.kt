@@ -11,7 +11,7 @@ class MockUpdateRepository : IUpdateRepository {
         private var lastUpdateReminder = ""
         private var alreadyDownloadedUpdate = false
 
-        private var showUpdate = false
+        private var showUpdate = true
     }
 
     override val reminderInterval: Long

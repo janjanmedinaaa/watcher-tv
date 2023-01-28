@@ -52,6 +52,7 @@ class SplashFragment : Fragment() {
         listenViews()
         listenVM()
         checkForSearchResult()
+        viewModel.setupDevModeName()
     }
 
     private fun listenViews() {
@@ -75,6 +76,12 @@ class SplashFragment : Fragment() {
     }
 
     private fun listenVM() {
+        viewModel.isDeveloperMode.observe(viewLifecycleOwner) {
+            binding.textViewVersion.text =
+                if (it) getString(R.string.app_name_version_dev_mode)
+                else getString(R.string.app_name_version)
+        }
+
         viewModel.otpCode.observe(viewLifecycleOwner) {
             if (!it.isNullOrBlank() && it.length == 6) {
                 binding.root.hideKeyboard()
