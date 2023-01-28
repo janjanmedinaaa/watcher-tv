@@ -51,11 +51,13 @@
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_update"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/card_view_update_focus_background"
         app:layout_constraintEnd_toEndOf="@id/card_view_update_focus_background"
         app:layout_constraintStart_toStartOf="@id/card_view_update_focus_background"
         app:layout_constraintTop_toTopOf="@id/card_view_update_focus_background"
-        tools:ignore="UnusedAttribute" />
+        tools:ignore="UnusedAttribute"
+        tools:visibility="visible" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_search_focus_background"
