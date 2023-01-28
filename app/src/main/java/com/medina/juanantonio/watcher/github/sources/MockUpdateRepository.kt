@@ -10,6 +10,8 @@ class MockUpdateRepository : IUpdateRepository {
     companion object {
         private var lastUpdateReminder = ""
         private var alreadyDownloadedUpdate = false
+
+        private var showUpdate = false
     }
 
     override val reminderInterval: Long
@@ -32,7 +34,7 @@ class MockUpdateRepository : IUpdateRepository {
                     url = ""
                 )
             ),
-            draft = false,
+            draft = !showUpdate,
             prerelease = false,
             tag_name = newVersion,
             body = ""
