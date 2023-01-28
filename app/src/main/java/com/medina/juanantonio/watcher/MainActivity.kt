@@ -142,11 +142,6 @@ class MainActivity : FragmentActivity() {
         setupLoading()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!downloadManager.isDownloading) viewModel.checkForUpdates()
-    }
-
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastClickTime < CLICK_INTERVAL) return true
