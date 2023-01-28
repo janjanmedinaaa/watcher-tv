@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
+import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
@@ -21,6 +22,7 @@ class SplashViewModel @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val contentRepository: IContentRepository,
     private val authRepository: IAuthRepository,
+    private val updateRepository: IUpdateRepository,
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val authUseCase: AuthUseCase
@@ -40,6 +42,10 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    private val _isDeveloperMode = MutableLiveData<Boolean>()
+    val isDeveloperMode: LiveData<Boolean>
+        get() = _isDeveloperMode
+
     // Bug fix: Keyboard opens and closes quickly before navigating to the Home Screen
     var preventKeyboardPopup = false
 
@@ -52,6 +58,12 @@ class SplashViewModel @Inject constructor(
             contentRepository.clearHomePage()
             contentRepository.setupNavigationBar()
             checkAuthentication()
+        }
+    }
+
+    fun setupDevModeName() {
+        viewModelScope.launch {
+            _isDeveloperMode.value = updateRepository.isDeveloperMode()
         }
     }
 
