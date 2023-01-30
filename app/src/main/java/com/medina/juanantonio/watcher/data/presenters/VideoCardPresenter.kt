@@ -57,6 +57,14 @@ class VideoCardPresenter(private val glide: RequestManager) : Presenter() {
             }
         }
 
+        if (video.enableDeveloperMode) {
+            glide.load(R.drawable.drawable_developer_mode)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(binding.imageviewPoster)
+
+            return
+        }
+
         glide.load(video.imageUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .override(152 * 2, 203 * 2)

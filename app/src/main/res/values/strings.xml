@@ -41,6 +41,8 @@
     <string name="logout_title">Are you sure you want to logout?</string>
     <string name="save_local_video_title">Save On Going Videos</string>
     <string name="save_local_video_description">It looks like you have on going videos when you were using Guest Mode. Do you want to save them on your account Watch History?</string>
+    <string name="remove_from_watch_history_title">Remove from Watch History</string>
+    <string name="remove_from_watch_history_description">Do you want to remove %s from your Watch History?</string>
 
     <!-- Downloader -->
     <string name="title_file_download">Downloading Watcher TV Update</string>

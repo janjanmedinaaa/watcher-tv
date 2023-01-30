@@ -1,7 +1,6 @@
 package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
-import android.widget.Toast
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
@@ -10,6 +9,7 @@ import com.medina.juanantonio.watcher.network.models.home.HomePageBean
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.CollectionProportion
 import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.MovieListProportion
+import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 
 class ContentRepository(
     private val context: Context,
@@ -38,7 +38,7 @@ class ContentRepository(
                 addAll(filteredItems ?: emptyList())
             }
         } else {
-            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            result.message.toastIfNotBlank(context)
         }
     }
 
@@ -163,7 +163,10 @@ class ContentRepository(
                 } ?: emptyList(),
                 contentType = VideoGroup.ContentType.VIDEOS
             )
-        } else null
+        } else {
+            result.message.toastIfNotBlank(context)
+            null
+        }
     }
 
     override suspend fun searchByKeyword(keyword: String): List<VideoGroup>? {
@@ -197,7 +200,10 @@ class ContentRepository(
                     add(videoGroup)
                 }
             }
-        } else null
+        } else {
+            result.message.toastIfNotBlank(context)
+            null
+        }
     }
 
     override suspend fun getSearchLeaderboard(): VideoGroup? {

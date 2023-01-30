@@ -1,15 +1,12 @@
 package com.medina.juanantonio.watcher.features.splash
 
-import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
-import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
@@ -24,8 +21,8 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val contentRepository: IContentRepository,
-    private val updateRepository: IUpdateRepository,
     private val authRepository: IAuthRepository,
+    private val updateRepository: IUpdateRepository,
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val authUseCase: AuthUseCase
@@ -35,9 +32,7 @@ class SplashViewModel @Inject constructor(
     val navigateToHomeScreen: LiveData<Event<Unit>>
         get() = _navigateToHomeScreen
 
-    val newerRelease = MutableLiveData<Event<ReleaseBean>>()
     val splashState = MutableLiveData<Event<SplashState>>()
-    var assetToDownload: ReleaseBean.Asset? = null
 
     val phoneNumber = MutableLiveData<String>()
     val otpCode = MutableLiveData<String>()
@@ -47,47 +42,28 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    private val _isDeveloperMode = MutableLiveData<Boolean>()
+    val isDeveloperMode: LiveData<Boolean>
+        get() = _isDeveloperMode
+
     // Bug fix: Keyboard opens and closes quickly before navigating to the Home Screen
     var preventKeyboardPopup = false
 
     private var job: Job? = null
-
-    private val isEmulator: Boolean
-        get() = Build.FINGERPRINT.contains("generic")
 
     var hasPendingSearchResultToWatch = false
 
     init {
         viewModelScope.launch {
             contentRepository.clearHomePage()
-
-            val requestList = arrayListOf<Deferred<Any?>>(
-                async { contentRepository.setupNavigationBar() }
-            )
-
-            if (updateRepository.shouldGetUpdate() && !hasPendingSearchResultToWatch) {
-                requestList.add(
-                    async { updateRepository.getLatestRelease() }
-                )
-            }
-
-            val results = requestList.awaitAll()
-            val latestRelease = results.firstOrNull { it is ReleaseBean } as? ReleaseBean
-
-            latestRelease?.let { releaseBean ->
-                val developerModeEnabled = updateRepository.isDeveloperMode()
-                if (shouldDownloadRelease(releaseBean, developerModeEnabled)) {
-                    assetToDownload = releaseBean.assets.last { it.isAPK() }
-                    newerRelease.value = Event(releaseBean)
-                } else checkAuthentication()
-            } ?: checkAuthentication()
+            contentRepository.setupNavigationBar()
+            checkAuthentication()
         }
     }
 
-    fun saveLastUpdateReminder() {
+    fun setupDevModeName() {
         viewModelScope.launch {
-            updateRepository.saveLastUpdateReminder()
-            checkAuthentication()
+            _isDeveloperMode.value = updateRepository.isDeveloperMode()
         }
     }
 
@@ -119,7 +95,7 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    fun checkAuthentication() {
+    private fun checkAuthentication() {
         viewModelScope.launch {
             val isUserAuthenticated = authRepository.isUserAuthenticated()
             val shouldContinueWithoutAuth = authRepository.shouldContinueWithoutAuth()
@@ -153,7 +129,6 @@ class SplashViewModel @Inject constructor(
             val homePageId = contentRepository.navigationItems.firstOrNull()?.id ?: -1
             contentRepository.setPageId(homePageId)
             contentRepository.setupPage(homePageId) {
-                assetToDownload = null
                 preventKeyboardPopup = true
                 _navigateToHomeScreen.postValue(Event(Unit))
                 if (showLoading) loaderUseCase.hide()
@@ -166,18 +141,6 @@ class SplashViewModel @Inject constructor(
 
     private fun setSplashState(state: SplashState) {
         splashState.postValue(Event(state))
-    }
-
-    private fun shouldDownloadRelease(
-        releaseBean: ReleaseBean,
-        developerModeEnabled: Boolean
-    ): Boolean {
-        return releaseBean.run {
-            (developerModeEnabled || isForDownload())
-                && isNewerVersion()
-                && assets.any { it.isAPK() }
-                && (!BuildConfig.DEBUG || isEmulator)
-        }
     }
 }
 
