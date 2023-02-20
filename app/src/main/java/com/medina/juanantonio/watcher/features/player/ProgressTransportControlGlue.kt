@@ -93,6 +93,13 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     )
         private set
 
+    var settingsAction = CustomMultiAction(
+        context,
+        ACTION_SETTINGS,
+        intArrayOf(R.drawable.ic_settings),
+        intArrayOf(R.string.control_action_settings)
+    )
+
     private var onActionListener: (Action) -> Unit = {}
 
     override fun onCreatePrimaryActions(primaryActionsAdapter: ArrayObjectAdapter) {
@@ -186,6 +193,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         // Custom Action IDs
         private const val ACTION_SPEEDUP = 19
         private const val ACTION_BEDTIME = 20
+        private const val ACTION_SETTINGS = 21
 
         private const val MAX_VIDEO_AUTO_PLAYBACK = 5
 

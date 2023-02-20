@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 26
-        versionName "2.9"
+        versionCode 27
+        versionName "2.10"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -83,6 +83,7 @@ dependencies {
 
     def leanback_version = "1.2.0-alpha02"
     implementation "androidx.leanback:leanback:$leanback_version"
+    implementation "androidx.leanback:leanback-preference:$leanback_version"
 
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 
@@ -164,4 +165,8 @@ dependencies {
 
     // Used for version checking
     implementation 'org.apache.maven:maven-artifact:3.0.3'
+
+    // Country Code Picker
+    implementation 'io.michaelrocks:libphonenumber-android:8.13.5'
+    implementation 'com.github.joielechong:countrycodepicker:2.4.2'
 }
