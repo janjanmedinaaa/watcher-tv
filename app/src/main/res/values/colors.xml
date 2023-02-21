@@ -33,4 +33,6 @@
 
     <color name="button_off_focused_grey">#46E8EAED</color>
     <color name="edit_text_login_border">#37363E</color>
+
+    <color name="idle_dialog_button_background">#B3B3B3</color>
 </resources>

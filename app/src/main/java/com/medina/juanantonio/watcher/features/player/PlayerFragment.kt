@@ -17,7 +17,6 @@ import androidx.leanback.widget.ClassPresenterSelector
 import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
-import androidx.leanback.widget.PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -43,6 +42,8 @@ import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
+import com.medina.juanantonio.watcher.features.dialog.IdleDialogButton
+import com.medina.juanantonio.watcher.features.dialog.IdleDialogFragment
 import com.medina.juanantonio.watcher.features.home.cleanUpRows
 import com.medina.juanantonio.watcher.features.home.hideNavigationBar
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
@@ -90,6 +91,9 @@ class PlayerFragment : VideoSupportFragment() {
 
     private var timedPopBackstackJob: Job? = null
 
+    // Store current subtitle language so we know if the
+    // user just toggled the subtitle visibility and we don't
+    // need to refresh the videoMedia
     private var currentSubtitleLanguage = ""
 
     private val uiPlaybackStateListener = object : PlaybackStateListener {
@@ -130,8 +134,27 @@ class PlayerFragment : VideoSupportFragment() {
             seekTo(startPosition)
             playbackSpeed = viewModel.selectedPlaybackSpeed.toFloat()
             playWhenReady = controlGlue.autoPlayVideos
-            if (!controlGlue.autoPlayVideos) startTimerForPopBackstack()
+            if (!controlGlue.autoPlayVideos) {
+                startTimerForPopBackstack()
+                showIdleDialog()
+            }
         }
+    }
+
+    private fun showIdleDialog() {
+        IdleDialogFragment.getInstance(viewModel.videoTitle) {
+            when (it) {
+                IdleDialogButton.ASK_AGAIN -> {
+                    controlGlue.playAndResetVideoCount()
+                }
+                IdleDialogButton.PLAY_WITHOUT_ASKING -> {
+                    controlGlue.enableBedtimeMode(true)
+                }
+                IdleDialogButton.DONE -> {
+                    findNavController().popBackStack()
+                }
+            }
+        }.show(childFragmentManager, IdleDialogFragment::class.java.name)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -247,6 +270,7 @@ class PlayerFragment : VideoSupportFragment() {
             viewModel.onStateChange(VideoPlaybackState.Load(it))
         }
 
+        // Handle Change Request from Settings Screen
         viewModel.selectedSelectionItem.observeEvent(viewLifecycleOwner) {
             when (it.type) {
                 SettingsSelectionItem.Type.QUALITY -> {
@@ -341,10 +365,6 @@ class PlayerFragment : VideoSupportFragment() {
                             viewModel.handleSkipPrevious()
                         }
                     }
-                    bedtimeModeAction -> {
-                        bedtimeModeAction.nextIndex()
-                        enableBedtimeMode(bedtimeModeAction.index == INDEX_ON)
-                    }
                     settingsAction -> {
                         findNavController().safeNavigate(
                             PlayerFragmentDirections.actionPlayerFragmentToSettingsModal()
@@ -354,9 +374,6 @@ class PlayerFragment : VideoSupportFragment() {
 
                 stopTimerForPopBackstack()
             }
-
-            // Set Actions that are On by default
-            onActionClicked(bedtimeModeAction)
         }
     }
 

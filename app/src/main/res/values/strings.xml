@@ -49,9 +49,6 @@
     <string name="downloading">Downloading…</string>
 
     <!-- Custom Multi Actions -->
-    <string name="control_action_increase_speed_disabled">Increase Speed</string>
-    <string name="control_action_bedtime_mode_disabled">Enable Bedtime Mode</string>
-    <string name="control_action_bedtime_mode_enabled">Disable Bedtime Mode</string>
     <string name="control_action_settings">Show Settings</string>
 
     <!-- Login Screen -->
@@ -80,4 +77,10 @@
     <string name="settings_title_quality">Quality for current video</string>
     <string name="settings_title_captions">Subtitles/closed captions</string>
     <string name="settings_title_playback_speed">Playback Speed</string>
+
+    <!-- Idle Dialog -->
+    <string name="are_you_still_watching_title">Are you still watching %1$s?</string>
+    <string name="ask_again_later_button">Ask again later</string>
+    <string name="play_without_asking_button">Play without asking again</string>
+    <string name="im_done_button">I\'m done</string>
 </resources>

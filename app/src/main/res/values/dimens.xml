@@ -61,7 +61,11 @@
     <dimen name="sp_12">12sp</dimen>
     <dimen name="sp_16">16sp</dimen>
     <dimen name="sp_18">18sp</dimen>
+    <dimen name="sp_26">26sp</dimen>
     <dimen name="sp_32">32sp</dimen>
 
     <dimen name="rows_fragment_custom_list_height">290dp</dimen>
+
+    <dimen name="idle_dialog_button_width">300dp</dimen>
+    <dimen name="idle_dialog_prompt_title_max_width">700dp</dimen>
 </resources>

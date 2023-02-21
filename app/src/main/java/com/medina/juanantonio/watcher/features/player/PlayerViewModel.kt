@@ -63,6 +63,9 @@ class PlayerViewModel @Inject constructor(
             currentEpisodeIndex == episodeNumbers.lastIndex
         } ?: false
 
+    val videoTitle: String
+        get() = video?.title ?: ""
+
     private var episodeNumbers = listOf<Int>()
 
     private val playbackStateListeners = arrayListOf<PlaybackStateListener>()
