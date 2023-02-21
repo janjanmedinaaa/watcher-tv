@@ -1,10 +1,7 @@
 package com.medina.juanantonio.watcher.data.models.video
 
-import android.os.Parcelable
 import com.medina.juanantonio.watcher.network.models.player.*
-import kotlinx.android.parcel.Parcelize
 
-@Parcelize
 data class VideoMedia(
     val id: Int, // The id of the specific video media
     val contentId: Int, // The id of the show or movie
@@ -12,6 +9,7 @@ data class VideoMedia(
     val title: String,
     val introduction: String,
     val mediaUrl: String,
+    val definitions: List<Definition>,
     val subtitles: List<Subtitle>?,
     val connectedVideos: List<VideoSuggestion>?,
     val videoSuggestions: List<VideoSuggestion>?,
@@ -21,11 +19,13 @@ data class VideoMedia(
     val coverVerticalUrl: String,
     val coverHorizontalUrl: String,
     val isComingSoon: Boolean
-) : Parcelable {
+) {
 
     // Storing the score in the videoMedia so that
     // the video can use it when saving to local storage
     var score: Double = 0.0
+
+    var currentDefinition = Definition.DefinitionCode.UNKNOWN
 
     constructor(
         contentId: Int,
@@ -46,6 +46,7 @@ data class VideoMedia(
         },
         introduction = detailsResponse.introduction,
         mediaUrl = mediaResponse.mediaUrl,
+        definitions = episodeBean.definitionList,
         subtitles = detailsResponse.episodeVo.firstOrNull {
             it.id == episodeBean.id
         }?.subtitlingList,
@@ -61,9 +62,12 @@ data class VideoMedia(
         isComingSoon = isComingSoon
     ) {
         this.score = score
+        this.currentDefinition = mediaResponse.currentDefinition
     }
 
-    fun getPreferredSubtitle(): Subtitle? {
-        return subtitles?.firstOrNull { it.languageAbbr == "en" } ?: subtitles?.firstOrNull()
+    fun getPreferredSubtitle(languageAbbr: String = "en"): Subtitle? {
+        return subtitles?.firstOrNull {
+            it.languageAbbr == languageAbbr
+        } ?: subtitles?.firstOrNull()
     }
 }

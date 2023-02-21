@@ -1,23 +1,39 @@
 package com.medina.juanantonio.watcher.sources.media
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
+import com.medina.juanantonio.watcher.shared.utils.Event
 
 class MediaRepository(
     private val context: Context,
     private val remoteSource: IMediaRemoteSource
 ) : IMediaRepository {
 
-    override var currentlyPlayingVideo: Video? = null
+    private var _currentlyPlayingVideo: Video? = null
+    override val currentlyPlayingVideo: Video?
+        get() = _currentlyPlayingVideo
+
+    override val currentlyPlayingVideoMedia: VideoMedia?
+        get() = videoMediaLiveData.value?.peek()
+
+    override val videoMediaLiveData = MutableLiveData<Event<VideoMedia>>()
+
+    override fun setCurrentlyPlaying(video: Video, videoMedia: VideoMedia) {
+        _currentlyPlayingVideo = video
+        videoMediaLiveData.value = Event(videoMedia)
+    }
 
     override suspend fun getVideo(
         id: Int,
         category: Int,
+        definition: String?,
         episodeNumber: Int,
         isComingSoon: Boolean
     ): VideoMedia? {
@@ -30,13 +46,13 @@ class MediaRepository(
             } else {
                 videoDetails?.episodeVo?.firstOrNull { it.seriesNo == episodeNumber }
             }
-            val definition = episode?.getDefinition()
+            val chosenDefinition = definition ?: episode?.getDefaultDefinition()?.code?.name
 
             val videoMediaResult = remoteSource.getVideoResource(
                 category = category,
                 contentId = id,
                 episodeId = episode?.id ?: -1,
-                definition = definition?.name ?: ""
+                definition = chosenDefinition ?: ""
             )
 
             if (videoMediaResult is Result.Success) {
@@ -90,11 +106,16 @@ class MediaRepository(
 }
 
 interface IMediaRepository {
-    var currentlyPlayingVideo: Video?
+    val currentlyPlayingVideo: Video?
+    val currentlyPlayingVideoMedia: VideoMedia?
+    val videoMediaLiveData: LiveData<Event<VideoMedia>>
+
+    fun setCurrentlyPlaying(video: Video, videoMedia: VideoMedia)
 
     suspend fun getVideo(
         id: Int,
         category: Int,
+        definition: String? = null,
         episodeNumber: Int = 0,
         isComingSoon: Boolean = false
     ): VideoMedia?

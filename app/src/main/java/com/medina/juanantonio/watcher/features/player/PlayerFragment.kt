@@ -39,6 +39,7 @@ import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.data.presenters.VideoCardPresenter
@@ -89,6 +90,8 @@ class PlayerFragment : VideoSupportFragment() {
 
     private var timedPopBackstackJob: Job? = null
 
+    private var currentSubtitleLanguage = ""
+
     private val uiPlaybackStateListener = object : PlaybackStateListener {
         override fun onChanged(state: VideoPlaybackState) {
             val isPlaying = state is VideoPlaybackState.Play
@@ -108,7 +111,6 @@ class PlayerFragment : VideoSupportFragment() {
                 is VideoPlaybackState.Error -> {
                     findNavController().safeNavigate(
                         PlayerFragmentDirections.actionPlayerFragmentToPlayerErrorFragment(
-                            state.videoMedia,
                             state.exception
                         )
                     )
@@ -126,6 +128,7 @@ class PlayerFragment : VideoSupportFragment() {
     private fun startPlaybackFromWatchProgress(startPosition: Long) {
         exoPlayer?.apply {
             seekTo(startPosition)
+            playbackSpeed = viewModel.selectedPlaybackSpeed.toFloat()
             playWhenReady = controlGlue.autoPlayVideos
             if (!controlGlue.autoPlayVideos) startTimerForPopBackstack()
         }
@@ -134,9 +137,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.videoMedia = PlayerFragmentArgs.fromBundle(requireArguments()).videoMedia
         glide = Glide.with(requireContext())
-
         classPresenterSelector = ClassPresenterSelector()
         // This is required when adding the Related Videos section
         classPresenterSelector.addClassPresenter(ListRow::class.java, ListRowPresenter())
@@ -161,6 +162,7 @@ class PlayerFragment : VideoSupportFragment() {
             setStyle(style)
             setFixedTextSize(Dimension.DP, 75F)
             updatePadding(left = 300, right = 300)
+            isVisible = true
         }
 
         setOnItemViewClickedListener { _, item, _, _ ->
@@ -174,7 +176,7 @@ class PlayerFragment : VideoSupportFragment() {
             if (item == null) return@setOnItemViewSelectedListener
             subtitleView.isVisible =
                 if (item is Video) false
-                else controlGlue.closedCaptioningAction.index == INDEX_ON
+                else viewModel.selectedLanguage.isNotEmpty()
         }
 
         lifecycleScope.launch {
@@ -240,11 +242,31 @@ class PlayerFragment : VideoSupportFragment() {
                 PlayerFragmentDirections.actionPlayerFragmentToHomeFragment(episodeList, autoPlay)
             )
         }
+
+        viewModel.ldVideoMedia.observeEvent(viewLifecycleOwner) {
+            viewModel.onStateChange(VideoPlaybackState.Load(it))
+        }
+
+        viewModel.selectedSelectionItem.observeEvent(viewLifecycleOwner) {
+            when (it.type) {
+                SettingsSelectionItem.Type.QUALITY -> {
+                    viewModel.getVideoMediaOfNewDefinition(it.key)
+                }
+                SettingsSelectionItem.Type.CAPTIONS -> {
+                    subtitleView.isVisible = it.key.isNotEmpty()
+                    if (it.key.isNotEmpty() && it.key != currentSubtitleLanguage) {
+                        setupVideoMedia(videoMedia)
+                    }
+                }
+                SettingsSelectionItem.Type.PLAYBACK_SPEED -> {
+                    exoPlayer?.playbackSpeed = it.key.toFloat()
+                }
+            }
+        }
     }
 
     private fun createMediaSession() {
         mediaSession = MediaSessionCompat(requireContext(), MEDIA_SESSION_TAG)
-
         mediaSessionConnector = MediaSessionConnector(mediaSession).apply {
             val queueNavigator = SingleVideoQueueNavigator(videoMedia, mediaSession) {
                 when (it) {
@@ -319,23 +341,14 @@ class PlayerFragment : VideoSupportFragment() {
                             viewModel.handleSkipPrevious()
                         }
                     }
-                    increaseSpeedAction -> {
-                        increaseSpeedAction.nextIndex()
-                        exoPlayer!!.let { p ->
-                            if (p.playbackSpeed < 2.0) {
-                                p.playbackSpeed += .25f
-                            } else {
-                                p.playbackSpeed = 1.0f
-                            }
-                        }
-                    }
-                    closedCaptioningAction -> {
-                        closedCaptioningAction.nextIndex()
-                        subtitleView.isVisible = closedCaptioningAction.index == INDEX_ON
-                    }
                     bedtimeModeAction -> {
                         bedtimeModeAction.nextIndex()
                         enableBedtimeMode(bedtimeModeAction.index == INDEX_ON)
+                    }
+                    settingsAction -> {
+                        findNavController().safeNavigate(
+                            PlayerFragmentDirections.actionPlayerFragmentToSettingsModal()
+                        )
                     }
                 }
 
@@ -343,7 +356,6 @@ class PlayerFragment : VideoSupportFragment() {
             }
 
             // Set Actions that are On by default
-            onActionClicked(closedCaptioningAction)
             onActionClicked(bedtimeModeAction)
         }
     }
@@ -354,9 +366,10 @@ class PlayerFragment : VideoSupportFragment() {
         // connected and related videos
         viewModel.videoMedia = videoMedia
         viewModel.setEpisodeNumbers(videoMedia.episodeNumbers)
+        currentSubtitleLanguage = viewModel.selectedLanguage
 
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
-        val subtitleData = videoMedia.getPreferredSubtitle()
+        val subtitleData = videoMedia.getPreferredSubtitle(currentSubtitleLanguage)
         val subtitleUri = Uri.parse(subtitleData?.subtitlingUrl ?: "")
         val subtitleMediaItem = MediaItem.SubtitleConfiguration.Builder(subtitleUri)
             .setMimeType(MimeTypes.APPLICATION_SUBRIP)

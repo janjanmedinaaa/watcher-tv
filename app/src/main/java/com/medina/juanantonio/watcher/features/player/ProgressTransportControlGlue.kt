@@ -108,19 +108,9 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
         primaryActionsAdapter.apply {
             add(skipPreviousAction)
-            add(skipBackwardAction)
-            add(skipForwardAction)
             add(skipNextAction)
-        }
-    }
-
-    override fun onCreateSecondaryActions(secondaryActionsAdapter: ArrayObjectAdapter) {
-        super.onCreateSecondaryActions(secondaryActionsAdapter)
-
-        secondaryActionsAdapter.apply {
-            add(increaseSpeedAction)
-            add(closedCaptioningAction)
             add(bedtimeModeAction)
+            add(settingsAction)
         }
     }
 
@@ -132,8 +122,6 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     override fun onActionClicked(action: Action) {
         // Primary actions are handled manually. The superclass handles default play/pause action.
         when (action) {
-            skipBackwardAction -> skipBackward()
-            skipForwardAction -> skipForward()
             skipPreviousAction,
             skipNextAction -> Unit
             else -> super.onActionClicked(action)

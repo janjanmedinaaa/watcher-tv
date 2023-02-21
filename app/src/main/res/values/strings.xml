@@ -71,4 +71,13 @@
     <string name="search_hint">Search for movies</string>
 
     <string name="lb_search_bar_hint_with_title">%1$s</string>
+
+    <!-- Settings -->
+    <string name="settings_item_title_quality">Quality</string>
+    <string name="settings_item_title_captions">Captions</string>
+    <string name="settings_item_title_playback_speed">Playback Speed</string>
+    <string name="settings_title_initial">Settings</string>
+    <string name="settings_title_quality">Quality for current video</string>
+    <string name="settings_title_captions">Subtitles/closed captions</string>
+    <string name="settings_title_playback_speed">Playback Speed</string>
 </resources>

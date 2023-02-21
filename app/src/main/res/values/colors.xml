@@ -3,6 +3,7 @@
     <!-- Warm dark gray for backgrounds -->
     <color name="gray_dark">#212121</color>
     <color name="edit_text_gray_background">#191919</color>
+    <color name="light_gray">#333333</color>
 
     <!-- Colors defined dedicated for TV screen white. -->
     <color name="screen_white">#E8EAED</color>

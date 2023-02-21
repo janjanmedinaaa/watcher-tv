@@ -1,8 +1,10 @@
 package com.medina.juanantonio.watcher.features.player
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
@@ -11,6 +13,7 @@ import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
+import com.medina.juanantonio.watcher.sources.settings.SettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -23,13 +26,26 @@ class PlayerViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository,
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
+    private val settingsUseCase: SettingsUseCase,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
     private var job: Job? = null
 
-    lateinit var videoMedia: VideoMedia
+    var videoMedia: VideoMedia = mediaRepository.currentlyPlayingVideoMedia!!
+
+    val ldVideoMedia: LiveData<Event<VideoMedia>>
+        get() = mediaRepository.videoMediaLiveData
+
+    val selectedSelectionItem: LiveData<Event<SettingsSelectionItem>>
+        get() = settingsUseCase.selectedSelectionItem
+
+    val selectedLanguage: String
+        get() = settingsUseCase.selectedLanguage
+
+    val selectedPlaybackSpeed: String
+        get() = settingsUseCase.selectedPlaybackSpeed
 
     val savedProgress = MutableLiveData<Event<Long>>()
     val handleVideoEndNavigation = MutableLiveData<Event<Unit>>()
@@ -57,16 +73,10 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Adds a [PlaybackStateListener] to be notified of [VideoPlaybackState] changes.
-     */
     fun addPlaybackStateListener(listener: PlaybackStateListener) {
         playbackStateListeners.add(listener)
     }
 
-    /**
-     * Removes the [PlaybackStateListener] so it receives no further [VideoPlaybackState] changes.
-     */
     fun removePlaybackStateListener(listener: PlaybackStateListener) {
         playbackStateListeners.remove(listener)
     }
@@ -146,24 +156,29 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun getVideoMediaOfNewDefinition(definition: String?) {
+        video?.let { getVideoMedia(it, definition) }
+    }
+
     /**
      * Used for handling Movie Recommendations, no need to
      * navigate to new PlayerFragment
      */
-    fun getVideoMedia(video: Video) {
+    fun getVideoMedia(video: Video, definition: String? = null) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             loaderUseCase.show()
             val videoMedia = mediaRepository.getVideo(
                 id = video.contentId,
                 category = video.category ?: -1,
+                definition = definition,
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video.apply {
+                val currentlyPlayingVideo = video.apply {
                     score = videoMedia.score
                 }
-                onStateChange(VideoPlaybackState.Load(it))
+                mediaRepository.setCurrentlyPlaying(currentlyPlayingVideo, it)
             }
             loaderUseCase.hide()
         }
@@ -208,12 +223,11 @@ class PlayerViewModel @Inject constructor(
                 )
 
                 videoMedia?.let {
-                    mediaRepository.currentlyPlayingVideo =
-                        currentlyPlayingVideo.createNew(
-                            episodeNumber = newEpisodeNumber,
-                            videoProgress = 0L
-                        )
-                    onStateChange(VideoPlaybackState.Load(it))
+                    val newPlayingVideo = currentlyPlayingVideo.createNew(
+                        episodeNumber = newEpisodeNumber,
+                        videoProgress = 0L
+                    )
+                    mediaRepository.setCurrentlyPlaying(newPlayingVideo, it)
                 }
             }
             loaderUseCase.hide()

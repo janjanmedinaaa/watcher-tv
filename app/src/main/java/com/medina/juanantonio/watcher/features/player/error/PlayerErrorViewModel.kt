@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.features.player.error
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +17,12 @@ class PlayerErrorViewModel @Inject constructor(
     private val mediaRepository: IMediaRepository
 ) : ViewModel() {
 
-    val videoMedia = MutableLiveData<Event<VideoMedia>>()
+    val videoMediaThatFailed: VideoMedia?
+        get() = mediaRepository.currentlyPlayingVideoMedia
+
+    val videoMedia: LiveData<Event<VideoMedia>>
+        get() = mediaRepository.videoMediaLiveData
+
     private var job: Job? = null
 
     fun getNewVideoMedia() {
@@ -29,8 +35,7 @@ class PlayerErrorViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video
-                this@PlayerErrorViewModel.videoMedia.value = Event(it)
+                mediaRepository.setCurrentlyPlaying(video, it)
             }
         }
     }
