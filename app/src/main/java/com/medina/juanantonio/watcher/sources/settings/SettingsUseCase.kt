@@ -79,7 +79,8 @@ class SettingsUseCase @Inject constructor(
             SettingsScreen(
                 key = SETTINGS_CAPTIONS_KEY,
                 title = context.getString(R.string.settings_item_title_captions),
-                description = captionDetails?.language,
+                description = if (captionDetails?.language.isNullOrBlank()) "Off"
+                else captionDetails?.language,
                 icon = R.drawable.ic_closed_captions
             ),
             SettingsScreen(
@@ -117,7 +118,9 @@ class SettingsUseCase @Inject constructor(
                 SettingsSelectionItem(
                     title = "Off",
                     description = null,
-                    isSelected = selectedLanguage.isEmpty(),
+                    isSelected = selectedLanguage.isEmpty() || videoMedia?.subtitles?.none {
+                        selectedLanguage == it.languageAbbr
+                    } == true,
                     key = "",
                     type = SettingsSelectionItem.Type.CAPTIONS
                 )
