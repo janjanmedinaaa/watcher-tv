@@ -91,6 +91,8 @@ class PlayerFragment : VideoSupportFragment() {
 
     private var timedPopBackstackJob: Job? = null
 
+    private var idleDialog: IdleDialogFragment? = null
+
     // Store current subtitle language so we know if the
     // user just toggled the subtitle visibility and we don't
     // need to refresh the videoMedia
@@ -142,7 +144,7 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun showIdleDialog() {
-        IdleDialogFragment.getInstance(viewModel.videoTitle) {
+        idleDialog = IdleDialogFragment.getInstance(viewModel.videoTitle) {
             when (it) {
                 IdleDialogButton.ASK_AGAIN -> {
                     controlGlue.playAndResetVideoCount()
@@ -154,7 +156,8 @@ class PlayerFragment : VideoSupportFragment() {
                     findNavController().popBackStack()
                 }
             }
-        }.show(childFragmentManager, IdleDialogFragment::class.java.name)
+        }
+        idleDialog?.show(childFragmentManager, IdleDialogFragment::class.java.name)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -456,6 +459,7 @@ class PlayerFragment : VideoSupportFragment() {
     private fun startTimerForPopBackstack() {
         timedPopBackstackJob = viewModel.viewModelScope.launch {
             delay(TimeUnit.MINUTES.toMillis(5))
+            idleDialog?.dismiss()
             findNavController().popBackStack()
         }
     }

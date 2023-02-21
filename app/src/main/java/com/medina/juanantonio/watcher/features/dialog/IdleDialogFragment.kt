@@ -14,13 +14,13 @@ class IdleDialogFragment : androidx.fragment.app.DialogFragment() {
 
     companion object {
         private const val TITLE_KEY = "TITLE_KEY"
-        private var _onClickListener: (IdleDialogButton) -> Unit = {}
+        private var onClickListener: (IdleDialogButton) -> Unit = {}
 
         fun getInstance(
             title: String,
-            onClicklistener: (IdleDialogButton) -> Unit = {}
+            onClickListener: (IdleDialogButton) -> Unit = {}
         ): IdleDialogFragment {
-            _onClickListener = onClicklistener
+            this.onClickListener = onClickListener
 
             return IdleDialogFragment().apply {
                 arguments = Bundle().apply {
@@ -48,23 +48,23 @@ class IdleDialogFragment : androidx.fragment.app.DialogFragment() {
         val title = arguments?.getString(TITLE_KEY)
         binding.textViewPromptTitle.text = getString(R.string.are_you_still_watching_title, title)
         binding.buttonAskAgainLater.setOnClickListener {
-            _onClickListener(IdleDialogButton.ASK_AGAIN)
+            onClickListener(IdleDialogButton.ASK_AGAIN)
             dismiss()
         }
         binding.buttonPlayWithoutAskingAgain.setOnClickListener {
-            _onClickListener(IdleDialogButton.PLAY_WITHOUT_ASKING)
+            onClickListener(IdleDialogButton.PLAY_WITHOUT_ASKING)
             dismiss()
         }
         binding.buttonImDone.setOnClickListener {
-            _onClickListener(IdleDialogButton.DONE)
+            onClickListener(IdleDialogButton.DONE)
             dismiss()
         }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        _onClickListener(IdleDialogButton.ASK_AGAIN)
-        _onClickListener = {}
+        onClickListener(IdleDialogButton.ASK_AGAIN)
+        onClickListener = {}
     }
 }
 
