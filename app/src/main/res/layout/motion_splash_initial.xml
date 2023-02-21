@@ -44,7 +44,7 @@
         android:hint="@string/input_hint_phone_number"
         android:maxLength="10"
         android:paddingVertical="@dimen/dp_14"
-        android:paddingStart="@dimen/dp_36"
+        android:paddingStart="@dimen/dp_88"
         android:paddingEnd="@dimen/dp_14"
         android:textSize="@dimen/sp_12"
         android:visibility="gone"
@@ -55,15 +55,19 @@
         app:layout_constraintWidth_percent=".45"
         tools:text="9123456789123456789123456789123456789" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_prefix"
+    <com.rilixtech.widget.countrycodepicker.CountryCodePicker
+        android:id="@+id/country_code_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:padding="@dimen/dp_14"
-        android:text="@string/phone_number_prefix"
-        android:textSize="@dimen/sp_12"
         android:visibility="gone"
+        app:ccp_customMasterCountries="PR,DO,TT,JM,GT,SV,HN,NI,CR,PA,HT,PE,MX,CU,AR,BR,CL,CO,VE,BO,EC,PY,UY,MY,ID,PH,SG,TH,BN,JP,KR,VN,KP,HK,MO,KH,LA,CN,BD,TW,TR,IN,PK,AF,LK,MM,MV,LB,JO,SY,IQ,KW,SA,OM,IL,BH,QA,BT,MN,NP,IR"
+        app:ccp_defaultNameCode="PH"
+        app:ccp_hideNameCode="true"
+        app:ccp_setCountryByTimeZone="true"
+        app:ccp_textColor="@color/screen_white"
+        app:ccp_textSize="@dimen/sp_12"
         app:layout_constraintBottom_toBottomOf="@id/edit_text_phone_number"
         app:layout_constraintStart_toStartOf="@id/edit_text_phone_number"
         app:layout_constraintTop_toTopOf="@id/edit_text_phone_number" />

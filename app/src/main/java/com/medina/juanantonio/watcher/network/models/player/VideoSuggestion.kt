@@ -1,9 +1,5 @@
 package com.medina.juanantonio.watcher.network.models.player
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
-@Parcelize
 data class VideoSuggestion(
     val category: Int,
     val coverHorizontalUrl: String,
@@ -12,4 +8,4 @@ data class VideoSuggestion(
     val name: String,
     val score: Double,
     val seriesNo: Int
-): Parcelable
+)

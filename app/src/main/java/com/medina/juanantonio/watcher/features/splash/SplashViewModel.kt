@@ -35,6 +35,7 @@ class SplashViewModel @Inject constructor(
     val splashState = MutableLiveData<Event<SplashState>>()
 
     val phoneNumber = MutableLiveData<String>()
+    val countryCode = MutableLiveData<String>()
     val otpCode = MutableLiveData<String>()
     val isPhoneNumberValid = MediatorLiveData<Boolean>().apply {
         addSource(phoneNumber) {
@@ -67,12 +68,17 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    fun setupDefaultCountryCode(countryCode: String) {
+        this.countryCode.value = countryCode
+    }
+
     fun requestOTP() {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
             loaderUseCase.show()
             val phoneNumber = phoneNumber.value ?: ""
-            val isOTPRequestSuccess = authRepository.getOTPForLogin(phoneNumber)
+            val countryCode = countryCode.value ?: "63"
+            val isOTPRequestSuccess = authRepository.getOTPForLogin(phoneNumber, countryCode)
             if (isOTPRequestSuccess) setSplashState(SplashState.INPUT_CODE)
             loaderUseCase.hide()
         }
@@ -84,7 +90,8 @@ class SplashViewModel @Inject constructor(
             loaderUseCase.show()
             val phoneNumber = phoneNumber.value ?: ""
             val otpCode = otpCode.value ?: ""
-            val isLoginSuccessful = authUseCase.login(phoneNumber, otpCode)
+            val countryCode = countryCode.value ?: ""
+            val isLoginSuccessful = authUseCase.login(phoneNumber, otpCode, countryCode)
 
             if (isLoginSuccessful) {
                 navigateToHomeScreen(showLoading = true)

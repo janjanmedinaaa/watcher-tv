@@ -100,13 +100,13 @@ class AuthRemoteSource(
 interface IAuthRemoteSource {
     suspend fun getOTPForLogin(
         phoneNumber: String,
-        countryCode: String = "63",
+        countryCode: String,
         sendType: String = "2"
     ): Result<BasicResponse>
 
     suspend fun login(
         phoneNumber: String,
-        countryCode: String = "63",
+        countryCode: String,
         captcha: String,
         phoneModel: String = Build.MODEL,
         phoneSystem: String = Build.HARDWARE,

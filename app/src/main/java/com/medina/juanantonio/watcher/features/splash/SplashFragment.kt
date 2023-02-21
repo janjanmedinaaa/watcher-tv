@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.leanback.widget.picker.PickerColumn
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.MainViewModel
@@ -53,6 +54,7 @@ class SplashFragment : Fragment() {
         listenVM()
         checkForSearchResult()
         viewModel.setupDevModeName()
+        viewModel.setupDefaultCountryCode(binding.countryCodePicker.defaultCountryCode)
     }
 
     private fun listenViews() {
@@ -72,6 +74,11 @@ class SplashFragment : Fragment() {
         binding.editTextCode.setOnFocusChangeListener { view, onFocus ->
             if (onFocus && !viewModel.preventKeyboardPopup) view.showKeyboard()
             else view.hideKeyboard()
+        }
+
+        binding.countryCodePicker.setOnCountryChangeListener {
+            viewModel.countryCode.value = it.phoneCode
+            binding.editTextPhoneNumber.requestFocus()
         }
     }
 

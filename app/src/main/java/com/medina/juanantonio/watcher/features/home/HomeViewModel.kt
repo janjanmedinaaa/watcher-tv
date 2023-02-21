@@ -37,7 +37,9 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
-    val videoMedia = MutableLiveData<Event<VideoMedia>>()
+    val videoMedia: LiveData<Event<VideoMedia>>
+        get() = mediaRepository.videoMediaLiveData
+
     val selectedVideoGroup = MutableLiveData<Event<VideoGroup>>()
     val onGoingVideosList = MutableLiveData<Event<VideoGroup>>()
     val episodeToAutoPlay = MutableLiveData<Event<Video>>()
@@ -149,12 +151,12 @@ class HomeViewModel @Inject constructor(
                 isComingSoon = isComingSoon
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video.apply {
+                val currentlyPlayingVideo = video.apply {
                     // Reset video progress
                     videoProgress = 0L
                     score = videoMedia.score
                 }
-                this@HomeViewModel.videoMedia.value = Event(it)
+                mediaRepository.setCurrentlyPlaying(currentlyPlayingVideo, it)
             }
             loaderUseCase.hide()
         }
@@ -298,9 +300,9 @@ class HomeViewModel @Inject constructor(
             val cacheVideos = watchHistoryUseCase.getLocalOnGoingVideos()
             cacheVideos.forEach {
                 val videoMedia = mediaRepository.getVideo(
-                    it.contentId,
-                    it.category ?: 0,
-                    it.episodeNumber
+                    id = it.contentId,
+                    category = it.category ?: 0,
+                    episodeNumber = it.episodeNumber
                 ) ?: return@forEach
 
                 watchHistoryUseCase.addOnGoingVideo(it, videoMedia)

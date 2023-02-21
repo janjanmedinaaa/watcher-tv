@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:id="@+id/text_view_prompt_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_16"
+        android:clickable="false"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:maxWidth="@dimen/idle_dialog_prompt_title_max_width"
+        android:maxLines="2"
+        android:textSize="@dimen/sp_26"
+        android:textAlignment="center"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toTopOf="@id/button_ask_again_later"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@tools:sample/lorem/random[4]" />
+
+    <Button
+        android:id="@+id/button_ask_again_later"
+        android:layout_width="@dimen/idle_dialog_button_width"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/dp_6"
+        android:background="@drawable/idle_dialog_button_background"
+        android:text="@string/ask_again_later_button"
+        android:textAllCaps="false"
+        android:textColor="@color/color_idle_dialog_button_text"
+        app:layout_constraintBottom_toTopOf="@id/button_play_without_asking_again"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_view_prompt_title"
+        app:layout_constraintWidth_percent=".4" />
+
+    <Button
+        android:id="@+id/button_play_without_asking_again"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/dp_6"
+        android:background="@drawable/idle_dialog_button_background"
+        android:text="@string/play_without_asking_button"
+        android:textAllCaps="false"
+        android:textColor="@color/color_idle_dialog_button_text"
+        app:layout_constraintBottom_toTopOf="@id/button_im_done"
+        app:layout_constraintEnd_toEndOf="@id/button_ask_again_later"
+        app:layout_constraintStart_toStartOf="@id/button_ask_again_later"
+        app:layout_constraintTop_toBottomOf="@id/button_ask_again_later" />
+
+    <Button
+        android:id="@+id/button_im_done"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/dp_6"
+        android:background="@drawable/idle_dialog_button_background"
+        android:text="@string/im_done_button"
+        android:textAllCaps="false"
+        android:textColor="@color/color_idle_dialog_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/button_ask_again_later"
+        app:layout_constraintStart_toStartOf="@id/button_ask_again_later"
+        app:layout_constraintTop_toBottomOf="@id/button_play_without_asking_again" />
+</androidx.constraintlayout.widget.ConstraintLayout>

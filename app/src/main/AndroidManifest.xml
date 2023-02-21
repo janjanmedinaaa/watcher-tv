@@ -71,11 +71,11 @@
 
         <!-- Content provider used to expose our metadata database to other apps like Assistant -->
         <provider
-            tools:ignore="ExportedContentProvider"
             android:name=".data.providers.SearchResultsProvider"
-            android:permission="${applicationId}.MEDIA"
             android:authorities="@string/authority"
-            android:exported="true">
+            android:exported="true"
+            android:permission="${applicationId}.MEDIA"
+            tools:ignore="ExportedContentProvider">
             <path-permission
                 android:pathPrefix="/search"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />

@@ -66,32 +66,17 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     val autoPlayVideos: Boolean
         get() = autoPlayedVideoCount <= MAX_VIDEO_AUTO_PLAYBACK || !bedtimeModeEnabled
 
-    private var skipForwardAction = FastForwardAction(context)
-    private var skipBackwardAction = RewindAction(context)
     var skipNextAction = SkipNextAction(context)
         private set
     var skipPreviousAction = SkipPreviousAction(context)
         private set
-    var closedCaptioningAction = ClosedCaptioningAction(context)
-        private set
-    var increaseSpeedAction = CustomMultiAction(
-        context,
-        ACTION_SPEEDUP,
-        intArrayOf(R.drawable.ic_speed_increase),
-        intArrayOf(R.string.control_action_increase_speed_disabled)
-    )
-        private set
 
-    var bedtimeModeAction = CustomMultiAction(
+    var settingsAction = CustomMultiAction(
         context,
-        ACTION_BEDTIME,
-        intArrayOf(R.drawable.ic_bedtime_mode_disabled, R.drawable.ic_bedtime_mode_enabled),
-        intArrayOf(
-            R.string.control_action_bedtime_mode_disabled,
-            R.string.control_action_bedtime_mode_enabled
-        )
+        ACTION_SETTINGS,
+        intArrayOf(R.drawable.ic_settings),
+        intArrayOf(R.string.control_action_settings)
     )
-        private set
 
     private var onActionListener: (Action) -> Unit = {}
 
@@ -101,19 +86,8 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
         primaryActionsAdapter.apply {
             add(skipPreviousAction)
-            add(skipBackwardAction)
-            add(skipForwardAction)
             add(skipNextAction)
-        }
-    }
-
-    override fun onCreateSecondaryActions(secondaryActionsAdapter: ArrayObjectAdapter) {
-        super.onCreateSecondaryActions(secondaryActionsAdapter)
-
-        secondaryActionsAdapter.apply {
-            add(increaseSpeedAction)
-            add(closedCaptioningAction)
-            add(bedtimeModeAction)
+            add(settingsAction)
         }
     }
 
@@ -125,8 +99,6 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     override fun onActionClicked(action: Action) {
         // Primary actions are handled manually. The superclass handles default play/pause action.
         when (action) {
-            skipBackwardAction -> skipBackward()
-            skipForwardAction -> skipForward()
             skipPreviousAction,
             skipNextAction -> Unit
             else -> super.onActionClicked(action)
@@ -154,6 +126,11 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         autoPlayedVideoCount++
     }
 
+    fun playAndResetVideoCount() {
+        play()
+        resetAutoPlayedVideoCount()
+    }
+
     private fun resetAutoPlayedVideoCount() {
         autoPlayedVideoCount = 1
     }
@@ -168,28 +145,12 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         }
     }
 
-    /** Skips backward 30 seconds.  */
-    private fun skipBackward() {
-        var newPosition: Long = currentPosition - THIRTY_SECONDS
-        newPosition = newPosition.coerceAtLeast(0L)
-        playerAdapter.seekTo(newPosition)
-    }
-
-    /** Skips forward 30 seconds.  */
-    private fun skipForward() {
-        var newPosition: Long = currentPosition + THIRTY_SECONDS
-        newPosition = newPosition.coerceAtMost(duration)
-        playerAdapter.seekTo(newPosition)
-    }
-
     companion object {
         // Custom Action IDs
-        private const val ACTION_SPEEDUP = 19
-        private const val ACTION_BEDTIME = 20
+        private const val ACTION_SETTINGS = 21
 
         private const val MAX_VIDEO_AUTO_PLAYBACK = 5
 
-        val THIRTY_SECONDS = TimeUnit.SECONDS.toMillis(30)
         private val FIVE_SECONDS = TimeUnit.SECONDS.toMillis(5)
     }
 
