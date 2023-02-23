@@ -10,7 +10,7 @@ data class GetVideoResourceResponse(
 
     inner class Data(
         val businessType: Int,
-        val currentDefinition: EpisodeBean.DefinitionCode,
+        val currentDefinition: Definition.DefinitionCode,
         val episodeId: String,
         val mediaUrl: String,
         val totalDuration: Int

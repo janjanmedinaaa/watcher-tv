@@ -14,16 +14,21 @@ class AuthRepository(
     private val dataStoreManager: IDataStoreManager
 ) : IAuthRepository {
 
-    override suspend fun getOTPForLogin(phoneNumber: String): Boolean {
-        val result = remoteSource.getOTPForLogin(phoneNumber)
+    override suspend fun getOTPForLogin(phoneNumber: String, countryCode: String): Boolean {
+        val result = remoteSource.getOTPForLogin(phoneNumber, countryCode)
 
         return result is Result.Success
     }
 
-    override suspend fun login(phoneNumber: String, captcha: String): String? {
+    override suspend fun login(
+        phoneNumber: String,
+        captcha: String,
+        countryCode: String
+    ): String? {
         val result = remoteSource.login(
             phoneNumber = phoneNumber,
-            captcha = captcha
+            countryCode = countryCode,
+            captcha = captcha,
         )
 
         return if (result is Result.Success) {
@@ -95,8 +100,9 @@ class AuthRepository(
 }
 
 interface IAuthRepository {
-    suspend fun getOTPForLogin(phoneNumber: String): Boolean
-    suspend fun login(phoneNumber: String, captcha: String): String?
+    suspend fun getOTPForLogin(phoneNumber: String, countryCode: String): Boolean
+
+    suspend fun login(phoneNumber: String, captcha: String, countryCode: String): String?
     suspend fun logout(): Boolean
     suspend fun refreshToken(): Boolean
     suspend fun getUserToken(): String

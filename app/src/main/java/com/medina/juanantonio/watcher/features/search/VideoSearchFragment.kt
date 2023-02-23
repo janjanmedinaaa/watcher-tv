@@ -99,7 +99,7 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
             activityViewModel.setMovieBackground()
             findNavController().safeNavigate(
-                VideoSearchFragmentDirections.actionVideoSearchFragmentToPlayerFragment(it)
+                VideoSearchFragmentDirections.actionVideoSearchFragmentToPlayerFragment()
             )
         }
 

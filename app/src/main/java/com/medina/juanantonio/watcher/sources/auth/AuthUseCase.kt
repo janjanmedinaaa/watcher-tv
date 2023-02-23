@@ -12,8 +12,8 @@ class AuthUseCase @Inject constructor(
     private val userDatabase: IUserDatabase
 ) {
 
-    suspend fun login(phoneNumber: String, captcha: String): Boolean {
-        val userToken = authRepository.login(phoneNumber, captcha)
+    suspend fun login(phoneNumber: String, captcha: String, countryCode: String): Boolean {
+        val userToken = authRepository.login(phoneNumber, captcha, countryCode)
 
         userToken?.let { token ->
             val userInfo = userRepository.getUserInfo()

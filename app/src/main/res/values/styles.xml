@@ -40,4 +40,8 @@
 
     <style name="ErrorActionButton" parent="ErrorActionButtonBase" />
 
+    <style name="settings_modal_animation">
+        <item name="android:windowEnterAnimation">@anim/slide_from_right_in</item>
+        <item name="android:windowExitAnimation">@anim/slide_from_right_out</item>
+    </style>
 </resources>

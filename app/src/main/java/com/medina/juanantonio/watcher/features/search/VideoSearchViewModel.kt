@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.features.search
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +27,9 @@ class VideoSearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     val searchResults = MutableLiveData<Event<List<VideoGroup>>>()
-    val videoMedia = MutableLiveData<Event<VideoMedia>>()
+    val videoMedia: LiveData<Event<VideoMedia>>
+        get() = mediaRepository.videoMediaLiveData
+
     val episodeList = MutableLiveData<Event<VideoGroup>>()
     private var job: Job? = null
 
@@ -79,10 +82,10 @@ class VideoSearchViewModel @Inject constructor(
                 episodeNumber = video.episodeNumber
             )
             videoMedia?.let {
-                mediaRepository.currentlyPlayingVideo = video.apply {
+                val currentlyPlayingVideo = video.apply {
                     score = videoMedia.score
                 }
-                this@VideoSearchViewModel.videoMedia.value = Event(it)
+                mediaRepository.setCurrentlyPlaying(currentlyPlayingVideo, it)
             }
             loaderUseCase.hide()
         }

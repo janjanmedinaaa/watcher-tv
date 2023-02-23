@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_modal"
+    app:startDestination="@id/settingsDisplayFragment">
+
+    <fragment
+        android:id="@+id/settingsDisplayFragment"
+        android:name="com.medina.juanantonio.watcher.features.settings.display.SettingsDisplayFragment"
+        android:label="SettingsDisplayFragment">
+
+        <argument
+            android:name="key"
+            android:defaultValue=""
+            app:argType="string"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/action_settingsDisplayFragment_self"
+            app:destination="@id/settingsDisplayFragment"
+            app:enterAnim="@anim/stepper_next_enter_animation"
+            app:exitAnim="@anim/stepper_next_exit_animation"
+            app:popEnterAnim="@anim/stepper_back_enter_animation"
+            app:popExitAnim="@anim/stepper_back_exit_animation" />
+    </fragment>
+</navigation>

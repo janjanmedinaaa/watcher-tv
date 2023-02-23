@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.medina.juanantonio.watcher.R
-import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.databinding.FragmentPlayerErrorBinding
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
 import com.medina.juanantonio.watcher.shared.utils.autoCleared
@@ -21,7 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class PlayerErrorFragment : Fragment() {
 
-    private lateinit var videoMedia: VideoMedia
     private lateinit var error: Exception
 
     private var binding: FragmentPlayerErrorBinding by autoCleared()
@@ -30,7 +28,6 @@ class PlayerErrorFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         error = PlayerErrorFragmentArgs.fromBundle(requireArguments()).error
-        videoMedia = PlayerErrorFragmentArgs.fromBundle(requireArguments()).videoMedia
 
         val onBackPressedCallback = object : OnBackPressedCallback(/* enabled = */ true) {
             override fun handleOnBackPressed() {
@@ -61,7 +58,10 @@ class PlayerErrorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.run {
-            title.text = getString(R.string.error_title_with_video, videoMedia.title)
+            title.text = getString(
+                R.string.error_title_with_video,
+                viewModel.videoMediaThatFailed?.title
+            )
             // The entire stack trace is printed to logcat. We only need to show the cause's message
             // in the UI to give enough context for the error. Search logcat for "Playback error" to
             // view the full exception.
@@ -82,7 +82,7 @@ class PlayerErrorFragment : Fragment() {
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
             findNavController().safeNavigate(
                 PlayerErrorFragmentDirections
-                    .actionPlayerErrorFragmentToPlayerFragment(it)
+                    .actionPlayerErrorFragmentToPlayerFragment()
             )
         }
     }

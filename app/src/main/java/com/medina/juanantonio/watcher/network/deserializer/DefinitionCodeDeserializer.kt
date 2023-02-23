@@ -3,20 +3,20 @@ package com.medina.juanantonio.watcher.network.deserializer
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import com.medina.juanantonio.watcher.network.models.player.EpisodeBean
+import com.medina.juanantonio.watcher.network.models.player.Definition
 import java.lang.reflect.Type
 
-class DefinitionCodeDeserializer : JsonDeserializer<EpisodeBean.DefinitionCode> {
+class DefinitionCodeDeserializer : JsonDeserializer<Definition.DefinitionCode> {
 
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type,
         context: JsonDeserializationContext
-    ): EpisodeBean.DefinitionCode {
+    ): Definition.DefinitionCode {
         return try {
-            EpisodeBean.DefinitionCode.valueOf(json.asString)
+            Definition.DefinitionCode.valueOf(json.asString)
         } catch (e: Exception) {
-            EpisodeBean.DefinitionCode.UNKNOWN
+            Definition.DefinitionCode.UNKNOWN
         }
     }
 }
