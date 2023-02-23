@@ -24,8 +24,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 27
-        versionName "2.10"
+        versionCode 28
+        versionName "2.10.1"
 
         javaCompileOptions {
             annotationProcessorOptions {
