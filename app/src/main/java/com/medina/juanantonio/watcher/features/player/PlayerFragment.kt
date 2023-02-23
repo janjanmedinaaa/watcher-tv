@@ -150,7 +150,7 @@ class PlayerFragment : VideoSupportFragment() {
                     controlGlue.playAndResetVideoCount()
                 }
                 IdleDialogButton.PLAY_WITHOUT_ASKING -> {
-                    controlGlue.enableBedtimeMode(true)
+                    controlGlue.enableBedtimeMode(false)
                 }
                 IdleDialogButton.DONE -> {
                     findNavController().popBackStack()

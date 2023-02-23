@@ -61,7 +61,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
     private var autoPlayedVideoCount = 0
 
-    private var bedtimeModeEnabled = false
+    private var bedtimeModeEnabled = true
 
     val autoPlayVideos: Boolean
         get() = autoPlayedVideoCount <= MAX_VIDEO_AUTO_PLAYBACK || !bedtimeModeEnabled
@@ -149,7 +149,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         // Custom Action IDs
         private const val ACTION_SETTINGS = 21
 
-        private const val MAX_VIDEO_AUTO_PLAYBACK = 5
+        private const val MAX_VIDEO_AUTO_PLAYBACK = 3
 
         private val FIVE_SECONDS = TimeUnit.SECONDS.toMillis(5)
     }
