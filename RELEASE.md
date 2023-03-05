@@ -1,4 +1,4 @@
-# Watcher v2.10.1
+# Watcher v2.10.2
 
 ## Bug Fix
-- Fixed bug when bedtime mode is enabled by default and never show idle dialog 
+- Updated API Header `versioncode` to 33
