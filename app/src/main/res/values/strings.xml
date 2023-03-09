@@ -60,7 +60,7 @@
 
     <!-- Home Screen -->
     <string name="label_guest">Guest</string>
-    <string name="disabled_update_manager">Disabled in-app updater. Visit Watcher-TV in Github for update.</string>
+    <string name="disabled_update_manager">Disabled in-app updater. Visit janjanmedinaaa/watcher-tv in Github for update.</string>
 
     <!-- Player Screen -->
     <string name="dev_mode_player_title">%s; %d:%d</string>
