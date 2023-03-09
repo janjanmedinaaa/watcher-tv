@@ -9,6 +9,7 @@ import android.view.View
 import androidx.annotation.Dimension
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
@@ -37,6 +38,7 @@ import com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_RAISED
 import com.google.android.exoplayer2.ui.SubtitleView
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
+import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
@@ -77,6 +79,7 @@ class PlayerFragment : VideoSupportFragment() {
 
     private var exoPlayer: ExoPlayer? = null
     private val viewModel: PlayerViewModel by viewModels()
+    private val activityViewModel: MainViewModel by activityViewModels()
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var controlGlue: ProgressTransportControlGlue<LeanbackPlayerAdapter>
@@ -227,6 +230,7 @@ class PlayerFragment : VideoSupportFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.removePlaybackStateListener(uiPlaybackStateListener)
+        activityViewModel.cancelBackgroundImage()
     }
 
     override fun onStart() {

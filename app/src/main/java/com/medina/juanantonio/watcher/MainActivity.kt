@@ -163,7 +163,7 @@ class MainActivity : FragmentActivity() {
     private fun listenVM() {
         viewModel.backgroundImageUrl.observe(this) {
             when (it) {
-                null -> cancelBackgroundImageLoading()
+                null -> showDefaultBackground()
                 SHOW_MOVIE_BACKGROUND -> showMovieBackground()
                 else -> updateBackgroundDelayed(it)
             }
@@ -232,13 +232,14 @@ class MainActivity : FragmentActivity() {
         imageLoadingJob = null
     }
 
+    private fun showDefaultBackground() {
+        cancelBackgroundImageLoading()
+        backgroundManager.setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
+    }
+
     private fun showMovieBackground() {
         cancelBackgroundImageLoading()
         backgroundManager.setThemeDrawableResourceId(MOVIE_BACKGROUND_RESOURCE_ID)
-
-        val drawable =
-            ResourcesCompat.getDrawable(resources, MOVIE_BACKGROUND_RESOURCE_ID, null)
-        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 
     private fun setupLoading() {
