@@ -49,11 +49,6 @@ class VideoSearchFragment : SearchSupportFragment(), SearchSupportFragment.Searc
             }
         }
 
-        setOnItemViewSelectedListener { _, item, _, _ ->
-            if (item !is Video) return@setOnItemViewSelectedListener
-            activityViewModel.setBackgroundImage(item.imageUrl)
-        }
-
         badgeDrawable = ResourcesCompat.getDrawable(resources, R.mipmap.ic_launcher, null)
     }
 
