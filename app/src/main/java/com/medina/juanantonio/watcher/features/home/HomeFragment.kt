@@ -3,7 +3,6 @@ package com.medina.juanantonio.watcher.features.home
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
@@ -25,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.adapters.ContentAdapter
@@ -66,6 +64,8 @@ class HomeFragment : RowsSupportFragment() {
     private var autoPlayFirstEpisode = false
 
     private var singleClickJob: Job? = null
+
+    private var previewPlayer: PreviewPlayer? = null
 
     companion object {
         private const val CONTINUE_WATCHING_POSITION = 0
@@ -143,6 +143,7 @@ class HomeFragment : RowsSupportFragment() {
             val isSelectedVideos = selectedVideoGroup != null
 
             if (isLastItem && !isSelectedVideos) viewModel.addNewContent()
+            previewPlayer?.readyForNewPreview()
             viewModel.getVideoDetails(item)
         }
     }
@@ -164,6 +165,9 @@ class HomeFragment : RowsSupportFragment() {
 
         viewModel.setupVideoList(selectedVideoGroup, autoPlayFirstEpisode)
         viewModel.getUserInfo()
+
+        previewPlayer = view?.findViewById(R.id.preview_player)
+        previewPlayer?.setupPlayer()
     }
 
     private fun setupViews() {
@@ -300,6 +304,10 @@ class HomeFragment : RowsSupportFragment() {
                 )
             )
         }
+
+        viewModel.videoMediaForPreview.observeEvent(viewLifecycleOwner) { (data, isTrailer) ->
+            previewPlayer?.setVideoPreview(data.mediaUrl, data.totalDuration, isTrailer)
+        }
     }
 
     private fun listenActivityVM() {
@@ -322,6 +330,11 @@ class HomeFragment : RowsSupportFragment() {
                 view?.findViewById<AppCompatImageView>(R.id.image_view_update)
             imageViewUpdate?.isVisible = it && selectedVideoGroup == null
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        previewPlayer?.cleanUpPlayer()
     }
 
     override fun onDestroy() {
@@ -373,8 +386,6 @@ class HomeFragment : RowsSupportFragment() {
             view?.findViewById<AppCompatTextView>(R.id.text_view_preview_year)
         val textViewPreviewTags =
             view?.findViewById<AppCompatTextView>(R.id.text_view_preview_tags)
-        val imageViewPosterPreview =
-            view?.findViewById<ImageView>(R.id.image_view_poster_preview)
 
         groupDetailsPreview?.isVisible = true
 
@@ -387,13 +398,7 @@ class HomeFragment : RowsSupportFragment() {
         textViewPreviewDescription?.maxLines =
             if ((textViewPreviewTitle?.lineCount ?: 1) > 1) 3 else 5
 
-        imageViewPosterPreview?.let {
-            glide.load(details.coverHorizontalUrl)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .error(R.drawable.drawable_image_error)
-                .into(it)
-        }
+        previewPlayer?.setImagePreview(details.coverHorizontalUrl)
     }
 
     private fun setupUserDetailsPreview(details: GetUserInfoResponse.Data) {
