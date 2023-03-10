@@ -14,10 +14,10 @@
         android:focusable="false"
         app:layout_constraintBottom_toTopOf="@id/guide_line_center_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintWidth_percent=".6"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent=".65">
 
         <ImageView
             android:id="@+id/image_view_poster_preview"
@@ -29,37 +29,16 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_0"
-            android:background="@drawable/preview_gradient_border_top"
-            app:layout_constraintHeight_percent=".5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:layout_width="@dimen/dp_0"
             android:layout_height="match_parent"
-            android:background="@drawable/preview_gradient_border_left"
-            android:rotation="180"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent=".5" />
+            android:background="@drawable/preview_gradient_borders" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_0"
-            android:background="@drawable/preview_gradient_border_top"
-            android:rotation="180"
+            android:background="@drawable/preview_gradient_border_bottom"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent=".5"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <View
-            android:layout_width="@dimen/dp_0"
-            android:layout_height="match_parent"
-            android:background="@drawable/preview_gradient_border_left"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent=".5" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -228,7 +207,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".6" />
+        app:layout_constraintGuide_percent=".65" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_preview_title"

@@ -1,9 +1,9 @@
 package com.medina.juanantonio.watcher
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -11,7 +11,6 @@ import android.view.KeyEvent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.BackgroundManager
@@ -31,12 +30,12 @@ import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.medina.juanantonio.watcher.databinding.ActivityMainBinding
-import com.medina.juanantonio.watcher.features.dialog.DialogActivity
 import com.medina.juanantonio.watcher.features.dialog.DialogFragment
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.data.manager.downloader.IDownloadManager
 import com.medina.juanantonio.watcher.data.manager.downloader.PollState
 import com.medina.juanantonio.watcher.shared.extensions.initPoll
+import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -170,19 +169,13 @@ class MainActivity : FragmentActivity() {
         }
 
         viewModel.askToUpdate.observeEvent(this) {
-            val releaseName = viewModel.updateRelease?.name ?: return@observeEvent
-            startForResultUpdate.launch(
-                DialogActivity.getIntent(
-                    context = this,
-                    title = getString(R.string.update_available_title),
-                    description = getString(
-                        R.string.update_available_description,
-                        releaseName
-                    ),
-                    positiveButton = getString(R.string.update_button),
-                    negativeButton = getString(R.string.no_thanks_button)
-                )
-            )
+            try {
+                val downloadUrl = viewModel.assetToDownload?.downloadUrl ?: return@observeEvent
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                startActivity(browserIntent)
+            } catch (e: ActivityNotFoundException) {
+                getString(R.string.install_browser_for_update).toastIfNotBlank(this)
+            }
         }
 
         viewModel.requestPermissions.observeEvent(this) {

@@ -20,7 +20,7 @@ data class ReleaseBean(
     ) {
 
         val downloadUrl: String
-            get() = url
+            get() = browser_download_url
 
         fun isAPK(): Boolean =
             content_type == "application/vnd.android.package-archive"
