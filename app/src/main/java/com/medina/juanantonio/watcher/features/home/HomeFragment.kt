@@ -40,7 +40,6 @@ import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.extensions.safeNavigate
-import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -182,7 +181,7 @@ class HomeFragment : RowsSupportFragment() {
 
         view?.findViewById<AppCompatImageView>(R.id.image_view_update)?.apply {
             setOnClickListener {
-                getString(R.string.disabled_update_manager).toastIfNotBlank(context)
+                activityViewModel.askToUpdate()
             }
 
             setOnFocusChangeListener { _, onFocus ->

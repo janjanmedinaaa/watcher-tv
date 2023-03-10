@@ -21,6 +21,8 @@ class MockUpdateRepository : IUpdateRepository {
         if (alreadyDownloadedUpdate) return null
         alreadyDownloadedUpdate = true
 
+        val sampleDownloadUrl =
+            "https://github.com/janjanmedinaaa/watcher-tv/releases/download/2.10.2/Watcher.TV.v2.10.2_29.Release.apk"
         val version = DefaultArtifactVersion(BuildConfig.VERSION_NAME)
         val newVersion = "${version.majorVersion}.${version.minorVersion + 1}"
 
@@ -30,8 +32,8 @@ class MockUpdateRepository : IUpdateRepository {
                 ReleaseBean.Asset(
                     id = 1,
                     content_type = "application/vnd.android.package-archive",
-                    browser_download_url = "",
-                    url = ""
+                    browser_download_url = sampleDownloadUrl,
+                    url = sampleDownloadUrl
                 )
             ),
             draft = !showUpdate,
