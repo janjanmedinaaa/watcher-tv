@@ -12,6 +12,7 @@ import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.network.models.auth.GetUserInfoResponse
 import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
+import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
@@ -46,6 +47,8 @@ class HomeViewModel @Inject constructor(
     val removeNavigationContent = MutableLiveData<Event<Unit>>()
     val videoDetails = MutableLiveData<GetVideoDetailsResponse.Data>()
     val userDetails = MutableLiveData<GetUserInfoResponse.Data>()
+    val videoMediaForPreview =
+        MutableLiveData<Event<Pair<GetVideoResourceResponse.Data, Boolean>>>()
 
     val navigationItems: List<NavigationItemBean>
         get() = contentRepository.navigationItems
@@ -63,6 +66,7 @@ class HomeViewModel @Inject constructor(
 
     private var job: Job? = null
     private var videoDetailsJob: Job? = null
+    private var videoPreviewJob: Job? = null
 
     var videoToRemove: Video? = null
 
@@ -251,6 +255,7 @@ class HomeViewModel @Inject constructor(
         videoDetailsJob = viewModelScope.launch {
             val videoDetails = mediaRepository.getVideoDetails(video) ?: return@launch
             this@HomeViewModel.videoDetails.value = videoDetails
+            if (!isDisplayingEpisodes) getVideoPreview(video, videoDetails)
         }
     }
 
@@ -263,6 +268,7 @@ class HomeViewModel @Inject constructor(
             val firstVideo = albumDetails.videoList.firstOrNull() ?: return@launch
             val videoDetails = mediaRepository.getVideoDetails(firstVideo) ?: return@launch
             this@HomeViewModel.videoDetails.value = videoDetails
+            if (!isDisplayingEpisodes) getVideoPreview(firstVideo, videoDetails)
         }
     }
 
@@ -323,6 +329,22 @@ class HomeViewModel @Inject constructor(
                 getOnGoingVideoGroup(removeVideo = video)
             }
             videoToRemove = null
+        }
+    }
+
+    private fun getVideoPreview(video: Video, videoDetails: GetVideoDetailsResponse.Data) {
+        if (videoPreviewJob?.isActive == true) videoPreviewJob?.cancel()
+        videoPreviewJob = viewModelScope.launch {
+            val randomEpisode = videoDetails.episodeVo.shuffled().random()
+            val videoMedia = mediaRepository.getVideoResource(
+                category = video.category ?: 0,
+                contentId = video.contentId,
+                episodeId = randomEpisode.id,
+                definition = randomEpisode.getDefaultDefinition().code.name
+            ) ?: return@launch
+
+            videoMediaForPreview.value =
+                Event(Pair(videoMedia, !video.onlineTime.isNullOrBlank()))
         }
     }
 }

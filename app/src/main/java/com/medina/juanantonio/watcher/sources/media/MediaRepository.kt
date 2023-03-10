@@ -8,6 +8,7 @@ import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.network.Result
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
+import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.shared.utils.Event
 
@@ -28,6 +29,20 @@ class MediaRepository(
     override fun setCurrentlyPlaying(video: Video, videoMedia: VideoMedia) {
         _currentlyPlayingVideo = video
         videoMediaLiveData.value = Event(videoMedia)
+    }
+
+    override suspend fun getVideoResource(
+        category: Int,
+        contentId: Int,
+        episodeId: Int,
+        definition: String
+    ): GetVideoResourceResponse.Data? {
+        return remoteSource.getVideoResource(
+            category = category,
+            contentId = contentId,
+            episodeId = episodeId,
+            definition = definition
+        ).data?.data
     }
 
     override suspend fun getVideo(
@@ -111,6 +126,12 @@ interface IMediaRepository {
     val videoMediaLiveData: LiveData<Event<VideoMedia>>
 
     fun setCurrentlyPlaying(video: Video, videoMedia: VideoMedia)
+    suspend fun getVideoResource(
+        category: Int,
+        contentId: Int,
+        episodeId: Int,
+        definition: String
+    ): GetVideoResourceResponse.Data?
 
     suspend fun getVideo(
         id: Int,
