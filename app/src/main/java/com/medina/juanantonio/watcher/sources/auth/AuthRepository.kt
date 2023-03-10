@@ -60,18 +60,16 @@ class AuthRepository(
         val result = remoteSource.refreshToken()
         val data = result.data?.data
 
-        val isSuccessful =
-            if (result is Result.Success) data != null
-            else false
-
-        if (isSuccessful) {
-            saveToken(data ?: "")
-        } else {
-            clearToken()
-            result.message.toastIfNotBlank(context)
-        }
-
-        return isSuccessful
+        return if (result is Result.Success) {
+            if (data != null) {
+                saveToken(data)
+                true
+            } else {
+                clearToken()
+                result.message.toastIfNotBlank(context)
+                false
+            }
+        } else false
     }
 
     private suspend fun clearToken() {
