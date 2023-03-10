@@ -268,7 +268,7 @@ class HomeViewModel @Inject constructor(
             val firstVideo = albumDetails.videoList.firstOrNull() ?: return@launch
             val videoDetails = mediaRepository.getVideoDetails(firstVideo) ?: return@launch
             this@HomeViewModel.videoDetails.value = videoDetails
-            if (isDisplayingEpisodes) getVideoPreview(video, videoDetails)
+            if (!isDisplayingEpisodes) getVideoPreview(firstVideo, videoDetails)
         }
     }
 
@@ -335,7 +335,7 @@ class HomeViewModel @Inject constructor(
     private fun getVideoPreview(video: Video, videoDetails: GetVideoDetailsResponse.Data) {
         if (videoPreviewJob?.isActive == true) videoPreviewJob?.cancel()
         videoPreviewJob = viewModelScope.launch {
-            val randomEpisode = videoDetails.episodeVo.random()
+            val randomEpisode = videoDetails.episodeVo.shuffled().random()
             val videoMedia = mediaRepository.getVideoResource(
                 category = video.category ?: 0,
                 contentId = video.contentId,

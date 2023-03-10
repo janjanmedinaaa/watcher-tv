@@ -224,7 +224,6 @@ class HomeFragment : RowsSupportFragment() {
         }
 
         viewModel.videoMedia.observeEvent(viewLifecycleOwner) {
-            activityViewModel.setMovieBackground()
             findNavController().safeNavigate(
                 HomeFragmentDirections.actionHomeFragmentToPlayerFragment()
             )

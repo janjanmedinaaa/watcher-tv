@@ -20,6 +20,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.databinding.ViewPreviewPlayerBinding
 import com.medina.juanantonio.watcher.shared.utils.animateAlpha
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ class PreviewPlayer(
     private val glide = Glide.with(context)
     private var cachedPreviewBitmap: Bitmap? = null
     private var imagePreviewLoaded = false
+    private var playVideoAfterImageLoadJob: Job? = null
 
     companion object {
         private const val START_POSITION_PERCENTAGE = 0.3
@@ -63,15 +65,15 @@ class PreviewPlayer(
             transition: Transition<in Bitmap>?
         ) {
             cachedPreviewBitmap = resource
-            imagePreviewLoaded = true
 
-            MainScope().launch {
+            playVideoAfterImageLoadJob = MainScope().launch {
                 binding.viewOverlay.animateAlpha(0f, 0)
                 setBitmapToImageView(resource)
-                delay(2000)
+                delay(3000)
 
+                imagePreviewLoaded = true
                 if (exoPlayer?.playbackState == Player.STATE_READY) {
-                    binding.imageViewPosterPreview.animateAlpha(0f)
+                    animateViews(showImageView = false)
                     exoPlayer?.play()
                 }
             }
@@ -95,12 +97,18 @@ class PreviewPlayer(
     }
 
     fun readyForNewPreview() {
+        // Clear all ongoing request, and prevent caching in case the request when through
+        glide.clear(backgroundTarget)
+
+        // Display the latest bitmap
         cachedPreviewBitmap?.let {
-            binding.viewOverlay.animateAlpha(0.4f)
+            binding.viewOverlay.animateAlpha(0.5f)
             setBitmapToImageView(it)
         }
+
         imagePreviewLoaded = false
         cachedPreviewBitmap = null
+        playVideoAfterImageLoadJob?.cancel()
 
         exoPlayer?.clearMediaItems()
         exoPlayer?.pause()
@@ -137,7 +145,7 @@ class PreviewPlayer(
                 when (playbackState) {
                     Player.STATE_READY -> {
                         if (imagePreviewLoaded) {
-                            binding.imageViewPosterPreview.animateAlpha(0f)
+                            animateViews(showImageView = false)
                             exoPlayer?.play()
                         }
                     }
@@ -152,11 +160,18 @@ class PreviewPlayer(
 
     private fun setBitmapToImageView(bitmap: Bitmap?) {
         if (bitmap == null) return
-        binding.imageViewPosterPreview.animateAlpha(1f)
+        animateViews(showImageView = true)
         glide.load(bitmap)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transition(DrawableTransitionOptions.withCrossFade())
             .error(R.drawable.drawable_image_error)
             .into(binding.imageViewPosterPreview)
+    }
+
+    private fun animateViews(showImageView: Boolean) {
+        val imageAlpha = if (showImageView) 1f else 0f
+        val playerAlpha = if (showImageView) 0f else 1f
+        binding.imageViewPosterPreview.animateAlpha(imageAlpha)
+        binding.playerView.animateAlpha(playerAlpha)
     }
 }
