@@ -135,6 +135,7 @@ class PlayerFragment : VideoSupportFragment() {
     }
 
     private fun startPlaybackFromWatchProgress(startPosition: Long) {
+        activityViewModel.setMovieBackground()
         exoPlayer?.apply {
             seekTo(startPosition)
             playbackSpeed = viewModel.selectedPlaybackSpeed.toFloat()
