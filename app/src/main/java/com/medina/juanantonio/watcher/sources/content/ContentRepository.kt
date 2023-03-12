@@ -2,6 +2,7 @@ package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.network.Result
@@ -10,10 +11,12 @@ import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.CollectionProportion
 import com.medina.juanantonio.watcher.shared.Constants.BannerProportions.MovieListProportion
 import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
+import com.medina.juanantonio.watcher.sources.content.IContentRepository.Companion.API_HEADERS
 
 class ContentRepository(
     private val context: Context,
-    private val remoteSource: IContentRemoteSource
+    private val remoteSource: IContentRemoteSource,
+    private val dataStoreManager: IDataStoreManager
 ) : IContentRepository {
 
     override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
@@ -86,8 +89,7 @@ class ContentRepository(
         return if (result is Result.Success) {
             val validVideoGroups = result.data?.data?.recommendItems?.filter {
                 !it.recommendContentVOList.any { content ->
-                    content.contentType == HomePageBean.ContentType.UNKNOWN ||
-                        content.needLogin
+                    (content.contentType == HomePageBean.ContentType.UNKNOWN) || content.needLogin
                 } && getVideoGroupContentType(it) != null
             }
 
@@ -147,6 +149,13 @@ class ContentRepository(
                 }
             }
             else -> null
+        }
+    }
+
+    override suspend fun getHeaders() {
+        val result = remoteSource.getHeaders()
+        if (result is Result.Success && result.data?.isJsonObject == true) {
+            dataStoreManager.putString(API_HEADERS, result.data.toString())
         }
     }
 
@@ -235,8 +244,15 @@ interface IContentRepository {
 
     fun getHomePage(): List<VideoGroup>
     fun clearHomePage()
+
+    suspend fun getHeaders()
+
     suspend fun getAlbumDetails(id: Int): VideoGroup?
 
     suspend fun searchByKeyword(keyword: String): List<VideoGroup>?
     suspend fun getSearchLeaderboard(): VideoGroup?
+
+    companion object {
+        const val API_HEADERS = "API_HEADERS"
+    }
 }
