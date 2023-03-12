@@ -4,20 +4,27 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.data.models.settings.SettingsItem
+import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsScreen
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
+import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SettingsUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val mediaRepository: IMediaRepository
+    private val mediaRepository: IMediaRepository,
+    private val dataStoreManager: IDataStoreManager,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) {
 
     companion object {
@@ -25,6 +32,20 @@ class SettingsUseCase @Inject constructor(
         private const val SETTINGS_QUALITY_KEY = "settings_quality"
         private const val SETTINGS_CAPTIONS_KEY = "settings_captions"
         private const val SETTINGS_PLAYBACK_SPEED_KEY = "settings_playback_speed"
+        private const val SETTINGS_CAPTIONS_LANGUAGE_KEY = "settings_captions_language"
+
+        // DataStore Keys
+        private const val SETTINGS_SELECTED_LANGUAGE_KEY = "SETTINGS_SELECTED_LANGUAGE_KEY"
+        private const val SETTINGS_SELECTED_CAPTION_SIZE_KEY = "SETTINGS_SELECTED_CAPTION_SIZE_KEY"
+    }
+
+    init {
+        applicationScope.launch {
+            val savedLanguage = dataStoreManager.getString(SETTINGS_SELECTED_LANGUAGE_KEY)
+            if (savedLanguage.isNotBlank()) selectedLanguage = savedLanguage
+            val savedCaptionSize = dataStoreManager.getInt(SETTINGS_SELECTED_CAPTION_SIZE_KEY)
+            if (savedCaptionSize != -1) selectedCaptionSize = savedCaptionSize
+        }
     }
 
     val videoMedia: VideoMedia?
@@ -34,14 +55,23 @@ class SettingsUseCase @Inject constructor(
     val selectedSelectionItem: LiveData<Event<SettingsSelectionItem>>
         get() = _selectedSelectionItem
 
+    private val _selectedNumberPickerItem = MutableLiveData<Event<SettingsNumberPickerItem>>()
+    val selectedNumberPickerItem: LiveData<Event<SettingsNumberPickerItem>>
+        get() = _selectedNumberPickerItem
+
     var selectedLanguage = "en"
         private set
     var selectedPlaybackSpeed = "1.0"
+        private set
+    var selectedCaptionSize = 75
         private set
 
     fun selectedSelectionItem(item: SettingsSelectionItem) {
         when (item.type) {
             SettingsSelectionItem.Type.CAPTIONS -> {
+                applicationScope.launch {
+                    dataStoreManager.putString(SETTINGS_SELECTED_LANGUAGE_KEY, item.key)
+                }
                 selectedLanguage = item.key
             }
             SettingsSelectionItem.Type.PLAYBACK_SPEED -> {
@@ -52,11 +82,23 @@ class SettingsUseCase @Inject constructor(
         _selectedSelectionItem.value = Event(item)
     }
 
+    fun selectedNumberPickerItem(item: SettingsNumberPickerItem) {
+        when (item.type) {
+            SettingsNumberPickerItem.Type.CAPTION_SIZE -> {
+                applicationScope.launch {
+                    dataStoreManager.putInt(SETTINGS_SELECTED_CAPTION_SIZE_KEY, item.value)
+                }
+                selectedCaptionSize = item.value
+            }
+        }
+    }
+
     fun getSettingsList(key: String): Pair<String, List<SettingsItem>> {
         return when (key) {
             SETTINGS_INITIAL_KEY -> getInitialSettingsScreen()
             SETTINGS_QUALITY_KEY -> getQualitySettingsList()
             SETTINGS_CAPTIONS_KEY -> getCaptionsSettingsList()
+            SETTINGS_CAPTIONS_LANGUAGE_KEY -> getCaptionsLanguageSettingsList()
             SETTINGS_PLAYBACK_SPEED_KEY -> getPlaybackSpeedSettingsList()
             else -> Pair("", emptyList())
         }
@@ -113,6 +155,30 @@ class SettingsUseCase @Inject constructor(
     }
 
     private fun getCaptionsSettingsList(): Pair<String, List<SettingsItem>> {
+        val captionDetails = videoMedia?.subtitles?.firstOrNull {
+            selectedLanguage == it.languageAbbr
+        }
+        val settingsList = arrayListOf(
+            SettingsNumberPickerItem(
+                title = context.getString(R.string.settings_item_title_caption_size),
+                description = context.getString(R.string.settings_item_description_caption_size),
+                icon = R.drawable.ic_font_size,
+                value = selectedCaptionSize,
+                type = SettingsNumberPickerItem.Type.CAPTION_SIZE
+            ),
+            SettingsScreen(
+                key = SETTINGS_CAPTIONS_LANGUAGE_KEY,
+                title = context.getString(R.string.settings_item_title_language),
+                description = if (captionDetails?.language.isNullOrBlank()) "Off"
+                else captionDetails?.language,
+                icon = R.drawable.ic_closed_captions
+            ),
+        )
+
+        return Pair(context.getString(R.string.settings_title_captions_settings), settingsList)
+    }
+
+    private fun getCaptionsLanguageSettingsList(): Pair<String, List<SettingsItem>> {
         val settingsList = arrayListOf<SettingsSelectionItem>().apply {
             val captionsOffSelectionItem =
                 SettingsSelectionItem(

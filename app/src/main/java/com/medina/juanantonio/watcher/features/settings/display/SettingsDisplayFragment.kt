@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.medina.juanantonio.watcher.data.adapters.SettingsAdapter
+import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsScreen
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.databinding.FragmentSettingsDisplayBinding
@@ -65,6 +66,9 @@ class SettingsDisplayFragment : Fragment() {
                 is SettingsSelectionItem -> {
                     viewModel.selectedSelectionItem(it)
                     findNavController().popBackStack()
+                }
+                is SettingsNumberPickerItem -> {
+                    viewModel.selectedNumberPickerItem(it)
                 }
             }
         }
