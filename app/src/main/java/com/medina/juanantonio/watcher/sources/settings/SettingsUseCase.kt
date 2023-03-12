@@ -91,6 +91,7 @@ class SettingsUseCase @Inject constructor(
                 selectedCaptionSize = item.value
             }
         }
+        _selectedNumberPickerItem.value = Event(item)
     }
 
     fun getSettingsList(key: String): Pair<String, List<SettingsItem>> {
