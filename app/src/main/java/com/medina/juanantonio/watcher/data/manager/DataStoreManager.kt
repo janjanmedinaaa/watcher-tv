@@ -2,10 +2,7 @@ package com.medina.juanantonio.watcher.data.manager
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -47,6 +44,22 @@ class DataStoreManager(private val context: Context) : IDataStoreManager {
 
         return stringFlow.firstOrNull() ?: defaultValue
     }
+
+    override suspend fun putInt(key: String, value: Int) {
+        val preferencesKey = intPreferencesKey(key)
+        context.dataStore.edit {
+            it[preferencesKey] = value
+        }
+    }
+
+    override suspend fun getInt(key: String, defaultValue: Int): Int {
+        val preferencesKey = intPreferencesKey(key)
+        val stringFlow: Flow<Int> = context.dataStore.data.map {
+            it[preferencesKey] ?: defaultValue
+        }
+
+        return stringFlow.firstOrNull() ?: defaultValue
+    }
 }
 
 interface IDataStoreManager {
@@ -54,4 +67,6 @@ interface IDataStoreManager {
     suspend fun getString(key: String, defaultValue: String = ""): String
     suspend fun putBoolean(key: String, value: Boolean)
     suspend fun getBoolean(key: String, defaultValue: Boolean = false): Boolean
+    suspend fun putInt(key: String, value: Int)
+    suspend fun getInt(key: String, defaultValue: Int = -1): Int
 }

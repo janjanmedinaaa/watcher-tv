@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import androidx.room.Room
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.medina.juanantonio.watcher.BuildConfig
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.DataStoreManager
@@ -22,6 +24,7 @@ import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.ContentRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.IContentRepository.Companion.API_HEADERS
 import com.medina.juanantonio.watcher.sources.media.*
 import com.medina.juanantonio.watcher.sources.user.IUserRemoteSource
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
@@ -67,13 +70,21 @@ class AppModule {
             val requestBuilder =
                 chain.request()
                     .newBuilder()
-                    .addHeader("User-Agent", "Dart/2.16 (dart:io)")
-                    .addHeader("lang", "en")
-                    .addHeader("versioncode", "33")
-                    .addHeader("clienttype", "android_tem3")
                     .addHeader("deviceid", deviceId)
                     .also {
                         runBlocking {
+                            val requiredHeaders = dataStoreManager.getString(API_HEADERS)
+                            if (requiredHeaders.isNotBlank()) {
+                                val headerType = object : TypeToken<Map<String, String>>() {}.type
+                                val headersMap = Gson().fromJson<Map<String, String>>(
+                                    requiredHeaders,
+                                    headerType
+                                )
+                                headersMap.entries.forEach { (header, value) ->
+                                    it.addHeader(header, value)
+                                }
+                            }
+
                             val authToken = dataStoreManager.getString(AUTH_TOKEN)
                             if (authToken.isNotBlank()) {
                                 it.addHeader("token", authToken)
@@ -165,9 +176,10 @@ class AppModule {
     @Singleton
     fun provideContentRepository(
         @ApplicationContext context: Context,
-        remoteSource: IContentRemoteSource
+        remoteSource: IContentRemoteSource,
+        dataStoreManager: IDataStoreManager
     ): IContentRepository {
-        return ContentRepository(context, remoteSource)
+        return ContentRepository(context, remoteSource, dataStoreManager)
     }
 
     @Provides

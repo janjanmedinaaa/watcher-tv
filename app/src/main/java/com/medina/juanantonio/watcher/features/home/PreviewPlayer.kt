@@ -69,7 +69,7 @@ class PreviewPlayer(
             playVideoAfterImageLoadJob = MainScope().launch {
                 binding.viewOverlay.animateAlpha(0f, 0)
                 setBitmapToImageView(resource)
-                delay(3000)
+                delay(1500)
 
                 imagePreviewLoaded = true
                 if (exoPlayer?.playbackState == Player.STATE_READY) {
