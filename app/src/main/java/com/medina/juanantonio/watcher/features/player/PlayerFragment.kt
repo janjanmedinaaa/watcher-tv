@@ -40,6 +40,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.medina.juanantonio.watcher.MainViewModel
 import com.medina.juanantonio.watcher.R
+import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
@@ -190,10 +191,10 @@ class PlayerFragment : VideoSupportFragment() {
                 null
             )
             setStyle(style)
-            setFixedTextSize(Dimension.DP, 75F)
             updatePadding(left = 300, right = 300)
             isVisible = true
         }
+        setSubtitleTextSize(viewModel.selectedCaptionSize)
 
         setOnItemViewClickedListener { _, item, _, _ ->
             if (item !is Video) return@setOnItemViewClickedListener
@@ -292,6 +293,14 @@ class PlayerFragment : VideoSupportFragment() {
                 }
                 SettingsSelectionItem.Type.PLAYBACK_SPEED -> {
                     exoPlayer?.playbackSpeed = it.key.toFloat()
+                }
+            }
+        }
+
+        viewModel.selectedNumberPickerItem.observeEvent(viewLifecycleOwner) {
+            when (it.type) {
+                SettingsNumberPickerItem.Type.CAPTION_SIZE -> {
+                    setSubtitleTextSize(it.value)
                 }
             }
         }
@@ -472,6 +481,10 @@ class PlayerFragment : VideoSupportFragment() {
     private fun stopTimerForPopBackstack() {
         timedPopBackstackJob?.cancel()
         timedPopBackstackJob = null
+    }
+
+    private fun setSubtitleTextSize(size: Int) {
+        subtitleView.setFixedTextSize(Dimension.DP, size.toFloat())
     }
 
     inner class PlayerEventListener : Player.Listener {

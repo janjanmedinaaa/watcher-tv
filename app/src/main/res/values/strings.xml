@@ -74,10 +74,14 @@
     <string name="settings_item_title_quality">Quality</string>
     <string name="settings_item_title_captions">Captions</string>
     <string name="settings_item_title_playback_speed">Playback Speed</string>
+    <string name="settings_item_title_caption_size">Text Size</string>
+    <string name="settings_item_description_caption_size">Click to update subtitle size</string>
+    <string name="settings_item_title_language">Language</string>
     <string name="settings_title_initial">Settings</string>
     <string name="settings_title_quality">Quality for current video</string>
     <string name="settings_title_captions">Subtitles/closed captions</string>
     <string name="settings_title_playback_speed">Playback Speed</string>
+    <string name="settings_title_captions_settings">Caption Settings</string>
 
     <!-- Idle Dialog -->
     <string name="are_you_still_watching_title">Are you still watching %1$s?</string>

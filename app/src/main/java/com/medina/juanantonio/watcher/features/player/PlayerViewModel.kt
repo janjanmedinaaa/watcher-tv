@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
@@ -41,11 +42,17 @@ class PlayerViewModel @Inject constructor(
     val selectedSelectionItem: LiveData<Event<SettingsSelectionItem>>
         get() = settingsUseCase.selectedSelectionItem
 
+    val selectedNumberPickerItem: LiveData<Event<SettingsNumberPickerItem>>
+        get() = settingsUseCase.selectedNumberPickerItem
+
     val selectedLanguage: String
         get() = settingsUseCase.selectedLanguage
 
     val selectedPlaybackSpeed: String
         get() = settingsUseCase.selectedPlaybackSpeed
+
+    val selectedCaptionSize: Int
+        get() = settingsUseCase.selectedCaptionSize
 
     val savedProgress = MutableLiveData<Event<Long>>()
     val handleVideoEndNavigation = MutableLiveData<Event<Unit>>()

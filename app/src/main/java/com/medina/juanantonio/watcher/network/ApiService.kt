@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher.network
 
+import com.google.gson.JsonObject
 import com.medina.juanantonio.watcher.network.models.auth.*
 import com.medina.juanantonio.watcher.network.models.home.*
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
@@ -7,13 +8,14 @@ import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResp
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
+import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiService {
+
+    @GET(IContentRemoteSource.API_HEADERS_URL)
+    suspend fun getHeaders(): Response<JsonObject>
 
     @GET("cms/app/homePage/navigationBar")
     suspend fun getNavigationBar(): Response<GetNavigationBarResponse>

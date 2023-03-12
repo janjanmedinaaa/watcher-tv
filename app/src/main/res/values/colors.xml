@@ -36,4 +36,6 @@
     <color name="edit_text_login_border">#37363E</color>
 
     <color name="idle_dialog_button_background">#B3B3B3</color>
+
+    <color name="number_picker_selected_background">#F3F3F3</color>
 </resources>
