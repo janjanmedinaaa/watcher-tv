@@ -1,4 +1,4 @@
-# Watcher v2.11.1
+# Watcher TV v2.11.1
 
 ## What's new
 - Added video preview
