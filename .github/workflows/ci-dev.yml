@@ -39,6 +39,10 @@ jobs:
         run: |
           echo "${{ secrets.WATCHER_JKS }}" | base64 --decode > ./app/watcher-keystore.jks
 
+      - name: Create google-services.json file
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_MAIN }}" | base64 --decode > ./app/google-services.json
+
       - name: Build Release
         run: |
           ./gradlew --no-daemon --stacktrace assembleRelease
