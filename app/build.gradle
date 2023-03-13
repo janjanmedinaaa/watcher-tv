@@ -7,6 +7,8 @@ plugins {
     id 'kotlin-android-extensions'
     id 'org.jetbrains.kotlin.android.extensions'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -24,7 +26,7 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 34
+        versionCode 35
         versionName "2.11.1"
 
         javaCompileOptions {
@@ -169,4 +171,8 @@ dependencies {
     // Country Code Picker
     implementation 'io.michaelrocks:libphonenumber-android:8.13.5'
     implementation 'com.github.joielechong:countrycodepicker:2.4.2'
+
+    implementation platform('com.google.firebase:firebase-bom:31.2.3')
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
 }
