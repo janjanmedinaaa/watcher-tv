@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.sources.content
 
 import android.content.Context
+import com.google.gson.JsonObject
 import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.network.models.home.GetHomePageResponse
 import com.medina.juanantonio.watcher.network.wrapWithResultForLoklok
@@ -11,6 +12,7 @@ import com.medina.juanantonio.watcher.network.models.home.GetNavigationBarRespon
 import com.medina.juanantonio.watcher.network.models.search.GetSearchLeaderboardResponse
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordRequest
 import com.medina.juanantonio.watcher.network.models.search.SearchByKeywordResponse
+import com.medina.juanantonio.watcher.network.wrapWithResult
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.BaseRemoteSource
 import kotlinx.coroutines.withContext
@@ -20,6 +22,19 @@ class ContentRemoteSource(
     private val apiService: ApiService,
     private val dispatchers: CoroutineDispatchers
 ) : BaseRemoteSource(context), IContentRemoteSource {
+
+    override suspend fun getHeaders(): Result<JsonObject> {
+        return try {
+            val response = withContext(dispatchers.io) {
+                apiService.getHeaders()
+            }
+            response.wrapWithResult()
+        } catch (exception: CancellationException) {
+            Result.Cancelled()
+        } catch (exception: Exception) {
+            getDefaultErrorResponse()
+        }
+    }
 
     override suspend fun getNavigationBar(): Result<GetNavigationBarResponse> {
         return try {
@@ -104,6 +119,9 @@ class ContentRemoteSource(
 }
 
 interface IContentRemoteSource {
+
+    suspend fun getHeaders(): Result<JsonObject>
+
     suspend fun getNavigationBar(): Result<GetNavigationBarResponse>
     suspend fun getHomePage(page: Int, navigationId: Int? = null): Result<GetHomePageResponse>
     suspend fun getAlbumDetails(
@@ -120,4 +138,9 @@ interface IContentRemoteSource {
     ): Result<SearchByKeywordResponse>
 
     suspend fun getSearchLeaderboard(): Result<GetSearchLeaderboardResponse>
+
+    companion object {
+        const val API_HEADERS_URL =
+            "https://raw.githubusercontent.com/janjanmedinaaa/watcher-tv/master/api/headers.json"
+    }
 }

@@ -56,6 +56,7 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            contentRepository.getHeaders()
             contentRepository.clearHomePage()
             contentRepository.setupNavigationBar()
             checkAuthentication()

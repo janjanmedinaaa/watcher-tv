@@ -44,4 +44,16 @@
         <item name="android:windowEnterAnimation">@anim/slide_from_right_in</item>
         <item name="android:windowExitAnimation">@anim/slide_from_right_out</item>
     </style>
+
+    <style name="SettingsNumberPicker" parent="@android:style/Theme.Holo.Light">
+        <item name="android:textSize">@dimen/sp_14</item>
+    </style>
+
+    <style name="SettingsNumberPickerBlack" parent="@style/SettingsNumberPicker">
+        <item name="android:textColorPrimary">@android:color/black</item>
+    </style>
+
+    <style name="SettingsNumberPickerWhite" parent="@style/SettingsNumberPicker">
+        <item name="android:textColorPrimary">@android:color/white</item>
+    </style>
 </resources>

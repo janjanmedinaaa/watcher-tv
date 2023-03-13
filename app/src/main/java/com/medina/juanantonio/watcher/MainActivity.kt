@@ -4,6 +4,7 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.view.KeyEvent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.BackgroundManager
@@ -228,11 +230,19 @@ class MainActivity : FragmentActivity() {
     private fun showDefaultBackground() {
         cancelBackgroundImageLoading()
         backgroundManager.setThemeDrawableResourceId(BACKGROUND_RESOURCE_ID)
+
+        val drawable =
+            ResourcesCompat.getDrawable(resources, BACKGROUND_RESOURCE_ID, null)
+        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 
     private fun showMovieBackground() {
         cancelBackgroundImageLoading()
         backgroundManager.setThemeDrawableResourceId(MOVIE_BACKGROUND_RESOURCE_ID)
+
+        val drawable =
+            ResourcesCompat.getDrawable(resources, MOVIE_BACKGROUND_RESOURCE_ID, null)
+        backgroundManager.setBitmap((drawable as? BitmapDrawable)?.bitmap)
     }
 
     private fun setupLoading() {

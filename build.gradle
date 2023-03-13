@@ -5,6 +5,8 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
     id 'com.google.dagger.hilt.android' version '2.41' apply false
     id 'androidx.navigation.safeargs.kotlin' version '2.5.0-alpha01' apply false
+    id 'com.google.gms.google-services' version '4.3.15' apply false
+    id 'com.google.firebase.crashlytics' version '2.9.4' apply false
 }
 
 task clean(type: Delete) {

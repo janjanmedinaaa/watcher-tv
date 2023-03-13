@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_poster_preview"
+    <com.medina.juanantonio.watcher.features.home.PreviewPlayer
+        android:id="@+id/preview_player"
         android:layout_width="@dimen/dp_0"
         android:layout_height="@dimen/dp_0"
         android:clickable="false"
@@ -17,29 +17,7 @@
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent=".65">
-
-        <ImageView
-            android:id="@+id/image_view_poster_preview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:scaleType="centerCrop"
-            tools:src="@tools:sample/backgrounds/scenic" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/preview_gradient_borders" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_0"
-            android:background="@drawable/preview_gradient_border_bottom"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHeight_percent=".5"
-            app:layout_constraintStart_toStartOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintWidth_percent=".65" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_navigation"
@@ -136,7 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:constraint_referenced_ids="card_view_logo, layout_poster_preview, text_view_preview_title,
+        app:constraint_referenced_ids="card_view_logo, preview_player, text_view_preview_title,
         text_view_preview_description, text_view_preview_year, text_view_preview_tags,
         image_view_search, text_view_preview_score, text_view_user_name"
         tools:visibility="visible" />

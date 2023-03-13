@@ -4,12 +4,15 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.models.settings.SettingsItem
+import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsScreen
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
+import com.medina.juanantonio.watcher.databinding.ItemSettingsNumberPickerBinding
 import com.medina.juanantonio.watcher.databinding.ItemSettingsScreenBinding
 import com.medina.juanantonio.watcher.databinding.ItemSettingsSelectionBinding
 
@@ -26,8 +29,15 @@ class SettingsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     false
                 )
             )
-            else -> SettingsSelectionItemViewHolder(
+            R.layout.item_settings_selection -> SettingsSelectionItemViewHolder(
                 ItemSettingsSelectionBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+            else -> SettingsNumberPickerItemViewHolder(
+                ItemSettingsNumberPickerBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -46,6 +56,9 @@ class SettingsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         when (val item = _settingsItemList[position]) {
             is SettingsScreen -> (holder as? SettingsScreenViewHolder)?.bind(item)
             is SettingsSelectionItem -> (holder as? SettingsSelectionItemViewHolder)?.bind(item)
+            is SettingsNumberPickerItem -> (holder as? SettingsNumberPickerItemViewHolder)?.bind(
+                item
+            )
         }
     }
 
@@ -105,6 +118,66 @@ class SettingsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 text = item.description
             }
             binding.imageViewSelected.isVisible = item.isSelected
+        }
+    }
+
+    inner class SettingsNumberPickerItemViewHolder(
+        private val binding: ItemSettingsNumberPickerBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: SettingsNumberPickerItem) {
+            binding.root.setOnFocusChangeListener { _, onFocus ->
+                binding.textViewTitle.setTextColor(if (onFocus) Color.BLACK else Color.WHITE)
+                binding.imageViewIcon.setColorFilter(if (onFocus) Color.BLACK else Color.WHITE)
+                binding.viewFocusBackground.isVisible = onFocus
+
+                binding.numberPickerWhite.isInvisible = onFocus
+                binding.numberPickerBlack.isInvisible = !onFocus
+            }
+
+            binding.root.setOnClickListener {
+                binding.numberPickerBlack.requestFocus()
+            }
+
+            binding.numberPickerWhite.run {
+                minValue = 0
+                maxValue = 100
+                value = item.value
+            }
+
+            binding.numberPickerBlack.run {
+                minValue = 0
+                maxValue = 100
+                value = item.value
+
+                setOnValueChangedListener { _, _, newValue ->
+                    binding.numberPickerWhite.value = newValue
+                    _onClickListener(item.copy(value = newValue))
+                }
+
+                setOnClickListener {
+                    binding.root.requestFocus()
+                }
+
+                setOnFocusChangeListener { _, onFocus ->
+                    binding.textViewTitle.setTextColor(if (onFocus) Color.BLACK else Color.WHITE)
+                    binding.imageViewIcon.setColorFilter(if (onFocus) Color.BLACK else Color.WHITE)
+                    binding.viewFocusBackground.isVisible = onFocus
+
+                    binding.numberPickerWhite.isInvisible = onFocus
+                    binding.numberPickerBlack.isInvisible = !onFocus
+
+                    binding.viewNumberPickerBackground.isVisible = onFocus
+
+                    if (onFocus) binding.numberPickerBlack.requestFocus()
+                }
+            }
+
+            binding.imageViewIcon.setImageResource(item.icon)
+            binding.textViewTitle.text = item.title
+            binding.textViewDescription.apply {
+                isVisible = !item.description.isNullOrBlank()
+                text = item.description
+            }
         }
     }
 }

@@ -1,9 +1,11 @@
-# Watcher v2.11
+# Watcher TV v2.11.1
 
 ## What's new
-- Removed blurred background
-- Added new image preview
-- Disabled in-app updater. Uses external browser from now on.
+- Added video preview
+- Changed background to `#000000`
+- Minor UI enhancements for Image and Video Preview
+- Added subtitle text size settings
+- New Dynamic Headers
 
 ## Bug fix
-- Fixed logging out when refresh token request fails due to network error
+- Fix player borders not black
