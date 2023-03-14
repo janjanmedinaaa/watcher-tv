@@ -134,8 +134,7 @@ class SplashFragment : Fragment() {
     }
 
     private fun checkForSearchResult() {
-        viewModel.hasPendingSearchResultToWatch =
-            mainViewModel.searchResultToWatch.value?.peekConsumedContent() != null
+        viewModel.hasPendingSearchResultToWatch = mainViewModel.hasSearchResultToWatch
     }
 
     private fun checkCacheVideos() {

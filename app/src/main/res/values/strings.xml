@@ -5,6 +5,8 @@
     <string name="repository_releases_url">https://api.github.com/repos/janjanmedinaaa/watcher-tv/releases</string>
     <string name="registration_token" tools:ignore="Typos">eO2U9oC1TUORTjhyXTVlK_:APA91bFwAtTroKdE62deLPQ-Se1Fx6oV_jPd-4p4qG8wIs1k71bhDoUjurlMVyqvkKkJChVNT_5Umq8WaCILsSYqF-rkBLM7ySnQShDGohJSM4JaaHibtLpc1B7qCRnmSeKlPIRHD6_l</string>
 
+    <string name="default_channel_title">Recommended</string>
+
     <!-- Server Error Message -->
     <string name="no_internet_connection">Please check your internet connection and try again later.</string>
     <string name="something_went_wrong">Something went wrong. Try again later.</string>
