@@ -1,4 +1,4 @@
-# Watcher TV v2.12
+# Watcher TV v2.11.2
 
 ## What's new
 - Added Watch Next and Recommended Channels for Android O+
