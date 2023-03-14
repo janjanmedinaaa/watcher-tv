@@ -187,7 +187,7 @@ class TVProviderUseCase @Inject constructor(
         duration: Int
     ): WatchNextProgram? {
         val videoInfo = mediaRepository.getVideoDetails(this) ?: return null
-        val (seriesTitle, seasonTitle) = getSeriesTitleDescription()
+        val (seriesTitle, _) = getSeriesTitleDescription()
         val launchIntentExtra = "$category;$contentId;$imageUrl;$title"
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(PROGRAM_INFO_EXTRA, launchIntentExtra)
@@ -208,22 +208,17 @@ class TVProviderUseCase @Inject constructor(
             .setLastEngagementTimeUtcMillis(lastWatchTime)
             .setLastPlaybackPositionMillis(videoProgress.toInt())
             .setIntent(launchIntent)
-            .apply {
-                if (!isMovie) {
-                    val seasonNumber = seasonTitle.split(" ").last().toIntOrNull()
-                    setSeasonNumber(seasonNumber ?: 1)
-                    if (episodeNumber != 0) setEpisodeNumber(episodeNumber)
-                }
-            }
             .build()
     }
 
     private suspend fun Video.toPreviewProgram(channelId: Long): PreviewProgram? {
-        val videoInfo = mediaRepository.getVideoDetails(this) ?: return null
+        val videoInfo = mediaRepository.getVideo(contentId, category ?: 0) ?: return null
+        val (seriesTitle, seasonTitle) = getSeriesTitleDescription()
         val launchIntentExtra = "$category;$contentId;$imageUrl;$title"
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(PROGRAM_INFO_EXTRA, launchIntentExtra)
         }
+        val totalDuration = TimeUnit.SECONDS.toMillis(videoInfo.totalDuration.toLong()).toInt()
 
         return PreviewProgram.Builder()
             .setChannelId(channelId)
@@ -233,10 +228,18 @@ class TVProviderUseCase @Inject constructor(
                 if (isMovie) TvContractCompat.PreviewPrograms.TYPE_MOVIE
                 else TvContractCompat.PreviewPrograms.TYPE_TV_EPISODE
             )
-            .setTitle(title)
+            .setTitle(seriesTitle)
             .setDescription(videoInfo.introduction)
+            .setDurationMillis(totalDuration)
             .setPosterArtUri(Uri.parse(videoInfo.coverHorizontalUrl))
             .setIntent(launchIntent)
+            .apply {
+                if (!isMovie) {
+                    val seasonNumber = seasonTitle.split(" ").last().toIntOrNull()
+                    setSeasonNumber(seasonNumber ?: 1)
+                    setEpisodeNumber(1)
+                }
+            }
             .build()
     }
 }
