@@ -20,10 +20,7 @@ import com.medina.juanantonio.watcher.network.ApiService
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.auth.*
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
-import com.medina.juanantonio.watcher.sources.content.ContentRemoteSource
-import com.medina.juanantonio.watcher.sources.content.ContentRepository
-import com.medina.juanantonio.watcher.sources.content.IContentRemoteSource
-import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.*
 import com.medina.juanantonio.watcher.sources.content.IContentRepository.Companion.API_HEADERS
 import com.medina.juanantonio.watcher.sources.media.*
 import com.medina.juanantonio.watcher.sources.user.IUserRemoteSource
@@ -196,9 +193,10 @@ class AppModule {
     @Singleton
     fun provideMediaRepository(
         @ApplicationContext context: Context,
-        remoteSource: IMediaRemoteSource
+        remoteSource: IMediaRemoteSource,
+        likedVideoUseCase: LikedVideoUseCase
     ): IMediaRepository {
-        return MediaRepository(context, remoteSource)
+        return MediaRepository(context, remoteSource, likedVideoUseCase)
     }
 
     @Provides
@@ -280,5 +278,11 @@ class AppModule {
     ): IDownloadManager {
         return if (BuildConfig.DEBUG) MockDownloadManager(coroutineScope)
         else DownloadManager(context, coroutineScope)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLikedVideoDatabase(watcherDb: WatcherDb): ILikedVideoDatabase {
+        return LikedVideoDatabase(watcherDb)
     }
 }

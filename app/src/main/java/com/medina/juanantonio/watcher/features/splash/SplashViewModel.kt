@@ -12,6 +12,7 @@ import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.LikedVideoUseCase
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -25,7 +26,8 @@ class SplashViewModel @Inject constructor(
     private val updateRepository: IUpdateRepository,
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
-    private val authUseCase: AuthUseCase
+    private val authUseCase: AuthUseCase,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : ViewModel() {
 
     private val _navigateToHomeScreen = MutableLiveData<Event<Unit>>()
@@ -114,6 +116,7 @@ class SplashViewModel @Inject constructor(
                     return@launch
                 } else {
                     watchHistoryUseCase.clearLocalOnGoingVideos()
+                    likedVideoUseCase.clearLocalLikedVideos()
                 }
             } else if (shouldContinueWithoutAuth || hasPendingSearchResultToWatch) {
                 navigateToHomeScreen()

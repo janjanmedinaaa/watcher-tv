@@ -6,8 +6,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.tv.TvContract.BaseTvColumns
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.tvprovider.media.tv.PreviewChannel
 import androidx.tvprovider.media.tv.PreviewChannelHelper
 import androidx.tvprovider.media.tv.PreviewProgram
@@ -33,7 +31,6 @@ import javax.inject.Singleton
 
 @Singleton
 @SuppressLint("RestrictedApi")
-@RequiresApi(Build.VERSION_CODES.O)
 class TVProviderUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationScope private val coroutineScope: CoroutineScope,

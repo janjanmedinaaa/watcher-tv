@@ -18,6 +18,7 @@ import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.LikedVideoUseCase
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
@@ -34,7 +35,8 @@ class HomeViewModel @Inject constructor(
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val userRepository: IUserRepository,
     private val authRepository: IAuthRepository,
-    private val authUseCase: AuthUseCase
+    private val authUseCase: AuthUseCase,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -297,6 +299,7 @@ class HomeViewModel @Inject constructor(
             val isSuccessful = authUseCase.logout(userId)
             if (isSuccessful) {
                 watchHistoryUseCase.clearLocalOnGoingVideos()
+                likedVideoUseCase.clearLocalLikedVideos()
                 _navigateToHomeScreen.value = Event(Unit)
             }
         }
@@ -320,6 +323,7 @@ class HomeViewModel @Inject constructor(
     fun clearCacheVideos() {
         viewModelScope.launch {
             watchHistoryUseCase.clearLocalOnGoingVideos()
+            likedVideoUseCase.clearLocalLikedVideos()
         }
     }
 

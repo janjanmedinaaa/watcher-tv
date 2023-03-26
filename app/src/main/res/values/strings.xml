@@ -52,6 +52,8 @@
 
     <!-- Custom Multi Actions -->
     <string name="control_action_settings">Show Settings</string>
+    <string name="control_action_like">Like</string>
+    <string name="control_action_unlike">Unlike</string>
 
     <!-- Login Screen -->
     <string name="input_hint_phone_number">Phone Number</string>
