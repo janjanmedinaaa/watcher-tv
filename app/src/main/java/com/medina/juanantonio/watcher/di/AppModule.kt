@@ -17,6 +17,11 @@ import com.medina.juanantonio.watcher.database.WatcherDb
 import com.medina.juanantonio.watcher.github.GithubApiService
 import com.medina.juanantonio.watcher.github.sources.*
 import com.medina.juanantonio.watcher.network.ApiService
+import com.medina.juanantonio.watcher.openai.OpenAIAPIService
+import com.medina.juanantonio.watcher.openai.sources.IOpenAIRemoteSource
+import com.medina.juanantonio.watcher.openai.sources.IOpenAIRepository
+import com.medina.juanantonio.watcher.openai.sources.OpenAIRemoteSource
+import com.medina.juanantonio.watcher.openai.sources.OpenAIRepository
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.sources.auth.*
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository.Companion.AUTH_TOKEN
@@ -146,6 +151,38 @@ class AppModule {
 
     @Provides
     @Singleton
+    fun provideOpenAIApiService(
+        @ApplicationContext context: Context
+    ): OpenAIAPIService {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val requiredHeaderInterceptor = Interceptor { chain ->
+            val requestBuilder =
+                chain.request()
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer ${BuildConfig.OPEN_AI_KEY}")
+
+            chain.proceed(requestBuilder.build())
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(requiredHeaderInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(context.getString(R.string.open_ai_api_base_url))
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenAIAPIService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideWatcherDb(@ApplicationContext context: Context): WatcherDb {
         return Room.databaseBuilder(context, WatcherDb::class.java, "watcher.db")
             .fallbackToDestructiveMigration()
@@ -174,10 +211,9 @@ class AppModule {
     fun provideContentRepository(
         @ApplicationContext context: Context,
         remoteSource: IContentRemoteSource,
-        dataStoreManager: IDataStoreManager,
-        likedVideoUseCase: LikedVideoUseCase
+        dataStoreManager: IDataStoreManager
     ): IContentRepository {
-        return ContentRepository(context, remoteSource, dataStoreManager, likedVideoUseCase)
+        return ContentRepository(context, remoteSource, dataStoreManager)
     }
 
     @Provides
@@ -285,5 +321,21 @@ class AppModule {
     @Singleton
     fun provideLikedVideoDatabase(watcherDb: WatcherDb): ILikedVideoDatabase {
         return LikedVideoDatabase(watcherDb)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenAIRemoteSource(
+        @ApplicationContext context: Context,
+        apiService: OpenAIAPIService,
+        dispatchers: CoroutineDispatchers
+    ): IOpenAIRemoteSource {
+        return OpenAIRemoteSource(context, apiService, dispatchers)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenAIRepository(remoteSource: IOpenAIRemoteSource): IOpenAIRepository {
+        return OpenAIRepository(remoteSource)
     }
 }

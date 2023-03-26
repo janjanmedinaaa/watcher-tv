@@ -2,6 +2,7 @@
     <string name="app_name">Watcher</string>
     <string name="loklok_api_base_url">https://ga-mobile-api.loklok.tv/</string>
     <string name="github_api_base_url">https://api.github.com/</string>
+    <string name="open_ai_api_base_url">https://api.openai.com/</string>
     <string name="repository_releases_url">https://api.github.com/repos/janjanmedinaaa/watcher-tv/releases</string>
     <string name="registration_token" tools:ignore="Typos">eO2U9oC1TUORTjhyXTVlK_:APA91bFwAtTroKdE62deLPQ-Se1Fx6oV_jPd-4p4qG8wIs1k71bhDoUjurlMVyqvkKkJChVNT_5Umq8WaCILsSYqF-rkBLM7ySnQShDGohJSM4JaaHibtLpc1B7qCRnmSeKlPIRHD6_l</string>
 
@@ -32,6 +33,7 @@
     <string name="connected_videos">Collection</string>
     <string name="search_results">Search Results for %s</string>
     <string name="search_leaderboard">Search Leaderboard</string>
+    <string name="since_you_liked_videos">Since you liked %s</string>
 
     <!-- Dialogs -->
     <string name="continue_watching_title">Continue Watching?</string>
@@ -66,7 +68,7 @@
     <string name="label_guest">Guest</string>
     <string name="disabled_update_manager">Disabled in-app updater. Visit janjanmedinaaa/watcher-tv in Github for update.</string>
     <string name="install_browser_for_update">Disabled in-app updater. Please install a browser to download update.</string>
-    <string name="my_list_navigation_title">My List</string>
+
     <!-- Player Screen -->
     <string name="dev_mode_player_title">%s; %d:%d</string>
 
@@ -93,4 +95,7 @@
     <string name="ask_again_later_button">Ask again later</string>
     <string name="play_without_asking_button">Play without asking again</string>
     <string name="im_done_button">I\'m done</string>
+
+    <!-- Open AI Da Vinci Formats -->
+    <string name="open_ai_similar_films_format">You are a chatbot that returns a list of answers and separates it like this: "Answer^Answer"\n\nAnswer is Title~Year\nMe: %d films similar to %s\nYou:</string>
 </resources>

@@ -16,12 +16,11 @@ import com.medina.juanantonio.watcher.sources.content.IContentRepository.Compani
 class ContentRepository(
     private val context: Context,
     private val remoteSource: IContentRemoteSource,
-    private val dataStoreManager: IDataStoreManager,
-    private val likedVideoUseCase: LikedVideoUseCase
+    private val dataStoreManager: IDataStoreManager
 ) : IContentRepository {
 
     companion object {
-        const val MY_LIST_NAVIGATION_BAR_ID = 11399
+        private const val MAX_PAGES = 100
     }
 
     override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
@@ -44,14 +43,6 @@ class ContentRepository(
             navigationItems.apply {
                 clear()
                 addAll(filteredItems ?: emptyList())
-                add(
-                    NavigationItemBean(
-                        id = MY_LIST_NAVIGATION_BAR_ID,
-                        name = context.getString(R.string.my_list_navigation_title),
-                        redirectContentType = NavigationItemBean.RedirectContentType.HOME,
-                        sequence = 10
-                    )
-                )
             }
         } else {
             result.message.toastIfNotBlank(context)
@@ -76,6 +67,7 @@ class ContentRepository(
             return
         }
 
+        if (startingPage > MAX_PAGES) return
         val pageHasContent = getHomePage(navigationId, startingPage)
         if (pageHasContent) {
             if (startingPage == 0) onFirstPage()
@@ -97,8 +89,6 @@ class ContentRepository(
     }
 
     private suspend fun getHomePage(navigationId: Int?, page: Int): Boolean {
-        if (navigationId == MY_LIST_NAVIGATION_BAR_ID) return getMyListNavigation(page)
-
         val result = remoteSource.getHomePage(page, navigationId)
 
         return if (result is Result.Success) {
@@ -139,38 +129,6 @@ class ContentRepository(
             searchResultsHint = result.data?.data?.searchKeyWord ?: ""
 
             !validVideoGroups.isNullOrEmpty()
-        } else false
-    }
-
-    private suspend fun getMyListNavigation(page: Int): Boolean {
-        val likedVideos = likedVideoUseCase.getLikedVideos()
-
-        return if (likedVideos.isNotEmpty()) {
-            val listVideoGroup = arrayListOf<VideoGroup>()
-            when (page) {
-                0 -> {
-                    listVideoGroup.add(
-                        VideoGroup(
-                            category = context.getString(R.string.my_list_navigation_title),
-                            videoList = likedVideos.map { likedVideo ->
-                                Video(likedVideo)
-                            },
-                            contentType = VideoGroup.ContentType.VIDEOS
-                        )
-                    )
-                }
-            }
-
-            val mapId = MY_LIST_NAVIGATION_BAR_ID
-            if (listVideoGroup.isNotEmpty()) {
-                if (homeContentMap[mapId] == null) {
-                    homeContentMap[mapId] = arrayListOf(listVideoGroup)
-                } else {
-                    homeContentMap[mapId]?.add(listVideoGroup)
-                }
-            }
-
-            listVideoGroup.isNotEmpty()
         } else false
     }
 

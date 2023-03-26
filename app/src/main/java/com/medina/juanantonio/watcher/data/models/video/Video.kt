@@ -164,7 +164,9 @@ data class Video(
         contentId = bean.contentId,
         imageUrl = bean.imageUrl,
         title = bean.title
-    )
+    ) {
+        isHomeDisplay = true
+    }
 
     /**
      * Deep copy Video object
