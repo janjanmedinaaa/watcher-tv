@@ -49,7 +49,7 @@ class TVProviderUseCase @Inject constructor(
     private val previewChannelHelper = PreviewChannelHelper(context)
 
     private val reminderInterval: Long
-        get() = TimeUnit.DAYS.toMillis(7)
+        get() = TimeUnit.DAYS.toMillis(4)
 
     suspend fun addVideoToWatchNextRow(
         video: Video,
@@ -199,7 +199,6 @@ class TVProviderUseCase @Inject constructor(
                 else TvContractCompat.PreviewPrograms.TYPE_TV_EPISODE
             )
             .setTitle(seriesTitle)
-            .setDescription(videoInfo.introduction)
             .setPosterArtUri(Uri.parse(videoInfo.coverHorizontalUrl))
             .setDurationMillis(duration)
             .setLastEngagementTimeUtcMillis(lastWatchTime)
@@ -226,7 +225,6 @@ class TVProviderUseCase @Inject constructor(
                 else TvContractCompat.PreviewPrograms.TYPE_TV_EPISODE
             )
             .setTitle(seriesTitle)
-            .setDescription(videoInfo.introduction)
             .setDurationMillis(totalDuration)
             .setPosterArtUri(Uri.parse(videoInfo.coverHorizontalUrl))
             .setIntent(launchIntent)

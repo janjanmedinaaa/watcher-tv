@@ -219,10 +219,12 @@ class PlayerViewModel @Inject constructor(
 
     fun updateLikedVideo() {
         viewModelScope.launch {
-            val id = videoMedia.contentId
-            likedVideoUseCase.run {
-                if (checkLikedVideo(id)) removeLikedVideo(id)
-                else addLikedVideo(id)
+            video?.let {
+                likedVideoUseCase.run {
+                    if (checkLikedVideo(it.contentId)) {
+                        removeLikedVideo(it.contentId)
+                    } else addLikedVideo(it)
+                }
             }
         }
     }

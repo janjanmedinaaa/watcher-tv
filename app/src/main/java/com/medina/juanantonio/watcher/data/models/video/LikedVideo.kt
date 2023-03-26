@@ -5,5 +5,16 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class LikedVideo(
-    @PrimaryKey val contentId: Int
-)
+    val category: Int?,
+    @PrimaryKey val contentId: Int,
+    val imageUrl: String,
+    val title: String
+) {
+
+    constructor(video: Video) : this(
+        category = video.category,
+        contentId = video.contentId,
+        imageUrl = video.imageUrl,
+        title = video.title
+    )
+}

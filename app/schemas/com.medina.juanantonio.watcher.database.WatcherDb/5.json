@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "acaec2f5ba9777694534b14f2716c435",
+    "identityHash": "0366ee5c01976f7a7ca6cda8888fa02b",
     "entities": [
       {
         "tableName": "Video",
@@ -124,12 +124,30 @@
       },
       {
         "tableName": "LikedVideo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentId` INTEGER NOT NULL, PRIMARY KEY(`contentId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`category` INTEGER, `contentId` INTEGER NOT NULL, `imageUrl` TEXT NOT NULL, `title` TEXT NOT NULL, PRIMARY KEY(`contentId`))",
         "fields": [
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
           {
             "fieldPath": "contentId",
             "columnName": "contentId",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -146,7 +164,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'acaec2f5ba9777694534b14f2716c435')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0366ee5c01976f7a7ca6cda8888fa02b')"
     ]
   }
 }

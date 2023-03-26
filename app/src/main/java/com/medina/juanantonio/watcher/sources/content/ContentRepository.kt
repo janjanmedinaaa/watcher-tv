@@ -16,8 +16,13 @@ import com.medina.juanantonio.watcher.sources.content.IContentRepository.Compani
 class ContentRepository(
     private val context: Context,
     private val remoteSource: IContentRemoteSource,
-    private val dataStoreManager: IDataStoreManager
+    private val dataStoreManager: IDataStoreManager,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : IContentRepository {
+
+    companion object {
+        const val MY_LIST_NAVIGATION_BAR_ID = 11399
+    }
 
     override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
     override var searchResultsHint: String = ""
@@ -39,6 +44,14 @@ class ContentRepository(
             navigationItems.apply {
                 clear()
                 addAll(filteredItems ?: emptyList())
+                add(
+                    NavigationItemBean(
+                        id = MY_LIST_NAVIGATION_BAR_ID,
+                        name = context.getString(R.string.my_list_navigation_title),
+                        redirectContentType = NavigationItemBean.RedirectContentType.HOME,
+                        sequence = 10
+                    )
+                )
             }
         } else {
             result.message.toastIfNotBlank(context)
@@ -84,6 +97,8 @@ class ContentRepository(
     }
 
     private suspend fun getHomePage(navigationId: Int?, page: Int): Boolean {
+        if (navigationId == MY_LIST_NAVIGATION_BAR_ID) return getMyListNavigation(page)
+
         val result = remoteSource.getHomePage(page, navigationId)
 
         return if (result is Result.Success) {
@@ -124,6 +139,38 @@ class ContentRepository(
             searchResultsHint = result.data?.data?.searchKeyWord ?: ""
 
             !validVideoGroups.isNullOrEmpty()
+        } else false
+    }
+
+    private suspend fun getMyListNavigation(page: Int): Boolean {
+        val likedVideos = likedVideoUseCase.getLikedVideos()
+
+        return if (likedVideos.isNotEmpty()) {
+            val listVideoGroup = arrayListOf<VideoGroup>()
+            when (page) {
+                0 -> {
+                    listVideoGroup.add(
+                        VideoGroup(
+                            category = context.getString(R.string.my_list_navigation_title),
+                            videoList = likedVideos.map { likedVideo ->
+                                Video(likedVideo)
+                            },
+                            contentType = VideoGroup.ContentType.VIDEOS
+                        )
+                    )
+                }
+            }
+
+            val mapId = MY_LIST_NAVIGATION_BAR_ID
+            if (listVideoGroup.isNotEmpty()) {
+                if (homeContentMap[mapId] == null) {
+                    homeContentMap[mapId] = arrayListOf(listVideoGroup)
+                } else {
+                    homeContentMap[mapId]?.add(listVideoGroup)
+                }
+            }
+
+            listVideoGroup.isNotEmpty()
         } else false
     }
 
@@ -215,6 +262,21 @@ class ContentRepository(
         }
     }
 
+    override suspend fun searchByKeywordSpecific(title: String, year: String): Video? {
+        val result = remoteSource.searchByKeyword(title)
+
+        return if (result is Result.Success) {
+            val data = result.data?.data ?: return null
+            val filteredSearchList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank() }
+            filteredSearchList
+                .map { Video(it) }
+                .firstOrNull {
+                    val (name, _) = it.getSeriesTitleDescription()
+                    name.equals(title, true) && it.year == year
+                }
+        } else null
+    }
+
     override suspend fun getSearchLeaderboard(): VideoGroup? {
         val result = remoteSource.getSearchLeaderboard()
 
@@ -250,6 +312,7 @@ interface IContentRepository {
     suspend fun getAlbumDetails(id: Int): VideoGroup?
 
     suspend fun searchByKeyword(keyword: String): List<VideoGroup>?
+    suspend fun searchByKeywordSpecific(title: String, year: String): Video?
     suspend fun getSearchLeaderboard(): VideoGroup?
 
     companion object {

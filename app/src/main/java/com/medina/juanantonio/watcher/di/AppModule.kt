@@ -174,9 +174,10 @@ class AppModule {
     fun provideContentRepository(
         @ApplicationContext context: Context,
         remoteSource: IContentRemoteSource,
-        dataStoreManager: IDataStoreManager
+        dataStoreManager: IDataStoreManager,
+        likedVideoUseCase: LikedVideoUseCase
     ): IContentRepository {
-        return ContentRepository(context, remoteSource, dataStoreManager)
+        return ContentRepository(context, remoteSource, dataStoreManager, likedVideoUseCase)
     }
 
     @Provides

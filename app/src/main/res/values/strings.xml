@@ -66,6 +66,7 @@
     <string name="label_guest">Guest</string>
     <string name="disabled_update_manager">Disabled in-app updater. Visit janjanmedinaaa/watcher-tv in Github for update.</string>
     <string name="install_browser_for_update">Disabled in-app updater. Please install a browser to download update.</string>
+    <string name="my_list_navigation_title">My List</string>
     <!-- Player Screen -->
     <string name="dev_mode_player_title">%s; %d:%d</string>
 

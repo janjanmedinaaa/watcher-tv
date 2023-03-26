@@ -1,6 +1,7 @@
 package com.medina.juanantonio.watcher.sources.content
 
 import com.medina.juanantonio.watcher.data.models.video.LikedVideo
+import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.sources.media.ILikedVideoDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -12,8 +13,12 @@ class LikedVideoUseCase @Inject constructor(
     private val likedVideoDatabase: ILikedVideoDatabase
 ) {
 
-    suspend fun addLikedVideo(contentId: Int) {
-        likedVideoDatabase.addLikedVideo(LikedVideo(contentId))
+    suspend fun addLikedVideo(video: Video) {
+        likedVideoDatabase.addLikedVideo(LikedVideo(video))
+    }
+
+    suspend fun getLikedVideos(): List<LikedVideo> {
+        return likedVideoDatabase.getLikedVideos()
     }
 
     fun getLikedVideo(contentId: Int): Flow<LikedVideo?> {
