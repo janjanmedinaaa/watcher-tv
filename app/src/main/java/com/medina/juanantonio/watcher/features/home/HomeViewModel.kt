@@ -134,14 +134,15 @@ class HomeViewModel @Inject constructor(
         val imageUrl = splitSearchId.getOrNull(2).toString()
         val title = splitSearchId.getOrNull(3).toString()
 
-        getVideoMedia(
-            Video(
-                category = category,
-                contentId = contentId,
-                imageUrl = imageUrl,
-                title = title
-            )
+        val video = Video(
+            category = category,
+            contentId = contentId,
+            imageUrl = imageUrl,
+            title = title
         )
+
+        if (video.isMovie) getVideoMedia(video)
+        else getEpisodeList(video)
     }
 
     fun getVideoMedia(video: Video, isComingSoon: Boolean = false) {

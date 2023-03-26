@@ -7,7 +7,9 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,6 +41,7 @@ import com.medina.juanantonio.watcher.data.manager.downloader.PollState
 import com.medina.juanantonio.watcher.shared.extensions.initPoll
 import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.shared.utils.observeEvent
+import com.medina.juanantonio.watcher.sources.content.TVProviderUseCase.Companion.PROGRAM_INFO_EXTRA
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.gpu.BrightnessFilterTransformation
@@ -258,6 +261,14 @@ class MainActivity : FragmentActivity() {
                 "program" -> {
                     val contentId = uri.pathSegments.lastOrNull().toString()
                     viewModel.readySearchResultToWatch(contentId)
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val programInfoExtra = intent.getStringExtra(PROGRAM_INFO_EXTRA)
+                Log.d("DEVELOP", "$programInfoExtra")
+                if (!programInfoExtra.isNullOrBlank()) {
+                    viewModel.readySearchResultToWatch("$programInfoExtra")
                 }
             }
         }

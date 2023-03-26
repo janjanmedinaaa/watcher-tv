@@ -62,6 +62,7 @@ class HomeFragment : RowsSupportFragment() {
     private val navigationAdapter = NavigationAdapter()
 
     private var autoPlayFirstEpisode = false
+    private var autoPlaySearchResult = false
 
     private var singleClickJob: Job? = null
 
@@ -161,7 +162,9 @@ class HomeFragment : RowsSupportFragment() {
         super.onResume()
 
         autoPlayFirstEpisode =
-            HomeFragmentArgs.fromBundle(requireArguments()).autoPlayFirstEpisode
+            HomeFragmentArgs.fromBundle(requireArguments()).autoPlayFirstEpisode ||
+                autoPlaySearchResult
+        autoPlaySearchResult = false
 
         viewModel.setupVideoList(selectedVideoGroup, autoPlayFirstEpisode)
         viewModel.getUserInfo()
@@ -250,7 +253,7 @@ class HomeFragment : RowsSupportFragment() {
 
         viewModel.selectedVideoGroup.observeEvent(viewLifecycleOwner) {
             findNavController().safeNavigate(
-                HomeFragmentDirections.actionHomeFragmentSelf(it)
+                HomeFragmentDirections.actionHomeFragmentSelf(it, autoPlayFirstEpisode)
             )
         }
 
@@ -311,6 +314,7 @@ class HomeFragment : RowsSupportFragment() {
 
     private fun listenActivityVM() {
         activityViewModel.searchResultToWatch.observeEvent(viewLifecycleOwner) {
+            autoPlaySearchResult = true
             viewModel.getVideoMediaFromId(it)
         }
 
