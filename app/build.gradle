@@ -26,8 +26,8 @@ android {
         applicationId "com.medina.juanantonio.watcher"
         minSdk 21
         targetSdk 33
-        versionCode 35
-        versionName "2.11.1"
+        versionCode 36
+        versionName "2.11.2"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -69,6 +69,7 @@ android {
         variant.outputs.all {
             buildConfigField "String", "PRIVATE_KEY", "\"${secretProperties['privateKey']}\""
             buildConfigField "String", "APP_ID", "\"${secretProperties['appId']}\""
+            buildConfigField "String", "OPEN_AI_KEY", "\"${secretProperties['openAIKey']}\""
 
             def appName = "Watcher TV v${variant.versionName}"
             resValue "string", "app_name_version", appName
@@ -86,6 +87,7 @@ dependencies {
     def leanback_version = "1.2.0-alpha02"
     implementation "androidx.leanback:leanback:$leanback_version"
     implementation "androidx.leanback:leanback-preference:$leanback_version"
+    implementation "androidx.tvprovider:tvprovider:1.1.0-alpha01"
 
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 

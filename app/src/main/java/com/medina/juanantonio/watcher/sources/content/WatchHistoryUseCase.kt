@@ -12,7 +12,8 @@ import javax.inject.Singleton
 class WatchHistoryUseCase @Inject constructor(
     private val authRepository: IAuthRepository,
     private val userRepository: IUserRepository,
-    private val database: IVideoDatabase
+    private val database: IVideoDatabase,
+    private val tvProviderUseCase: TVProviderUseCase
 ) {
 
     companion object {
@@ -37,10 +38,13 @@ class WatchHistoryUseCase @Inject constructor(
         val hasVideoEnded = hasVideoEnd(video, videoMedia)
 
         if (video.isMovie && hasVideoEnded) {
+            tvProviderUseCase.removeVideoFromWatchNextRow(video)
             removeOnGoingVideo(video)
             return
         }
 
+        val durationMillis = videoMedia.totalDuration * 1000
+        tvProviderUseCase.addVideoToWatchNextRow(video, durationMillis)
         if (authRepository.isUserAuthenticated()) {
             userRepository.saveWatchHistory(video, videoMedia)
             return
@@ -63,6 +67,7 @@ class WatchHistoryUseCase @Inject constructor(
     }
 
     suspend fun removeOnGoingVideo(video: Video) {
+        tvProviderUseCase.removeVideoFromWatchNextRow(video)
         if (authRepository.isUserAuthenticated()) {
             userRepository.removeWatchHistory(video.contentId, video.category ?: 0)
             return

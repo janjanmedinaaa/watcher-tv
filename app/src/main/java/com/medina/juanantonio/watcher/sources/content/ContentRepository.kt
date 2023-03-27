@@ -19,6 +19,10 @@ class ContentRepository(
     private val dataStoreManager: IDataStoreManager
 ) : IContentRepository {
 
+    companion object {
+        private const val MAX_PAGES = 100
+    }
+
     override val navigationItems: ArrayList<NavigationItemBean> = arrayListOf()
     override var searchResultsHint: String = ""
     private var currentNavigationPage = -1
@@ -63,6 +67,7 @@ class ContentRepository(
             return
         }
 
+        if (startingPage > MAX_PAGES) return
         val pageHasContent = getHomePage(navigationId, startingPage)
         if (pageHasContent) {
             if (startingPage == 0) onFirstPage()
@@ -215,6 +220,21 @@ class ContentRepository(
         }
     }
 
+    override suspend fun searchByKeywordSpecific(title: String, year: String): Video? {
+        val result = remoteSource.searchByKeyword(title)
+
+        return if (result is Result.Success) {
+            val data = result.data?.data ?: return null
+            val filteredSearchList = data.searchResults.filter { it.coverVerticalUrl.isNotBlank() }
+            filteredSearchList
+                .map { Video(it) }
+                .firstOrNull {
+                    val (name, _) = it.getSeriesTitleDescription()
+                    name.equals(title, true) && it.year == year
+                }
+        } else null
+    }
+
     override suspend fun getSearchLeaderboard(): VideoGroup? {
         val result = remoteSource.getSearchLeaderboard()
 
@@ -250,6 +270,7 @@ interface IContentRepository {
     suspend fun getAlbumDetails(id: Int): VideoGroup?
 
     suspend fun searchByKeyword(keyword: String): List<VideoGroup>?
+    suspend fun searchByKeywordSpecific(title: String, year: String): Video?
     suspend fun getSearchLeaderboard(): VideoGroup?
 
     companion object {

@@ -4,6 +4,7 @@ object Constants {
 
     object VideoGroupTitle {
         const val ContinueWatchingTitle = "Continue Watching"
+        const val MyListTitle = "My List"
     }
 
     object BannerProportions {

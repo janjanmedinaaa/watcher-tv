@@ -1,5 +1,5 @@
 # Watcher TV
-Watcher TV is an Android TV app that uses the Android Leanback Library and Loklok API. If you want to support the development of Watcher-TV or just enjoyed it, consider buying me a coffee!
+Watcher TV is an Android TV app that uses the Android Leanback Library and Loklok API. If you want to support the development of Watcher TV or just enjoyed it, consider buying me a coffee!
 
 <a href="https://www.buymeacoffee.com/janjanmedinaaa"><img align="center" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="janjanmedinaaa" /></a>
 
@@ -34,7 +34,7 @@ Watcher TV is an Android TV app that uses the Android Leanback Library and Loklo
   <img alt="Episode List" src="https://raw.githubusercontent.com/janjanmedinaaa/watcher-tv/master/screenshots/Episode%20List.png" width="45%">
 </p>
 
-### Search Screen
+### Search Screen   
 <p align="center">
   <img alt="Top Search" src="https://raw.githubusercontent.com/janjanmedinaaa/watcher-tv/master/screenshots/Search%20Recommendations.png" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;

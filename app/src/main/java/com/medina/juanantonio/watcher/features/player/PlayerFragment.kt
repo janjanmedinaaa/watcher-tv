@@ -382,6 +382,9 @@ class PlayerFragment : VideoSupportFragment() {
                             viewModel.handleSkipPrevious()
                         }
                     }
+                    thumbsUpAction -> {
+                        viewModel.updateLikedVideo()
+                    }
                     settingsAction -> {
                         findNavController().safeNavigate(
                             PlayerFragmentDirections.actionPlayerFragmentToSettingsModal()
@@ -391,6 +394,8 @@ class PlayerFragment : VideoSupportFragment() {
 
                 stopTimerForPopBackstack()
             }
+
+            thumbsUpAction.index = if (videoMedia.isLikedVideo) 0 else 1
         }
     }
 
@@ -401,6 +406,14 @@ class PlayerFragment : VideoSupportFragment() {
         viewModel.videoMedia = videoMedia
         viewModel.setEpisodeNumbers(videoMedia.episodeNumbers)
         currentSubtitleLanguage = viewModel.selectedLanguage
+
+        lifecycleScope.launch {
+            viewModel.getLikedVideo(videoMedia.contentId)
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    setThumbsUpStatus()
+                }
+        }
 
         val dataSourceFactory = DefaultDataSource.Factory(requireContext())
         val subtitleData = videoMedia.getPreferredSubtitle(currentSubtitleLanguage)
@@ -438,6 +451,12 @@ class PlayerFragment : VideoSupportFragment() {
 
         viewModel.getVideoDetails(videoMedia.contentId)
         setupRelatedVideos()
+    }
+
+    private suspend fun setThumbsUpStatus() {
+        val isLikedVideo = viewModel.checkLikedVideo()
+        val index = if (isLikedVideo) 1 else 0
+        controlGlue.thumbsUpAction.index = index
     }
 
     private fun setupRelatedVideos() {

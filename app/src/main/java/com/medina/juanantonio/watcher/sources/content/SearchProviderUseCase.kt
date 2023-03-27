@@ -46,7 +46,7 @@ class SearchProviderUseCase @Inject constructor(
                 .add(SUGGEST_COLUMN_PRODUCTION_YEAR, video.year)
                 .add(
                     SUGGEST_COLUMN_DURATION,
-                    TimeUnit.MINUTES.toMillis(videoMedia.totalDuration.toLong())
+                    TimeUnit.SECONDS.toMillis(videoMedia.totalDuration.toLong())
                 )
                 .add(SUGGEST_COLUMN_RESULT_CARD_IMAGE, videoMedia.coverHorizontalUrl)
                 .add(SUGGEST_COLUMN_INTENT_DATA_ID, searchId)

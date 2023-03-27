@@ -66,12 +66,10 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
     val autoPlayVideos: Boolean
         get() = autoPlayedVideoCount <= MAX_VIDEO_AUTO_PLAYBACK || !bedtimeModeEnabled
 
-    var skipNextAction = SkipNextAction(context)
-        private set
-    var skipPreviousAction = SkipPreviousAction(context)
-        private set
-
-    var settingsAction = CustomMultiAction(
+    val skipNextAction = SkipNextAction(context)
+    val skipPreviousAction = SkipPreviousAction(context)
+    val thumbsUpAction = ThumbsUpAction(context)
+    val settingsAction = CustomMultiAction(
         context,
         ACTION_SETTINGS,
         intArrayOf(R.drawable.ic_settings),
@@ -87,6 +85,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
         primaryActionsAdapter.apply {
             add(skipPreviousAction)
             add(skipNextAction)
+            add(thumbsUpAction)
             add(settingsAction)
         }
     }
@@ -137,7 +136,7 @@ class ProgressTransportControlGlue<T : PlayerAdapter>(
 
     private fun notifyActionChanged(action: MultiAction) {
         var index: Int
-        (controlsRow.secondaryActionsAdapter as? ArrayObjectAdapter)?.let {
+        (controlsRow.primaryActionsAdapter as? ArrayObjectAdapter)?.let {
             index = it.indexOf(action)
             if (index >= 0) {
                 it.notifyArrayItemRangeChanged(index, 1)
