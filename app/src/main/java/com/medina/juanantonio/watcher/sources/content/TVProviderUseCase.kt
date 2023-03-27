@@ -16,7 +16,9 @@ import com.medina.juanantonio.watcher.MainActivity
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.di.ApplicationScope
+import com.medina.juanantonio.watcher.openai.sources.OpenAIUseCase
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.shared.helpers.TVProviderHelper.findFirstWatchNextProgram
 import com.medina.juanantonio.watcher.shared.helpers.TVProviderHelper.getChannelByInternalProviderId
@@ -37,7 +39,9 @@ class TVProviderUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val mediaRepository: IMediaRepository,
     private val contentRepository: IContentRepository,
-    private val dataStoreManager: IDataStoreManager
+    private val dataStoreManager: IDataStoreManager,
+    private val likedVideoUseCase: LikedVideoUseCase,
+    private val openAIUseCase: OpenAIUseCase
 ) {
 
     companion object {
@@ -130,7 +134,7 @@ class TVProviderUseCase @Inject constructor(
                 removeVideoFromChannel(it)
             }
 
-            contentRepository.getSearchLeaderboard()?.videoList?.forEach {
+            getDefaultChannelContent()?.videoList?.forEach {
                 try {
                     val program = it.toPreviewProgram(defaultChannel.id) ?: return@forEach
                     previewChannelHelper.publishPreviewProgram(program)
@@ -141,6 +145,20 @@ class TVProviderUseCase @Inject constructor(
 
             dataStoreManager.putString(LAST_CHANNEL_UPDATE_KEY, "${System.currentTimeMillis()}")
         }
+    }
+
+    private suspend fun getDefaultChannelContent(): VideoGroup? {
+        val likedVideos = likedVideoUseCase.getLikedVideos()
+        if (likedVideos.isNotEmpty()) {
+            val randomLikedVideo = likedVideos.random()
+            val (title, _) = Video(randomLikedVideo).getSeriesTitleDescription()
+            val similarContent = openAIUseCase.getSimilarContent(10, title)
+
+            if (similarContent != null && similarContent.videoList.isNotEmpty())
+                return similarContent
+        }
+
+        return contentRepository.getSearchLeaderboard()
     }
 
     private fun createDefaultChannel(): PreviewChannel {
