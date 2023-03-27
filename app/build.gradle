@@ -69,6 +69,7 @@ android {
         variant.outputs.all {
             buildConfigField "String", "PRIVATE_KEY", "\"${secretProperties['privateKey']}\""
             buildConfigField "String", "APP_ID", "\"${secretProperties['appId']}\""
+            buildConfigField "String", "OPEN_AI_KEY", "\"${secretProperties['openAIKey']}\""
 
             def appName = "Watcher TV v${variant.versionName}"
             resValue "string", "app_name_version", appName

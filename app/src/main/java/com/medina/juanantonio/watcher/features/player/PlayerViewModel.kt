@@ -6,12 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medina.juanantonio.watcher.data.models.settings.SettingsNumberPickerItem
 import com.medina.juanantonio.watcher.data.models.settings.SettingsSelectionItem
+import com.medina.juanantonio.watcher.data.models.video.LikedVideo
 import com.medina.juanantonio.watcher.data.models.video.Video
 import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.data.models.video.VideoMedia
 import com.medina.juanantonio.watcher.di.ApplicationScope
 import com.medina.juanantonio.watcher.features.loader.LoaderUseCase
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.content.LikedVideoUseCase
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.settings.SettingsUseCase
@@ -19,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,7 +31,8 @@ class PlayerViewModel @Inject constructor(
     private val loaderUseCase: LoaderUseCase,
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val settingsUseCase: SettingsUseCase,
-    @ApplicationScope private val applicationScope: CoroutineScope
+    @ApplicationScope private val applicationScope: CoroutineScope,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : ViewModel(), PlaybackStateMachine {
 
     private var video: Video? = null
@@ -207,6 +211,26 @@ class PlayerViewModel @Inject constructor(
             }
             loaderUseCase.hide()
         }
+    }
+
+    suspend fun checkLikedVideo(): Boolean {
+        return likedVideoUseCase.checkLikedVideo(videoMedia.contentId)
+    }
+
+    fun updateLikedVideo() {
+        viewModelScope.launch {
+            video?.let {
+                likedVideoUseCase.run {
+                    if (checkLikedVideo(it.contentId)) {
+                        removeLikedVideo(it.contentId)
+                    } else addLikedVideo(it)
+                }
+            }
+        }
+    }
+
+    fun getLikedVideo(id: Int): Flow<LikedVideo?> {
+        return likedVideoUseCase.getLikedVideo(id)
     }
 
     private fun getNewEpisodeNumber(currentEpisode: Int, next: Boolean): Int {

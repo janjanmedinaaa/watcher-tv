@@ -6,8 +6,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.tv.TvContract.BaseTvColumns
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.tvprovider.media.tv.PreviewChannel
 import androidx.tvprovider.media.tv.PreviewChannelHelper
 import androidx.tvprovider.media.tv.PreviewProgram
@@ -18,7 +16,9 @@ import com.medina.juanantonio.watcher.MainActivity
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.data.manager.IDataStoreManager
 import com.medina.juanantonio.watcher.data.models.video.Video
+import com.medina.juanantonio.watcher.data.models.video.VideoGroup
 import com.medina.juanantonio.watcher.di.ApplicationScope
+import com.medina.juanantonio.watcher.openai.sources.OpenAIUseCase
 import com.medina.juanantonio.watcher.shared.utils.CoroutineDispatchers
 import com.medina.juanantonio.watcher.shared.helpers.TVProviderHelper.findFirstWatchNextProgram
 import com.medina.juanantonio.watcher.shared.helpers.TVProviderHelper.getChannelByInternalProviderId
@@ -33,14 +33,15 @@ import javax.inject.Singleton
 
 @Singleton
 @SuppressLint("RestrictedApi")
-@RequiresApi(Build.VERSION_CODES.O)
 class TVProviderUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationScope private val coroutineScope: CoroutineScope,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val mediaRepository: IMediaRepository,
     private val contentRepository: IContentRepository,
-    private val dataStoreManager: IDataStoreManager
+    private val dataStoreManager: IDataStoreManager,
+    private val likedVideoUseCase: LikedVideoUseCase,
+    private val openAIUseCase: OpenAIUseCase
 ) {
 
     companion object {
@@ -52,7 +53,7 @@ class TVProviderUseCase @Inject constructor(
     private val previewChannelHelper = PreviewChannelHelper(context)
 
     private val reminderInterval: Long
-        get() = TimeUnit.DAYS.toMillis(7)
+        get() = TimeUnit.DAYS.toMillis(4)
 
     suspend fun addVideoToWatchNextRow(
         video: Video,
@@ -133,7 +134,7 @@ class TVProviderUseCase @Inject constructor(
                 removeVideoFromChannel(it)
             }
 
-            contentRepository.getSearchLeaderboard()?.videoList?.forEach {
+            getDefaultChannelContent()?.videoList?.forEach {
                 try {
                     val program = it.toPreviewProgram(defaultChannel.id) ?: return@forEach
                     previewChannelHelper.publishPreviewProgram(program)
@@ -144,6 +145,20 @@ class TVProviderUseCase @Inject constructor(
 
             dataStoreManager.putString(LAST_CHANNEL_UPDATE_KEY, "${System.currentTimeMillis()}")
         }
+    }
+
+    private suspend fun getDefaultChannelContent(): VideoGroup? {
+        val likedVideos = likedVideoUseCase.getLikedVideos()
+        if (likedVideos.isNotEmpty()) {
+            val randomLikedVideo = likedVideos.random()
+            val (title, _) = Video(randomLikedVideo).getSeriesTitleDescription()
+            val similarContent = openAIUseCase.getSimilarContent(10, title)
+
+            if (similarContent != null && similarContent.videoList.isNotEmpty())
+                return similarContent
+        }
+
+        return contentRepository.getSearchLeaderboard()
     }
 
     private fun createDefaultChannel(): PreviewChannel {
@@ -202,7 +217,6 @@ class TVProviderUseCase @Inject constructor(
                 else TvContractCompat.PreviewPrograms.TYPE_TV_EPISODE
             )
             .setTitle(seriesTitle)
-            .setDescription(videoInfo.introduction)
             .setPosterArtUri(Uri.parse(videoInfo.coverHorizontalUrl))
             .setDurationMillis(duration)
             .setLastEngagementTimeUtcMillis(lastWatchTime)
@@ -229,7 +243,6 @@ class TVProviderUseCase @Inject constructor(
                 else TvContractCompat.PreviewPrograms.TYPE_TV_EPISODE
             )
             .setTitle(seriesTitle)
-            .setDescription(videoInfo.introduction)
             .setDurationMillis(totalDuration)
             .setPosterArtUri(Uri.parse(videoInfo.coverHorizontalUrl))
             .setIntent(launchIntent)

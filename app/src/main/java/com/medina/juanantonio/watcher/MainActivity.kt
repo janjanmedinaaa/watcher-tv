@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -266,7 +265,6 @@ class MainActivity : FragmentActivity() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val programInfoExtra = intent.getStringExtra(PROGRAM_INFO_EXTRA)
-                Log.d("DEVELOP", "$programInfoExtra")
                 if (!programInfoExtra.isNullOrBlank()) {
                     viewModel.readySearchResultToWatch("$programInfoExtra")
                 }

@@ -18,7 +18,8 @@ data class VideoMedia(
     val seriesNo: Int?,
     val coverVerticalUrl: String,
     val coverHorizontalUrl: String,
-    val isComingSoon: Boolean
+    val isComingSoon: Boolean,
+    val isLikedVideo: Boolean
 ) {
 
     // Storing the score in the videoMedia so that
@@ -34,7 +35,8 @@ data class VideoMedia(
         detailsResponse: GetVideoDetailsResponse.Data,
         mediaResponse: GetVideoResourceResponse.Data,
         score: Double,
-        isComingSoon: Boolean
+        isComingSoon: Boolean,
+        isLikedVideo: Boolean
     ) : this(
         id = episodeBean.id,
         contentId = contentId,
@@ -59,7 +61,8 @@ data class VideoMedia(
         seriesNo = detailsResponse.seriesNo,
         coverVerticalUrl = detailsResponse.coverVerticalUrl,
         coverHorizontalUrl = detailsResponse.coverHorizontalUrl,
-        isComingSoon = isComingSoon
+        isComingSoon = isComingSoon,
+        isLikedVideo = isLikedVideo
     ) {
         this.score = score
         this.currentDefinition = mediaResponse.currentDefinition

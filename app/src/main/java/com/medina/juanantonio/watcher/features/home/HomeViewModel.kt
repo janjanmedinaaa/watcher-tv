@@ -14,10 +14,12 @@ import com.medina.juanantonio.watcher.network.models.home.NavigationItemBean
 import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsResponse
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.ContinueWatchingTitle
+import com.medina.juanantonio.watcher.shared.Constants.VideoGroupTitle.MyListTitle
 import com.medina.juanantonio.watcher.shared.utils.Event
 import com.medina.juanantonio.watcher.sources.auth.AuthUseCase
 import com.medina.juanantonio.watcher.sources.auth.IAuthRepository
 import com.medina.juanantonio.watcher.sources.content.IContentRepository
+import com.medina.juanantonio.watcher.sources.content.LikedVideoUseCase
 import com.medina.juanantonio.watcher.sources.content.WatchHistoryUseCase
 import com.medina.juanantonio.watcher.sources.media.IMediaRepository
 import com.medina.juanantonio.watcher.sources.user.IUserRepository
@@ -34,7 +36,8 @@ class HomeViewModel @Inject constructor(
     private val watchHistoryUseCase: WatchHistoryUseCase,
     private val userRepository: IUserRepository,
     private val authRepository: IAuthRepository,
-    private val authUseCase: AuthUseCase
+    private val authUseCase: AuthUseCase,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : ViewModel() {
 
     val contentList = MutableLiveData<Event<List<VideoGroup>>>()
@@ -69,6 +72,7 @@ class HomeViewModel @Inject constructor(
     private var videoPreviewJob: Job? = null
 
     var videoToRemove: Video? = null
+    private var isMyListDisplayed = false
 
     fun setupVideoList(videoGroup: VideoGroup?, autoPlayFirstEpisode: Boolean) {
         if (isContentLoaded) {
@@ -225,6 +229,7 @@ class HomeViewModel @Inject constructor(
             loaderUseCase.show()
             contentRepository.setPageId(id)
             contentRepository.setupPage(id) {
+                isMyListDisplayed = false
                 contentRepository.resetPage()
                 removeNavigationContent()
                 addNewContent()
@@ -241,7 +246,12 @@ class HomeViewModel @Inject constructor(
     }
 
     fun addNewContent() {
-        contentList.postValue(Event(contentRepository.getHomePage()))
+        val nextHomePage = contentRepository.getHomePage()
+        if (nextHomePage.isNotEmpty()) {
+            contentList.postValue(Event(nextHomePage))
+        } else viewModelScope.launch {
+            getMyListVideoGroup()
+        }
     }
 
     fun getVideoDetails(video: Video) {
@@ -297,6 +307,7 @@ class HomeViewModel @Inject constructor(
             val isSuccessful = authUseCase.logout(userId)
             if (isSuccessful) {
                 watchHistoryUseCase.clearLocalOnGoingVideos()
+                likedVideoUseCase.clearLocalLikedVideos()
                 _navigateToHomeScreen.value = Event(Unit)
             }
         }
@@ -320,6 +331,7 @@ class HomeViewModel @Inject constructor(
     fun clearCacheVideos() {
         viewModelScope.launch {
             watchHistoryUseCase.clearLocalOnGoingVideos()
+            likedVideoUseCase.clearLocalLikedVideos()
         }
     }
 
@@ -347,5 +359,23 @@ class HomeViewModel @Inject constructor(
             videoMediaForPreview.value =
                 Event(Pair(videoMedia, !video.onlineTime.isNullOrBlank()))
         }
+    }
+
+    private suspend fun getMyListVideoGroup() {
+        if (isMyListDisplayed) return
+        isMyListDisplayed = true
+
+        val likedVideos = likedVideoUseCase.getLikedVideos()
+        if (likedVideos.isEmpty()) return
+        val likedVideosVideos = likedVideos.map { Video(it) }
+
+        val likedVideoGroup =
+            VideoGroup(
+                category = MyListTitle,
+                videoList = likedVideosVideos,
+                contentType = VideoGroup.ContentType.VIDEOS
+            )
+
+        contentList.value = Event(listOf(likedVideoGroup))
     }
 }
