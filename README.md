@@ -17,6 +17,7 @@ Watcher TV is an Android TV app that uses the Android Leanback Library and Loklo
 - Display related Movies (for Seasons/Sequels)
 - Display Movie Suggestions
 - Auto Update via External Browser
+- Tv Provider Channels
 
 ## Screenshots
 
@@ -34,7 +35,7 @@ Watcher TV is an Android TV app that uses the Android Leanback Library and Loklo
   <img alt="Episode List" src="https://raw.githubusercontent.com/janjanmedinaaa/watcher-tv/master/screenshots/Episode%20List.png" width="45%">
 </p>
 
-### Search Screen   
+### Search Screen
 <p align="center">
   <img alt="Top Search" src="https://raw.githubusercontent.com/janjanmedinaaa/watcher-tv/master/screenshots/Search%20Recommendations.png" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
