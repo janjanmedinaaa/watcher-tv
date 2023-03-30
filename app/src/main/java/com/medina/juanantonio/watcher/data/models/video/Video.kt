@@ -158,6 +158,16 @@ data class Video(
         isHomeDisplay = true
     }
 
+    // Liked Video Items
+    constructor(bean: LikedVideo) : this(
+        category = bean.category,
+        contentId = bean.contentId,
+        imageUrl = bean.imageUrl,
+        title = bean.title
+    ) {
+        isHomeDisplay = true
+    }
+
     /**
      * Deep copy Video object
      */

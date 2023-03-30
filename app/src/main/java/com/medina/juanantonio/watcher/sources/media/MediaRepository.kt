@@ -11,10 +11,12 @@ import com.medina.juanantonio.watcher.network.models.player.GetVideoDetailsRespo
 import com.medina.juanantonio.watcher.network.models.player.GetVideoResourceResponse
 import com.medina.juanantonio.watcher.shared.extensions.toastIfNotBlank
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.content.LikedVideoUseCase
 
 class MediaRepository(
     private val context: Context,
-    private val remoteSource: IMediaRemoteSource
+    private val remoteSource: IMediaRemoteSource,
+    private val likedVideoUseCase: LikedVideoUseCase
 ) : IMediaRepository {
 
     private var _currentlyPlayingVideo: Video? = null
@@ -52,6 +54,7 @@ class MediaRepository(
         episodeNumber: Int,
         isComingSoon: Boolean
     ): VideoMedia? {
+        val isLikedVideo = likedVideoUseCase.checkLikedVideo(id)
         val videoDetailsResult = remoteSource.getVideoDetails(id, category)
 
         return if (videoDetailsResult is Result.Success) {
@@ -78,7 +81,8 @@ class MediaRepository(
                     detailsResponse = videoDetailsResult.data?.data ?: return null,
                     mediaResponse = videoMediaResult.data?.data ?: return null,
                     score = videoDetails?.score ?: return null,
-                    isComingSoon = isComingSoon
+                    isComingSoon = isComingSoon,
+                    isLikedVideo = isLikedVideo
                 )
             } else {
                 videoMediaResult.message.toastIfNotBlank(context)

@@ -1,5 +1,6 @@
 package com.medina.juanantonio.watcher
 
+import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,13 +9,15 @@ import com.medina.juanantonio.watcher.MainActivity.Companion.SHOW_MOVIE_BACKGROU
 import com.medina.juanantonio.watcher.github.models.ReleaseBean
 import com.medina.juanantonio.watcher.github.sources.IUpdateRepository
 import com.medina.juanantonio.watcher.shared.utils.Event
+import com.medina.juanantonio.watcher.sources.content.TVProviderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val updateRepository: IUpdateRepository
+    private val updateRepository: IUpdateRepository,
+    private val tvProviderUseCase: TVProviderUseCase
 ) : ViewModel() {
 
     val requestPermissions = MutableLiveData<Event<Unit>>()
@@ -31,6 +34,9 @@ class MainViewModel @Inject constructor(
     private val _searchResultToWatch = MutableLiveData<Event<String>>()
     val searchResultToWatch: LiveData<Event<String>>
         get() = _searchResultToWatch
+
+    val hasSearchResultToWatch: Boolean
+        get() = _searchResultToWatch.value?.peekConsumedContent() != null
 
     private val _hasGuestModeCacheVideos = MutableLiveData<Event<Unit>>()
     val hasGuestModeCacheVideos: LiveData<Event<Unit>>
@@ -49,6 +55,12 @@ class MainViewModel @Inject constructor(
         get() = updateRelease?.assets?.lastOrNull { it.isAPK() }
 
     private var currentBackgroundUrl = ""
+
+    init {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            tvProviderUseCase.fillDefaultChannel()
+        }
+    }
 
     fun setBackgroundImage(url: String) {
         _backgroundImageUrl.value = url

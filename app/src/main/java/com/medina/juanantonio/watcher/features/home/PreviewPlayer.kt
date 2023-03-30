@@ -19,7 +19,7 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.medina.juanantonio.watcher.R
 import com.medina.juanantonio.watcher.databinding.ViewPreviewPlayerBinding
-import com.medina.juanantonio.watcher.shared.utils.animateAlpha
+import com.medina.juanantonio.watcher.shared.extensions.animateAlpha
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay

@@ -38,11 +38,11 @@ class DataStoreManager(private val context: Context) : IDataStoreManager {
 
     override suspend fun getBoolean(key: String, defaultValue: Boolean): Boolean {
         val preferencesKey = booleanPreferencesKey(key)
-        val stringFlow: Flow<Boolean> = context.dataStore.data.map {
+        val booleanFlow: Flow<Boolean> = context.dataStore.data.map {
             it[preferencesKey] ?: defaultValue
         }
 
-        return stringFlow.firstOrNull() ?: defaultValue
+        return booleanFlow.firstOrNull() ?: defaultValue
     }
 
     override suspend fun putInt(key: String, value: Int) {
@@ -54,11 +54,27 @@ class DataStoreManager(private val context: Context) : IDataStoreManager {
 
     override suspend fun getInt(key: String, defaultValue: Int): Int {
         val preferencesKey = intPreferencesKey(key)
-        val stringFlow: Flow<Int> = context.dataStore.data.map {
+        val intFlow: Flow<Int> = context.dataStore.data.map {
             it[preferencesKey] ?: defaultValue
         }
 
-        return stringFlow.firstOrNull() ?: defaultValue
+        return intFlow.firstOrNull() ?: defaultValue
+    }
+
+    override suspend fun putLong(key: String, value: Long) {
+        val preferencesKey = longPreferencesKey(key)
+        context.dataStore.edit {
+            it[preferencesKey] = value
+        }
+    }
+
+    override suspend fun getLong(key: String, defaultValue: Long): Long {
+        val preferencesKey = longPreferencesKey(key)
+        val longFlow: Flow<Long> = context.dataStore.data.map {
+            it[preferencesKey] ?: defaultValue
+        }
+
+        return longFlow.firstOrNull() ?: defaultValue
     }
 }
 
@@ -69,4 +85,6 @@ interface IDataStoreManager {
     suspend fun getBoolean(key: String, defaultValue: Boolean = false): Boolean
     suspend fun putInt(key: String, value: Int)
     suspend fun getInt(key: String, defaultValue: Int = -1): Int
+    suspend fun putLong(key: String, value: Long)
+    suspend fun getLong(key: String, defaultValue: Long = -1L): Long
 }
