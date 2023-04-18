@@ -53,7 +53,7 @@ class TVProviderUseCase @Inject constructor(
     private val previewChannelHelper = PreviewChannelHelper(context)
 
     private val reminderInterval: Long
-        get() = TimeUnit.DAYS.toMillis(4)
+        get() = TimeUnit.DAYS.toMillis(2)
 
     suspend fun addVideoToWatchNextRow(
         video: Video,
@@ -164,7 +164,7 @@ class TVProviderUseCase @Inject constructor(
     private fun createDefaultChannel(): PreviewChannel {
         val channel = PreviewChannel.Builder()
             .setDisplayName(context.getString(R.string.default_channel_title))
-            .setLogo(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            .setLogo(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_round))
             .setAppLinkIntentUri(Uri.parse(context.getString(R.string.view_intent)))
             .setInternalProviderId(DEFAULT_CHANNEL_KEY)
             .build()
