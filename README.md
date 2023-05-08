@@ -1,3 +1,5 @@
+# Watcher TV is no longer supported nor maintained since the underlying API is not longer accessible. You can still use the repository as reference for your Android TV  Project. Hopefully, we can make it work in the future. Thanks for your support!
+
 # Watcher TV
 Watcher TV is an Android TV app that uses the Android Leanback Library and Loklok API. If you want to support the development of Watcher TV or just enjoyed it, consider buying me a coffee!
 
